@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Blind Links</string>
+    <string name="title_record_detail">Record Detail</string>
+    <string name="search_title">Search</string>
+    <string name="search_hint">Search</string>
+    <string name="search_results">Search Results</string>
+    <string name="save">Save</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="password_confirm">Password confirm</string>
+    <string name="starting_balance">Starting balance</string>
+    <string name="bank_details">Bank details</string>
+    <string name="rupees">Rs</string>
+    <string name="paise">paise</string>
+    <string name="category">Category(eg: books)</string>
+    <string name="new_record">New Record</string>
+    <string name="additional_details">Additional details(optional)</string>
+    <string name="archives">Archives</string>
+    <string name="amount">Amount</string>
+    <string name="date">Date</string>
+    <string-array name="credit_debit">
+        <item>Credit</item>
+        <item>Debit</item>
+    </string-array>
+
+</resources>

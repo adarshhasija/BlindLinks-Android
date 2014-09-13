@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <AutoCompleteTextView
+        android:id="@+id/category"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:maxLines="1"
+        android:layout_below="@+id/progressBarLbl"
+        android:layout_marginTop="21dp"
+        android:ems="10"
+        android:inputType="text"
+        android:hint="@string/category" >
+
+        <requestFocus />
+    </AutoCompleteTextView>
+    
+    <LinearLayout 
+    	android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+    	android:orientation="horizontal" >
+
+    <EditText
+        android:id="@+id/rupees"
+        android:layout_width="0dp"
+        android:layout_weight=".70"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/category"
+        android:ems="12"
+        android:hint="@string/rupees"
+        android:inputType="number" />
+    
+    <EditText
+        android:id="@+id/paise"
+        android:hint="@string/paise"
+        android:maxLength="2"
+        android:layout_width="0dp"
+        android:layout_weight=".30"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/category"
+        android:layout_toRightOf="@+id/rupees"
+        android:inputType="number"
+        android:ems="10" />
+    </LinearLayout>
+    
+    <EditText
+        android:id="@+id/additionalDetails"
+        android:hint="@string/additional_details"
+        android:inputType="textMultiLine"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/rupees"
+        android:ems="10" />
+
+</LinearLayout>
