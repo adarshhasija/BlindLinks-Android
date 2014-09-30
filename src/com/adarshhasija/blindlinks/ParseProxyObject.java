@@ -6,11 +6,8 @@ import java.util.HashMap;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 
-// By Jamie Chapman, @chappers57
-// License: open, do as you wish, just don't blame me if stuff breaks ;-)
-
 public class ParseProxyObject implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 	private HashMap<String, Object> values = new HashMap<String, Object>();
 

@@ -80,25 +80,24 @@ public class RecordDetailFragment extends Fragment {
 		MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
 		record = mainApplication.getSelectedRecord();
 		if(record != null) {
-			((TextView) getActivity().findViewById(R.id.category))
-			.setText(record.getString("category"));
-			((TextView) getActivity().findViewById(R.id.amount))
-			.setText("Rs " + record.getNumber("amount").toString());
+			((TextView) getActivity().findViewById(R.id.student))
+			.setText(record.getString("student"));
+			((TextView) getActivity().findViewById(R.id.subject))
+			.setText(record.getString("subject"));
 		
-			Date d = record.getUpdatedAt();
+			Date d = record.getDate("dateTime");
 			Calendar c = Calendar.getInstance();
 			c.setTime(d);
+			int minute = c.get(Calendar.MINUTE);
+			String minuteString = (minute < 10)?"0"+Integer.toString(minute):Integer.toString(minute);
 			String dateString = c.get(Calendar.DATE) + " " + 
-								c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US) + " " +
-								c.get(Calendar.YEAR);
+					c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US) + " " +
+					c.get(Calendar.YEAR) + " " +
+					c.get(Calendar.HOUR) + ":" +
+					minuteString + " " +
+					c.getDisplayName(Calendar.AM_PM, Calendar.LONG, Locale.US);
 			((TextView) getActivity().findViewById(R.id.date))
 			.setText("Date: " + dateString);
-		
-			String additionalDetails = record.getString("additionalDetails");
-			if(!additionalDetails.isEmpty()) {
-				((TextView) getActivity().findViewById(R.id.additional_details))
-				.setText("Additional details:\n " + additionalDetails);
-			}
 			
 			mainApplication.setSelectedRecord(null);
 		}
@@ -112,25 +111,25 @@ public class RecordDetailFragment extends Fragment {
 			mainApplication.setModifiedRecord(null);
 			
 			if(record != null) {
-				((TextView) getActivity().findViewById(R.id.category))
-				.setText(record.getString("category"));
-				((TextView) getActivity().findViewById(R.id.amount))
-				.setText("Rs " + record.getNumber("amount").toString());
+				((TextView) getActivity().findViewById(R.id.student))
+				.setText(record.getString("student"));
+				((TextView) getActivity().findViewById(R.id.subject))
+				.setText(record.getString("subject"));
 			
-				Date d = record.getUpdatedAt();
+				Date d = record.getDate("dateTime");
 				Calendar c = Calendar.getInstance();
 				c.setTime(d);
+				int minute = c.get(Calendar.MINUTE);
+				String minuteString = (minute < 10)?"0"+Integer.toString(minute):Integer.toString(minute);
 				String dateString = c.get(Calendar.DATE) + " " + 
 									c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US) + " " +
-									c.get(Calendar.YEAR);
+									c.get(Calendar.YEAR) + " " +
+									c.get(Calendar.HOUR) + ":" +
+									minuteString + " " +
+									c.getDisplayName(Calendar.AM_PM, Calendar.LONG, Locale.US);
+									;
 				((TextView) getActivity().findViewById(R.id.date))
-				.setText("Date: " + dateString);
-			
-				String additionalDetails = record.getString("additionalDetails");
-				if(!additionalDetails.isEmpty()) {
-					((TextView) getActivity().findViewById(R.id.additional_details))
-					.setText("Additional details:\n " + additionalDetails);
-				}
+				.setText(dateString);
 			}
 		}
 		
@@ -155,6 +154,28 @@ public class RecordDetailFragment extends Fragment {
 				Intent newIntent = new Intent(getActivity(),RecordEditActivity.class);
 		    	//newIntent.putExtras(bundle);
 		    	startActivityForResult(newIntent, 0); 
+
+				return false;
+			}
+		});
+		
+		MenuItem acceptButton = (MenuItem)menu.findItem(R.id.accept);
+		acceptButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+			
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				item.setVisible(false); 
+
+				return false;
+			}
+		});
+		
+		MenuItem cancelButton = (MenuItem)menu.findItem(R.id.cancel);
+		cancelButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+			
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				item.setVisible(false); 
 
 				return false;
 			}

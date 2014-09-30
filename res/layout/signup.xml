@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
@@ -47,7 +47,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/signingUpLbl"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="72dp"
         android:ems="10"
         android:hint="@string/email"
         android:inputType="textEmailAddress" >
@@ -65,38 +64,6 @@
         android:layout_marginBottom="80dp"
         android:text="Sign up" />
 
-    <TextView
-        android:id="@+id/startingBalanceLbl"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/password_confirm"
-        android:layout_alignRight="@+id/password_confirm"
-        android:layout_below="@+id/password_confirm"
-        android:gravity="center"
-        android:text="Starting balance:\n This will be the first entry in your cash book"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <EditText
-        android:id="@+id/rupees"
-        android:hint="@string/rupees"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/description"
-        android:layout_alignRight="@+id/signingUpLbl"
-        android:layout_below="@+id/description"
-        android:ems="10"
-        android:inputType="number" />
 
-    <EditText
-        android:id="@+id/paise"
-        android:hint="@string/paise"
-        android:maxLength="2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/description"
-        android:layout_below="@+id/description"
-        android:layout_toRightOf="@+id/rupees"
-        android:inputType="number"
-        android:ems="10" />
-
-</RelativeLayout>
+</LinearLayout>

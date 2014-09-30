@@ -23,8 +23,8 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> {
 	private final Context context;
 	private final List<ParseObject> recordList;
 	static class ViewHolderRecord {
-	    TextView categoryView;
-	    TextView amountView;
+	    TextView studentView;
+	    TextView subjectView;
 	    TextView dateView;
 	}
 	
@@ -45,8 +45,8 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> {
 			convertView = inflater.inflate(R.layout.record_row_layout, parent, false);
 			
 			viewHolder = new ViewHolderRecord();
-			viewHolder.categoryView = (TextView) convertView.findViewById(R.id.category);
-			viewHolder.amountView = (TextView) convertView.findViewById(R.id.amount);
+			viewHolder.studentView = (TextView) convertView.findViewById(R.id.student);
+			viewHolder.subjectView = (TextView) convertView.findViewById(R.id.subject);
 			viewHolder.dateView = (TextView) convertView.findViewById(R.id.date);
 			// ImageView iconView = (ImageView) rowView.findViewById(R.id.icon);
 			convertView.setTag(viewHolder);
@@ -76,8 +76,9 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> {
 				final_date = monthString + " " + Integer.toString(record_date);
 			}
 			viewHolder.dateView.setText(final_date);
-			viewHolder.amountView.setText((record.getNumber("amount")).toString());
-			viewHolder.categoryView.setText(record.getString("category"));
+			//viewHolder.amountView.setText((record.getNumber("amount")).toString());
+			viewHolder.studentView.setText(record.getString("student"));
+			viewHolder.subjectView.setText(record.getString("subject"));
 			//viewHolder.categoryView.setTag(record);
 			
 		}

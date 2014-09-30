@@ -3,8 +3,8 @@
 
     <string name="app_name">Blind Links</string>
     <string name="title_record_detail">Record Detail</string>
-    <string name="search_title">Search</string>
-    <string name="search_hint">Search</string>
+    <string name="search_title">Search students</string>
+    <string name="search_hint">Enter name</string>
     <string name="search_results">Search Results</string>
     <string name="save">Save</string>
     <string name="email">Email</string>
@@ -20,6 +20,10 @@
     <string name="archives">Archives</string>
     <string name="amount">Amount</string>
     <string name="date">Date</string>
+    <string name="time">Time</string>
+    <string name="volunteer_name">Volunteer name</string>
+    <string name="student_name">Student name</string>
+    <string name="subject">Subject</string>
     <string-array name="credit_debit">
         <item>Credit</item>
         <item>Debit</item>

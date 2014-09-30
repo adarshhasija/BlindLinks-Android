@@ -9,17 +9,17 @@
     tools:ignore="MergeRootFrame" >
 
     <TextView
-        android:id="@+id/category"
+        android:id="@+id/student"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/category"
+        android:text="@string/student_name"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
-        android:id="@+id/amount"
+        android:id="@+id/subject"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/amount"
+        android:text="@string/subject"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
@@ -29,11 +29,5 @@
         android:text="@string/date"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <TextView
-        android:id="@+id/additional_details"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/additional_details"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
     
 </LinearLayout>    

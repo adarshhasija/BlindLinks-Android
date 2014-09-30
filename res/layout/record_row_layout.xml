@@ -15,7 +15,7 @@
         android:src="@drawable/ic_launcher" /> -->
 
     <TextView
-        android:id="@+id/amount"
+        android:id="@+id/subject"
         android:layout_width="fill_parent"
         android:layout_height="26dip"
         android:layout_alignParentBottom="true"
@@ -23,21 +23,21 @@
         android:layout_marginLeft="10dp"
         android:ellipsize="marquee"
         android:singleLine="true"
-        android:text="Amount"
+        android:text="Subject"
         android:textSize="12sp" />
     
     <TextView
-        android:id="@+id/category"
+        android:id="@+id/student"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:layout_alignWithParentIfMissing="true"
         android:layout_marginLeft="10dp"
-        android:layout_above="@id/amount"
+        android:layout_above="@id/subject"
         android:gravity="center_vertical"
         android:textStyle="bold"
-        android:text="Description"
+        android:text="Student name"
         android:textSize="16sp" />
     
     <TextView
@@ -48,7 +48,7 @@
         android:layout_centerInParent="true"
         android:layout_alignWithParentIfMissing="true"
         android:layout_marginRight="10dp"
-        android:layout_above="@id/amount"
+        android:layout_above="@id/subject"
         android:gravity="center_vertical"
         android:text="Date"
         android:textSize="16sp" />

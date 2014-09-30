@@ -29,14 +29,6 @@ public class Signup extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.signup);
 		
-		//for now starting balance UI is not needed
-		TextView startingBalanceLbl = (TextView) findViewById(R.id.startingBalanceLbl);
-		EditText rupeesWidget = (EditText) findViewById(R.id.rupees);
-		EditText paiseWidget = (EditText) findViewById(R.id.paise);
-		startingBalanceLbl.setVisibility(View.INVISIBLE);
-		rupeesWidget.setVisibility(View.INVISIBLE);
-		paiseWidget.setVisibility(View.INVISIBLE);
-		
 		progressBar = (ProgressBar) findViewById(R.id.signUpProgressBar);
 		progressBar.setVisibility(View.INVISIBLE);
 		
@@ -51,14 +43,10 @@ public class Signup extends Activity {
 				EditText emailWidget = (EditText) findViewById(R.id.email);
 				EditText passwordWidget = (EditText) findViewById(R.id.password);
 				EditText passwordConfirmWidget = (EditText) findViewById(R.id.password_confirm);
-				EditText rupeesWidget = (EditText) findViewById(R.id.rupees);
-				EditText paiseWidget = (EditText) findViewById(R.id.paise);
 				
 				String email = emailWidget.getText().toString();
 				String password = passwordWidget.getText().toString();
 				String passwordConfirm = passwordConfirmWidget.getText().toString();
-				String rupees = rupeesWidget.getText().toString();
-				String paise = paiseWidget.getText().toString();
 				
 				ConnectivityManager cm = (ConnectivityManager) getSystemService(Signup.this.CONNECTIVITY_SERVICE);
 				if(cm.getActiveNetworkInfo() == null) {
@@ -75,18 +63,6 @@ public class Signup extends Activity {
 					Toast.makeText(Signup.this, "Password and password confirm do not match", Toast.LENGTH_SHORT).show();
 					return;
 				}
-				
-				if(rupees.isEmpty()) {
-					Toast.makeText(Signup.this, "You have not entered a starting balance", Toast.LENGTH_SHORT).show();
-					return;
-				}
-				
-				if(paise.isEmpty()) {
-					paise = "00";
-				}
-				
-				String amountString = rupees + "." + paise;
-				final float amount = Float.parseFloat(amountString);
 				
 				final ParseUser user = new ParseUser();
 				user.setUsername(email);
@@ -105,24 +81,6 @@ public class Signup extends Activity {
 							progressBar.setVisibility(View.INVISIBLE);
 							progressBarLbl.setVisibility(View.INVISIBLE);
 							finish();
-							/*	ParseObject startingBalance = new ParseObject("Record");
-								startingBalance.put("user", user);
-								startingBalance.put("amount", amount);
-								startingBalance.put("description", "Starting balance");
-								startingBalance.saveInBackground(new SaveCallback() {
-
-									@Override
-									public void done(ParseException error) {
-										if(error == null) {
-											progressBar.setVisibility(View.INVISIBLE);
-											progressBarLbl.setVisibility(View.INVISIBLE);
-											finish();
-										}
-										else {
-											Toast.makeText(Signup.this, error.getMessage(), Toast.LENGTH_SHORT).show();
-										}
-										
-									}}); */
 						    } else {
 						      // Sign up didn't succeed. Look at the ParseException
 						      // to figure out what went wrong
