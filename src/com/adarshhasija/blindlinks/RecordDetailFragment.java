@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.adarshhasija.blindlinks.dummy.DummyContent;
 import com.example.ngotransactionrecords.R;
@@ -29,6 +30,7 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 /**
  * A fragment representing a single Record detail screen. This fragment is
@@ -47,6 +49,8 @@ public class RecordDetailFragment extends Fragment {
 	 */
 	private DummyContent.DummyItem mItem;
 	private ParseObject record;
+	private ParseUser otherUser;
+	private MenuItem progressButton;
 	/**
 	 * Mandatory empty constructor for the fragment manager to instantiate the
 	 * fragment (e.g. upon screen orientation changes).
@@ -54,11 +58,34 @@ public class RecordDetailFragment extends Fragment {
 	public RecordDetailFragment() {
 	}
 	
-	private FindCallback<ParseObject> findCallback = new FindCallback<ParseObject>() {
+	private FindCallback setTitleFindCallback = new FindCallback() {
 
 		@Override
-		public void done(List<ParseObject> list, ParseException e) {
-			
+		public void done(List arg0, ParseException arg1) {
+			if (arg1 == null) {
+				ParseUser user = (ParseUser) arg0.get(0);
+				otherUser = user;
+				if(getActivity() != null) {
+					getActivity().setTitle(user.getString("firstName") + " " + user.getString("lastName"));
+				}
+				
+		    } else {
+		    	Toast.makeText(getActivity(), arg1.getMessage(), Toast.LENGTH_SHORT).show();
+		    }
+		}
+		
+	};
+	private SaveCallback saveCallback = new SaveCallback() {
+
+		@Override
+		public void done(ParseException e) {
+			if(e == null) {
+				((TextView) getActivity().findViewById(R.id.status))
+				.setText("Status: " + record.getString("status").toUpperCase());
+			}
+			else {
+				Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+			}
 		}
 		
 	};
@@ -79,6 +106,47 @@ public class RecordDetailFragment extends Fragment {
 		
 		MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
 		record = mainApplication.getSelectedRecord();
+		mainApplication.setSelectedRecord(null);
+		
+		ParseUser user = record.getParseUser("user");
+		ParseUser recipient = record.getParseUser("recipient");
+		ParseUser currentUser = ParseUser.getCurrentUser();
+		
+		ParseQuery<ParseUser> queryUser = ParseUser.getQuery();
+		queryUser.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
+		
+		//If they are not the same, this means currentUser is the recipient, so display the user in title
+		if(!user.getObjectId().equals(currentUser.getObjectId())) {
+			queryUser.whereEqualTo("objectId", user.getObjectId());
+		}
+		//If they are the same, currentUser is the user and recipient should be displayed
+		else {
+			queryUser.whereEqualTo("objectId", recipient.getObjectId());
+		}
+		queryUser.findInBackground(setTitleFindCallback);
+	}
+	
+
+
+	@Override
+	public void onDestroy() {
+		Bundle bundle = new Bundle();
+		bundle.putString("student", record.getString("student"));
+		bundle.putString("subject", record.getString("subject"));
+		bundle.putString("status", record.getString("status"));
+		ParseProxyObject ppo = new ParseProxyObject(record);
+		//returnIntent.putExtras(bundle);
+		Intent returnIntent = new Intent();
+		returnIntent.putExtra("parseObject", ppo);
+		getActivity().setResult(getActivity().RESULT_OK,returnIntent);
+		
+		super.onDestroy();
+	}
+
+
+
+	@Override
+	public void onResume() {
 		if(record != null) {
 			((TextView) getActivity().findViewById(R.id.student))
 			.setText(record.getString("student"));
@@ -99,9 +167,13 @@ public class RecordDetailFragment extends Fragment {
 			((TextView) getActivity().findViewById(R.id.date))
 			.setText("Date: " + dateString);
 			
-			mainApplication.setSelectedRecord(null);
+			((TextView) getActivity().findViewById(R.id.status))
+			.setText("Status: " + record.getString("status").toUpperCase());
 		}
+		
+		super.onResume();
 	}
+
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -109,28 +181,6 @@ public class RecordDetailFragment extends Fragment {
 			MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
 			record = mainApplication.getModifiedRecord();
 			mainApplication.setModifiedRecord(null);
-			
-			if(record != null) {
-				((TextView) getActivity().findViewById(R.id.student))
-				.setText(record.getString("student"));
-				((TextView) getActivity().findViewById(R.id.subject))
-				.setText(record.getString("subject"));
-			
-				Date d = record.getDate("dateTime");
-				Calendar c = Calendar.getInstance();
-				c.setTime(d);
-				int minute = c.get(Calendar.MINUTE);
-				String minuteString = (minute < 10)?"0"+Integer.toString(minute):Integer.toString(minute);
-				String dateString = c.get(Calendar.DATE) + " " + 
-									c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US) + " " +
-									c.get(Calendar.YEAR) + " " +
-									c.get(Calendar.HOUR) + ":" +
-									minuteString + " " +
-									c.getDisplayName(Calendar.AM_PM, Calendar.LONG, Locale.US);
-									;
-				((TextView) getActivity().findViewById(R.id.date))
-				.setText(dateString);
-			}
 		}
 		
 		super.onActivityResult(requestCode, resultCode, data);
@@ -140,7 +190,13 @@ public class RecordDetailFragment extends Fragment {
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.record_detail_activity, menu);
 		
+		progressButton = (MenuItem)menu.findItem(R.id.progress);
+		progressButton.setVisible(false);
+		
 		MenuItem editButton = (MenuItem)menu.findItem(R.id.edit);
+		final MenuItem acceptButton = (MenuItem)menu.findItem(R.id.accept);
+		final MenuItem cancelButton = (MenuItem)menu.findItem(R.id.cancel);
+		
 		editButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 			
 			@Override
@@ -159,27 +215,61 @@ public class RecordDetailFragment extends Fragment {
 			}
 		});
 		
-		MenuItem acceptButton = (MenuItem)menu.findItem(R.id.accept);
 		acceptButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 			
 			@Override
-			public boolean onMenuItemClick(MenuItem item) {
-				item.setVisible(false); 
+			public boolean onMenuItemClick(final MenuItem item) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		        builder.setMessage("Accept invitation?")
+		               .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		                   public void onClick(DialogInterface dialog, int id) {
+		                	   item.setVisible(false);
+		                	   cancelButton.setVisible(true);
+		                	   record.put("status", "accepted");
+		                	   record.put("status_by", ParseUser.getCurrentUser());
+		                	   record.saveInBackground(saveCallback);
+		                   }
+		               })
+		               .setNegativeButton("No", new DialogInterface.OnClickListener() {
+		                   public void onClick(DialogInterface dialog, int id) {
+		                       // User cancelled the dialog
+		                   }
+		               });
+		        builder.show(); 
 
 				return false;
 			}
 		});
+		if(record.getString("status").equals("accepted")) { acceptButton.setVisible(false); }
 		
-		MenuItem cancelButton = (MenuItem)menu.findItem(R.id.cancel);
+		
 		cancelButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 			
 			@Override
-			public boolean onMenuItemClick(MenuItem item) {
-				item.setVisible(false); 
+			public boolean onMenuItemClick(final MenuItem item) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		        builder.setMessage("Reject invitation?")
+		               .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		                   public void onClick(DialogInterface dialog, int id) {
+		                	   item.setVisible(false);
+		                	   acceptButton.setVisible(true);
+		                	   record.put("status", "rejected");
+		                	   record.put("status_by", ParseUser.getCurrentUser());
+		                	   record.saveInBackground(saveCallback);
+		                   }
+		               })
+		               .setNegativeButton("No", new DialogInterface.OnClickListener() {
+		                   public void onClick(DialogInterface dialog, int id) {
+		                       // User cancelled the dialog
+		                   }
+		               });
+		        builder.show();
+				
 
 				return false;
 			}
 		});
+		if(record.getString("status").equals("rejected")) { cancelButton.setVisible(false); }
 
 		super.onCreateOptionsMenu(menu, inflater);
 	}

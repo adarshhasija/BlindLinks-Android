@@ -97,7 +97,7 @@ public class RecordListFragment extends ListFragment {
 	
 	//private RecordAdapter recordAdapter=null;
 	public static ArrayList<ParseObject> recordsList = new ArrayList<ParseObject>();
-	private FindCallback<ParseObject> findCallback = new FindCallback<ParseObject>() {
+	private FindCallback<ParseObject> populateListCallback = new FindCallback<ParseObject>() {
 
 		@Override
 		public void done(List<ParseObject> list, ParseException e) {
@@ -125,10 +125,7 @@ public class RecordListFragment extends ListFragment {
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
 		
-		ParseQuery<ParseObject> query = ParseQuery.getQuery("Record");
-		query.whereEqualTo("user", ParseUser.getCurrentUser());
-		query.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
-		query.findInBackground(findCallback);
+		populateList();
 		
 		Calendar calendar = Calendar.getInstance();
 		String month = calendar.getDisplayName(calendar.MONTH, calendar.LONG, Locale.US);
@@ -322,6 +319,22 @@ public class RecordListFragment extends ListFragment {
 		});
 		
 		super.onCreateOptionsMenu(menu, inflater);
+	}
+	
+	private void populateList() {
+		ParseQuery<ParseObject> queryUser = ParseQuery.getQuery("Record");
+		queryUser.whereEqualTo("user", ParseUser.getCurrentUser());
+		queryUser.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
+		
+		ParseQuery<ParseObject> queryRecipient = ParseQuery.getQuery("Record");
+		queryRecipient.whereEqualTo("recipient", ParseUser.getCurrentUser());
+		queryRecipient.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
+		
+		List<ParseQuery<ParseObject>> queries = new ArrayList<ParseQuery<ParseObject>>();
+        queries.add(queryUser);
+        queries.add(queryRecipient);
+		ParseQuery<ParseObject> mainQuery = ParseQuery.or(queries);
+		mainQuery.findInBackground(populateListCallback);
 	}
 	
 	

@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-      <AutoCompleteTextView
+  <!--     <AutoCompleteTextView
         android:id="@+id/user"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -18,7 +18,12 @@
         android:hint="@string/volunteer_name" >
 
         <requestFocus />
-    </AutoCompleteTextView> 
+    </AutoCompleteTextView>  -->
+    
+    <Spinner
+    android:id="@+id/user"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" /> 
 
     <EditText
         android:id="@+id/student"

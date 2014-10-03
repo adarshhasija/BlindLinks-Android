@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,8 +21,26 @@ import android.widget.Toast;
 
 public class Login extends Activity {
 	
-	private ProgressBar progressBar;
-	private TextView progressBarLbl;
+	private MenuItem progressButton;
+	private MenuItem loginButton;
+	private MenuItem signupButton;
+	private LogInCallback logInCallback = new LogInCallback() {
+
+		@Override
+		public void done(ParseUser user, ParseException e) {
+			progressButton.setVisible(false);
+			signupButton.setVisible(true);
+			loginButton.setVisible(true);
+			
+			if (user != null) {
+				Intent mainIntent = new Intent(Login.this, RecordListActivity.class);
+				startActivity(mainIntent);
+		    } else {
+		    	Toast.makeText(Login.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+		    }
+		}
+		
+	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -28,70 +48,7 @@ public class Login extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login);
 		
-		progressBar = (ProgressBar) findViewById(R.id.loginProgressBar);
-		progressBar.setVisibility(View.INVISIBLE);
 		
-		progressBarLbl = (TextView) findViewById(R.id.loggingInLbl);
-		progressBarLbl.setVisibility(View.INVISIBLE);
-		
-		Button loginBtn = (Button) findViewById(R.id.loginBtn);
-		loginBtn.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				EditText emailWidget = (EditText) findViewById(R.id.email);
-				EditText passwordWidget = (EditText) findViewById(R.id.password);
-				
-				String email = emailWidget.getText().toString();
-				String password = passwordWidget.getText().toString();
-				
-				ConnectivityManager cm = (ConnectivityManager) getSystemService(Login.this.CONNECTIVITY_SERVICE);
-				if(cm.getActiveNetworkInfo() == null) {
-					Toast.makeText(Login.this, "No internet connection", Toast.LENGTH_SHORT).show();
-					return;
-				}
-				
-				if(!email.matches("^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$")) {
-					Toast.makeText(Login.this, "Email address is invalid", Toast.LENGTH_SHORT).show();
-					return;
-				}
-				
-				if(password.isEmpty()) {
-					Toast.makeText(Login.this, "You have not entered a password", Toast.LENGTH_SHORT).show();
-					return;
-				}
-				
-				progressBar.setVisibility(View.VISIBLE);
-				progressBarLbl.setVisibility(View.VISIBLE);
-				
-				ParseUser.logInInBackground(email, password, new LogInCallback() {
-
-					@Override
-					public void done(ParseUser user, ParseException e) {
-						progressBar.setVisibility(View.INVISIBLE);
-						progressBarLbl.setVisibility(View.INVISIBLE);
-						
-						if (user != null) {
-								Intent mainIntent = new Intent(Login.this, RecordListActivity.class);
-								startActivity(mainIntent);
-						    } else {
-						    	Toast.makeText(Login.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-						    }
-						
-					}});
-			}
-		});
-		
-		TextView signUp = (TextView) findViewById(R.id.signUpLbl);
-		signUp.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				Intent signupIntent = new Intent(Login.this, Signup.class);
-				startActivity(signupIntent);
-				
-			}
-		});
 	}
 
 	@Override
@@ -105,6 +62,72 @@ public class Login extends Activity {
 			finish();
 		}
 	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		
+		getMenuInflater().inflate(R.menu.login, menu);
+		
+		progressButton = (MenuItem)menu.findItem(R.id.progress);
+		progressButton.setVisible(false);
+		
+		loginButton = (MenuItem)menu.findItem(R.id.login);
+		loginButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+
+			@Override
+			public boolean onMenuItemClick(MenuItem arg0) {
+				EditText emailWidget = (EditText) findViewById(R.id.email);
+				EditText passwordWidget = (EditText) findViewById(R.id.password);
+				
+				String email = emailWidget.getText().toString();
+				String password = passwordWidget.getText().toString();
+				
+				ConnectivityManager cm = (ConnectivityManager) getSystemService(Login.this.CONNECTIVITY_SERVICE);
+				if(cm.getActiveNetworkInfo() == null) {
+					Toast.makeText(Login.this, "No internet connection", Toast.LENGTH_SHORT).show();
+					return false;
+				}
+				
+				if(!email.matches("^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$")) {
+					Toast.makeText(Login.this, "Email address is invalid", Toast.LENGTH_SHORT).show();
+					return false;
+				}
+				
+				if(password.isEmpty()) {
+					Toast.makeText(Login.this, "You have not entered a password", Toast.LENGTH_SHORT).show();
+					return false;
+				}
+				
+				loginButton.setVisible(false);
+				signupButton.setVisible(false);
+				progressButton.setActionView(R.layout.action_progressbar);
+	            progressButton.expandActionView();
+				progressButton.setVisible(true);
+				
+				ParseUser.logInInBackground(email, password, logInCallback);
+				
+				return false;
+			}
+			
+		});
+		
+		signupButton = (MenuItem)menu.findItem(R.id.signup);
+		signupButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+
+			@Override
+			public boolean onMenuItemClick(MenuItem arg0) {
+				Intent mainIntent = new Intent(Login.this, Signup.class);
+				startActivity(mainIntent);
+				
+				return false;
+			}
+			
+		});
+		
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	
 	
 
 	

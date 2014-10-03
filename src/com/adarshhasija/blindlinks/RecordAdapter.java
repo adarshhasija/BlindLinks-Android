@@ -9,6 +9,7 @@ import com.example.ngotransactionrecords.R;
 import com.parse.ParseObject;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,6 +27,7 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> {
 	    TextView studentView;
 	    TextView subjectView;
 	    TextView dateView;
+	    ImageView iconView;
 	}
 	
 	public RecordAdapter(Context context, int resource, List<ParseObject> values) {
@@ -48,7 +50,7 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> {
 			viewHolder.studentView = (TextView) convertView.findViewById(R.id.student);
 			viewHolder.subjectView = (TextView) convertView.findViewById(R.id.subject);
 			viewHolder.dateView = (TextView) convertView.findViewById(R.id.date);
-			// ImageView iconView = (ImageView) rowView.findViewById(R.id.icon);
+			viewHolder.iconView = (ImageView) convertView.findViewById(R.id.icon);
 			convertView.setTag(viewHolder);
 		}
 		else {
@@ -57,6 +59,13 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> {
 		
 	    ParseObject record = recordList.get(position);
 		if(record != null) {
+			if(record.getString("status").equals("accepted")) {
+				viewHolder.iconView.setImageResource(R.drawable.ic_action_accept);
+			}
+			else if(record.getString("status").equals("rejected")) {
+				viewHolder.iconView.setImageResource(R.drawable.ic_action_cancel);
+			}
+			
 			Calendar c = Calendar.getInstance();
 			int cur_date = c.get(Calendar.DATE);
 			c.setTime(record.getUpdatedAt());

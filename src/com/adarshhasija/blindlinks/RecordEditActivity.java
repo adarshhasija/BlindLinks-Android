@@ -46,7 +46,7 @@ import android.widget.Toast;
 public class RecordEditActivity extends FragmentActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
 	
 	private ParseObject record=null;
-	private ArrayList<ParseObject> userObjects;
+	private ArrayList<ParseUser> userObjects;
 	private ArrayList<String> userList;
 	private Calendar dateTime;
 	private MenuItem progressButton;
@@ -58,12 +58,6 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 			if(e == null) {
 				progressButton.setVisible(false);
 				saveButton.setVisible(true);
-				if(record != null) {
-					setTitle("Edit Record");
-				}
-				else {
-					setTitle("New Record");
-				}
 				finish();
 			}
 			else {
@@ -72,17 +66,37 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 		}
 		
 	};
-	private FindCallback findCallback = new FindCallback() {
+	private FindCallback populateSpinnerFindCallback = new FindCallback<ParseUser>() {
+
+		@Override
+		public void done(List<ParseUser> list, ParseException e) {
+			if (e == null) {
+				userObjects = new ArrayList<ParseUser>();
+	            userList = new ArrayList<String>();
+	            for(ParseUser user : list) {
+	            	userObjects.add(user); //This is needed later when saving
+	            	userList.add(user.getString("firstName")+" "+user.getString("lastName"));	
+	            }
+	            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_list_item_1, userList);
+	            Spinner userView = ((Spinner) findViewById(R.id.user));
+	            userView.setAdapter(adapter);
+	        } else {
+	            Log.d("RecordEditActivity", "Error: " + e.getMessage());
+	        }
+			
+		}
+		
+	};
+	private FindCallback setTitleFindCallback = new FindCallback() {
 
 		@Override
 		public void done(List arg0, ParseException arg1) {
 			if (arg1 == null) {
-				EditText recipientWidget = (EditText) findViewById(R.id.user);
 				ParseUser user = (ParseUser) arg0.get(0);
-				recipientWidget.setText(user.getString("firstName") + " " + user.getString("lastName"));
+				setTitle(user.getString("firstName") + " " + user.getString("lastName"));
 				
 		    } else {
-		        // Something went wrong.
+		    	Toast.makeText(RecordEditActivity.this, arg1.getMessage(), Toast.LENGTH_SHORT).show();
 		    }
 		}
 		
@@ -93,27 +107,11 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.record_edit_activity);
+
+		MainApplication mainApplication = (MainApplication) getBaseContext().getApplicationContext();
+		record = mainApplication.getSelectedRecord();
 		
-		Calendar c = Calendar.getInstance();
-		int year = c.get(Calendar.YEAR);
-        String month = c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
-        int day = c.get(Calendar.DAY_OF_MONTH);
-        int hour = c.get(Calendar.HOUR);
-        int minute = c.get(Calendar.MINUTE);
-        String am_pm = c.getDisplayName(Calendar.AM_PM, Calendar.LONG, Locale.US);
-        //String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
-        
-        //set private variable dateTime
-        dateTime = c;
-        
-		Button datePicker = ((Button) findViewById(R.id.datePicker));
-		datePicker.setText(day+" "+month+" "+year);
-		
-		Button timePicker = ((Button) findViewById(R.id.timePicker));
-		if(minute < 10) timePicker.setText(hour+":0"+minute+" "+am_pm);
-		else timePicker.setText(hour+":"+minute+" "+am_pm);
-		
-		ParseQuery<ParseObject> query = ParseQuery.getQuery("User");
+	/*	ParseQuery<ParseObject> query = ParseQuery.getQuery("User");
 		query.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
 		query.findInBackground(new FindCallback<ParseObject>() {
 			@Override
@@ -132,22 +130,56 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 		        }
 				
 			}
-		});
+		}); */
+
+	}
+	
+	
+
+	@Override
+	protected void onResume() {
+		EditText studentView = ((EditText) findViewById(R.id.student));
+		EditText subjectView = ((EditText) findViewById(R.id.subject));
+		Button datePicker = ((Button) findViewById(R.id.datePicker));
+		Button timePicker = ((Button) findViewById(R.id.timePicker));
 		
-		MainApplication mainApplication = (MainApplication) getBaseContext().getApplicationContext();
-		record = mainApplication.getSelectedRecord();
+		ParseQuery<ParseUser> querySpinner = ParseUser.getQuery();
+		querySpinner.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
+		querySpinner.findInBackground(populateSpinnerFindCallback);
 		
-		if(record != null) {
-			setTitle("Edit Record");
-			
-			EditText studentView = ((EditText) findViewById(R.id.student));
-			EditText subjectView = ((EditText) findViewById(R.id.subject));
+		Calendar c = Calendar.getInstance();
+		int year = c.get(Calendar.YEAR);
+        String month = c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
+        int day = c.get(Calendar.DAY_OF_MONTH);
+        int hour = c.get(Calendar.HOUR);
+        int minute = c.get(Calendar.MINUTE);
+        String am_pm = c.getDisplayName(Calendar.AM_PM, Calendar.LONG, Locale.US);
+        //String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
+        
+        //set private variable dateTime
+        dateTime = c;
+        
+        if(record != null) {
+        	Spinner userWidget = (Spinner) findViewById(R.id.user);
+        	userWidget.setVisibility(View.GONE);
+        	
 
 			ParseUser user = record.getParseUser("user");
+			ParseUser recipient = record.getParseUser("recipient");
+			ParseUser currentUser = ParseUser.getCurrentUser();
+			
 			ParseQuery<ParseUser> queryUser = ParseUser.getQuery();
 			queryUser.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
-			queryUser.whereEqualTo("objectId", user.getObjectId());
-			queryUser.findInBackground(findCallback);
+			
+			//If they are not the same, this means currentUser is the recipient, so display the user in title
+			if(!user.getObjectId().equals(currentUser.getObjectId())) {
+				queryUser.whereEqualTo("objectId", user.getObjectId());
+			}
+			//If they are the same, currentUser is the user and recipient should be displayed
+			else {
+				queryUser.whereEqualTo("objectId", recipient.getObjectId());
+			}
+			queryUser.findInBackground(setTitleFindCallback);
 			String studentString = record.getString("student");
 			String subjectString = record.getString("subject");
 			c.setTime(record.getDate("dateTime"));
@@ -165,10 +197,16 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 			if(minute < 10) timePicker.setText(hour+":0"+minute+" "+am_pm);
 			else timePicker.setText(hour+":"+minute+" "+am_pm);
 			
+		} else {
+			datePicker.setText(day+" "+month+" "+year);
+			if(minute < 10) timePicker.setText(hour+":0"+minute+" "+am_pm);
+			else timePicker.setText(hour+":"+minute+" "+am_pm);
 		}
+        
+		super.onResume();
 	}
-	
-	
+
+
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -183,23 +221,16 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 			
 			@Override
 			public boolean onMenuItemClick(MenuItem item) {
-				EditText recipientWidget = (EditText) findViewById(R.id.user);
+				Spinner userWidget = (Spinner) findViewById(R.id.user);
 				EditText studentWidget = (EditText) findViewById(R.id.student);
 				EditText subjectWidget = (EditText) findViewById(R.id.subject);
-				//EditText additionalDetailsWidget = (EditText) findViewById(R.id.additionalDetails);
-				
-				String recipient = recipientWidget.getText().toString();
+
 				String student = studentWidget.getText().toString();
 				String subject = subjectWidget.getText().toString();
 				
 				ConnectivityManager cm = (ConnectivityManager) getSystemService(getBaseContext().CONNECTIVITY_SERVICE);
 				if(cm.getActiveNetworkInfo() == null) {
 					Toast.makeText(getBaseContext(), "No internet connection, cannot save", Toast.LENGTH_SHORT).show();
-					return false;
-				}
-				
-				if(recipient.isEmpty()) {
-					Toast.makeText(getBaseContext(), "You have not entered a volunteer name", Toast.LENGTH_SHORT).show();
 					return false;
 				}
 				
@@ -213,27 +244,29 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 					return false;
 				}
 				
-				String firstName = recipient.split(" ")[0];
-				String lastName = recipient.split(" ")[1];
-				firstName = firstName.substring(0, 1).toUpperCase() + firstName.substring(1);
-				lastName = lastName.substring(0, 1).toUpperCase() + lastName.substring(1);
-				
 				saveButton.setVisible(false);
 				progressButton.setActionView(R.layout.action_progressbar);
 	            progressButton.expandActionView();
 				progressButton.setVisible(true);
-				setTitle("Saving...");
 				
+				ParseUser selectedUser=null;
+				if(userWidget.getVisibility() != View.GONE) {
+					selectedUser = userObjects.get((int)userWidget.getSelectedItemId());
+				}
 				if(record == null) {
 					record = new ParseObject("Record");
 					record.put("user", ParseUser.getCurrentUser());
 				}
-				int index = userList.indexOf(firstName+" "+lastName);
-				if(index > -1) record.put("recipient", userObjects.get(index));
+
+				if(selectedUser != null) {
+					record.put("recipient", userObjects.get((int)userWidget.getSelectedItemId()));
+				}
 				record.put("student", student);
 				record.put("subject", subject);
 				Date finalDate = dateTime.getTime();
 				record.put("dateTime", finalDate);
+				record.put("status", "edited");
+				record.put("status_by", ParseUser.getCurrentUser());
 				
 				Intent returnIntent = new Intent();
 				MainApplication mainApplication = (MainApplication) getApplicationContext();
@@ -241,6 +274,7 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 				Bundle bundle = new Bundle();
 				bundle.putString("student", student);
 				bundle.putString("subject", subject);
+				bundle.putString("status", "edited");
 				ParseProxyObject ppo = new ParseProxyObject(record);
 				//returnIntent.putExtras(bundle);
 				returnIntent.putExtra("parseObject", ppo);

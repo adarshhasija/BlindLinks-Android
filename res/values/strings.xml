@@ -10,6 +10,8 @@
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="password_confirm">Password confirm</string>
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
     <string name="starting_balance">Starting balance</string>
     <string name="bank_details">Bank details</string>
     <string name="rupees">Rs</string>
@@ -24,6 +26,7 @@
     <string name="volunteer_name">Volunteer name</string>
     <string name="student_name">Student name</string>
     <string name="subject">Subject</string>
+    <string name="status">Status: NEW</string>
     <string-array name="credit_debit">
         <item>Credit</item>
         <item>Debit</item>
