@@ -1,6 +1,6 @@
 package com.adarshhasija.blindlinks;
 
-import com.example.ngotransactionrecords.R;
+import com.adarshhasija.blindlinks.R;
 import com.parse.LogInCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;

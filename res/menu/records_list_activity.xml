@@ -1,6 +1,9 @@
 
     
     <menu xmlns:android="http://schemas.android.com/apk/res/android">
+        
+        <item android:id="@+id/progress"
+          android:showAsAction="ifRoom" />
 
         <item android:id="@+id/search"
           android:title="@string/search_title"
@@ -12,11 +15,11 @@
           android:icon="@drawable/ic_action_new"
           android:title="New"
           android:showAsAction="ifRoom" />
-        
-       <item
-        android:id="@+id/archives"
+       
+        <item
+        android:id="@+id/refresh"
         android:showAsAction="never"
-        android:title="View archives"/> 
+        android:title="Refresh"/> 
         
        <item
         android:id="@+id/logout"

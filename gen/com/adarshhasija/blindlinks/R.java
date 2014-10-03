@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package com.example.ngotransactionrecords;
+package com.adarshhasija.blindlinks;
 
 public final class R {
     public static final class array {
@@ -29,7 +29,6 @@ public final class R {
     public static final class id {
         public static final int accept=0x7f090015;
         public static final int add=0x7f090019;
-        public static final int archives=0x7f09001a;
         public static final int cancel=0x7f090014;
         public static final int date=0x7f090005;
         public static final int datePicker=0x7f09000a;
@@ -46,6 +45,7 @@ public final class R {
         public static final int progressBar=0x7f090000;
         public static final int record_detail_container=0x7f090001;
         public static final int record_list=0x7f090002;
+        public static final int refresh=0x7f09001a;
         public static final int save=0x7f090017;
         public static final int search=0x7f090018;
         public static final int signingUpLbl=0x7f09000d;
@@ -91,32 +91,33 @@ public final class R {
         public static final int signup=0x7f080005;
     }
     public static final class string {
-        public static final int additional_details=0x7f050011;
-        public static final int amount=0x7f050013;
+        public static final int additional_details=0x7f050012;
+        public static final int amount=0x7f050014;
         public static final int app_name=0x7f050000;
-        public static final int archives=0x7f050012;
-        public static final int bank_details=0x7f05000c;
-        public static final int category=0x7f05000f;
-        public static final int date=0x7f050014;
+        public static final int archives=0x7f050013;
+        public static final int bank_details=0x7f05000d;
+        public static final int category=0x7f050010;
+        public static final int date=0x7f050015;
         public static final int email=0x7f050006;
-        public static final int first_name=0x7f050009;
-        public static final int last_name=0x7f05000a;
-        public static final int new_record=0x7f050010;
-        public static final int paise=0x7f05000e;
+        public static final int first_name=0x7f05000a;
+        public static final int last_name=0x7f05000b;
+        public static final int new_record=0x7f050011;
+        public static final int paise=0x7f05000f;
         public static final int password=0x7f050007;
         public static final int password_confirm=0x7f050008;
-        public static final int rupees=0x7f05000d;
+        public static final int rupees=0x7f05000e;
         public static final int save=0x7f050005;
         public static final int search_hint=0x7f050003;
         public static final int search_results=0x7f050004;
         public static final int search_title=0x7f050002;
-        public static final int starting_balance=0x7f05000b;
-        public static final int status=0x7f050019;
-        public static final int student_name=0x7f050017;
-        public static final int subject=0x7f050018;
-        public static final int time=0x7f050015;
+        public static final int starting_balance=0x7f05000c;
+        public static final int status=0x7f05001a;
+        public static final int student_name=0x7f050018;
+        public static final int subject=0x7f050019;
+        public static final int time=0x7f050016;
         public static final int title_record_detail=0x7f050001;
-        public static final int volunteer_name=0x7f050016;
+        public static final int user=0x7f050009;
+        public static final int volunteer_name=0x7f050017;
     }
     public static final class style {
         /** 

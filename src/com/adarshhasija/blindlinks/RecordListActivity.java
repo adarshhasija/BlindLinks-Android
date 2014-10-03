@@ -14,7 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.SearchView;
 
-import com.example.ngotransactionrecords.R;
+import com.adarshhasija.blindlinks.R;
 import com.parse.Parse;
 import com.parse.ParseAnalytics;
 import com.parse.ParseObject;

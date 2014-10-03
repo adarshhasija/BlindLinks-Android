@@ -3,7 +3,7 @@ package com.adarshhasija.blindlinks;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import com.example.ngotransactionrecords.R;
+import com.adarshhasija.blindlinks.R;
 import com.parse.ParseObject;
 
 import android.app.AlertDialog;

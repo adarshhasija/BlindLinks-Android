@@ -9,10 +9,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import com.example.ngotransactionrecords.R;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.adarshhasija.blindlinks.R;
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
+import com.parse.ParsePush;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
@@ -56,6 +61,24 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 		@Override
 		public void done(ParseException e) {
 			if(e == null) {
+				ParseQuery<ParseInstallation> pushQuery = ParseInstallation.getQuery();
+				pushQuery.whereEqualTo("email", ParseUser.getCurrentUser().getUsername());
+				
+				JSONObject jsonObj=new JSONObject();
+	        	try {
+					jsonObj.put("action", "com.adarshhasija.blindlinks.intent.RECEIVE");
+					jsonObj.put("objectId", record.getObjectId());
+				} catch (JSONException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				ParsePush push = new ParsePush();
+				push.setQuery(pushQuery); // Set our Installation query
+				push.setData(jsonObj);
+				//push.setMessage("From the client");
+				push.sendInBackground();
+				
+				
 				progressButton.setVisible(false);
 				saveButton.setVisible(true);
 				finish();

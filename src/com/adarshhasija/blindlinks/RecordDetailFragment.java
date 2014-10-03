@@ -8,6 +8,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,13 +27,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.adarshhasija.blindlinks.dummy.DummyContent;
-import com.example.ngotransactionrecords.R;
+import com.adarshhasija.blindlinks.R;
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
+import com.parse.ParsePush;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
+import com.parse.SendCallback;
 
 /**
  * A fragment representing a single Record detail screen. This fragment is
@@ -82,6 +88,23 @@ public class RecordDetailFragment extends Fragment {
 			if(e == null) {
 				((TextView) getActivity().findViewById(R.id.status))
 				.setText("Status: " + record.getString("status").toUpperCase());
+				
+				ParseQuery<ParseInstallation> pushQuery = ParseInstallation.getQuery();
+				pushQuery.whereEqualTo("email", ParseUser.getCurrentUser().getUsername());
+				
+				JSONObject jsonObj=new JSONObject();
+	        	try {
+					jsonObj.put("action", "com.adarshhasija.blindlinks.intent.RECEIVE");
+					jsonObj.put("objectId", record.getObjectId());
+				} catch (JSONException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				ParsePush push = new ParsePush();
+				push.setQuery(pushQuery); // Set our Installation query
+				push.setData(jsonObj);
+				//push.setMessage("From the client");
+				push.sendInBackground();
 			}
 			else {
 				Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();

@@ -12,6 +12,7 @@
         android:layout_centerHorizontal="true"
         android:ems="10"
         android:hint="@string/email"
+        android:contentDescription="@string/email"
         android:inputType="textEmailAddress" >
 
         <requestFocus />
@@ -25,6 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/email"
         android:layout_below="@+id/email"
+        android:contentDescription="@string/password"
         android:ems="10"
         android:inputType="textPassword" />
 
@@ -36,6 +38,7 @@
         android:layout_alignLeft="@+id/password"
         android:layout_below="@+id/password"
         android:ems="10"
+        android:contentDescription="@string/password_confirm"
         android:inputType="textPassword" />
     
     <EditText
@@ -45,6 +48,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/password"
         android:ems="10"
+        android:contentDescription="@string/first_name"
         android:inputType="text" />
     
     <EditText
@@ -54,6 +58,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/password"
         android:ems="10"
+        android:contentDescription="@string/last_name"
         android:inputType="text" />
 
 

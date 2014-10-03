@@ -1,7 +1,11 @@
 package com.adarshhasija.blindlinks;
 
 import com.parse.Parse;
+import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParsePush;
+import com.parse.PushService;
+import com.parse.SaveCallback;
 
 import android.app.Application;
 import android.content.Context;
@@ -17,6 +21,7 @@ public class MainApplication extends Application{
 	public void onCreate() {
 		super.onCreate();
 		Parse.initialize(this, "9f3p730Ynsj9hLbeEuGxGC9Nifwmh5Co0NCAsbi5", "MogP0et66o0SlSgS2XXFNJhVqnlvICy3L3don29q");
+		PushService.setDefaultPushCallback(this, RecordListActivity.class);
 	}
 
 	

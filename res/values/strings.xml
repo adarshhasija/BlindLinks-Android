@@ -10,6 +10,7 @@
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="password_confirm">Password confirm</string>
+    <string name="user">User</string>
     <string name="first_name">First name</string>
     <string name="last_name">Last name</string>
     <string name="starting_balance">Starting balance</string>

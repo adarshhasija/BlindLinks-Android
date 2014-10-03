@@ -2,8 +2,9 @@ package com.adarshhasija.blindlinks;
 
 import java.util.Locale;
 
-import com.example.ngotransactionrecords.R;
+import com.adarshhasija.blindlinks.R;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
@@ -33,6 +34,12 @@ public class Signup extends Activity {
 			progressButton.setVisible(false);
 			signupButton.setVisible(true);
 			if (e == null) {
+				//Create a new installation object for push notifications
+				EditText emailWidget = (EditText) findViewById(R.id.email);
+				String email = emailWidget.getText().toString();
+				ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+				installation.put("email", email);
+				installation.saveInBackground();
 				finish();
 			 } else {
 			    	Toast.makeText(Signup.this, e.getMessage(), Toast.LENGTH_SHORT).show();

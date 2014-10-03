@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import com.example.ngotransactionrecords.R;
+import com.adarshhasija.blindlinks.R;
 import com.parse.ParseObject;
 
 import android.content.Context;

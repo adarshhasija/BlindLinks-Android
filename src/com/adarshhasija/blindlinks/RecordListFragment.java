@@ -36,7 +36,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.adarshhasija.blindlinks.dummy.DummyContent;
-import com.example.ngotransactionrecords.R;
+import com.adarshhasija.blindlinks.R;
 
 /**
  * A list fragment representing a list of Records. This fragment also supports
@@ -48,6 +48,13 @@ import com.example.ngotransactionrecords.R;
  * interface.
  */
 public class RecordListFragment extends ListFragment {
+	
+	private MenuItem progressButton;
+	private MenuItem searchButton;
+	private MenuItem addButton;
+	private MenuItem refreshButton;
+	private MenuItem logoutButton;
+	private boolean refreshing=false;
 
 	/**
 	 * The serialization (saved instance state) Bundle key representing the
@@ -113,6 +120,10 @@ public class RecordListFragment extends ListFragment {
 	  			});
 	            RecordAdapter recordAdapter = new RecordAdapter(getActivity(), 0, list);
 	            setListAdapter(recordAdapter);
+	            if(refreshing) {
+	            	toggleProgressBarVisibility();
+	            	refreshing = true;
+	            }
 	        } else {
 	            Log.d("score", "Error: " + e.getMessage());
 	        }
@@ -126,35 +137,6 @@ public class RecordListFragment extends ListFragment {
 		setHasOptionsMenu(true);
 		
 		populateList();
-		
-		Calendar calendar = Calendar.getInstance();
-		String month = calendar.getDisplayName(calendar.MONTH, calendar.LONG, Locale.US);
-		int year = calendar.get(Calendar.YEAR);
-		String month_year = month + " " + Integer.toString(year);
-		getActivity().setTitle(month_year);
-		
-		final List<String> list = new ArrayList<String>();
-    	list.add(month_year);
-    	list.add("item 2");
-    	
-    	/** Create an array adapter to populate dropdownlist */
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity().getBaseContext(), android.R.layout.simple_spinner_dropdown_item, list);
- 
-        /** Enabling dropdown list navigation for the action bar */
-        //getActivity().getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
- 
-        /** Defining Navigation listener */
-        OnNavigationListener navigationListener = new OnNavigationListener() {
- 
-            @Override
-            public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-
-                return false;
-            }
-        };
- 
-        /** Setting dropdown items and item navigation listener for the actionbar */
-        getActivity().getActionBar().setListNavigationCallbacks(adapter, navigationListener);
 	}
 	
 	@Override
@@ -283,6 +265,9 @@ public class RecordListFragment extends ListFragment {
 		
 		inflater.inflate(R.menu.records_list_activity, menu);
 		
+		progressButton = (MenuItem)menu.findItem(R.id.progress);
+		progressButton.setVisible(false);
+		
 		// Associate searchable configuration with the SearchView
 	    SearchManager searchManager =
 	           (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
@@ -290,8 +275,10 @@ public class RecordListFragment extends ListFragment {
 	            (SearchView) menu.findItem(R.id.search).getActionView();
 	    searchView.setSearchableInfo(
 	            searchManager.getSearchableInfo(getActivity().getComponentName()));
+	    searchButton = menu.findItem(R.id.search);
+	    searchButton.setVisible(false);
 		
-		MenuItem addButton = (MenuItem)menu.findItem(R.id.add);
+		addButton = (MenuItem)menu.findItem(R.id.add);
 		addButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 			
 			@Override
@@ -305,7 +292,19 @@ public class RecordListFragment extends ListFragment {
 			}
 		});
 		
-		MenuItem logoutButton = (MenuItem)menu.findItem(R.id.logout);
+		refreshButton = (MenuItem)menu.findItem(R.id.refresh);
+		refreshButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+			
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				refreshing=true;
+				toggleProgressBarVisibility();
+				populateList();
+				return false;
+			}
+		});
+		
+		logoutButton = (MenuItem)menu.findItem(R.id.logout);
 		logoutButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 			
 			@Override
@@ -335,6 +334,25 @@ public class RecordListFragment extends ListFragment {
         queries.add(queryRecipient);
 		ParseQuery<ParseObject> mainQuery = ParseQuery.or(queries);
 		mainQuery.findInBackground(populateListCallback);
+	}
+	
+	private void toggleProgressBarVisibility() {
+		if(!refreshing) return;
+		
+		if(!progressButton.isVisible()) {
+			progressButton.setVisible(true);
+			//searchButton.setVisible(false);
+			addButton.setVisible(false);
+			refreshButton.setVisible(false);
+			logoutButton.setVisible(false);
+		}
+		else {
+			progressButton.setVisible(false);
+			//searchButton.setVisible(true);
+			addButton.setVisible(true);
+			refreshButton.setVisible(true);
+			logoutButton.setVisible(true);
+		}
 	}
 	
 	

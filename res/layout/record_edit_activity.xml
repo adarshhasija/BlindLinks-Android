@@ -22,6 +22,7 @@
     
     <Spinner
     android:id="@+id/user"
+    android:contentDescription="@string/user"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content" /> 
 
@@ -31,6 +32,7 @@
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
         android:ems="12"
+        android:contentDescription="@string/student_name"
         android:hint="@string/student_name" />
     
     <EditText
@@ -38,6 +40,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:ems="12"
+        android:contentDescription="@string/subject"
         android:hint="@string/subject" />
 
     
@@ -46,6 +49,7 @@
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content"
     android:text="@string/date" 
+    android:contentDescription="@string/date"
     android:onClick="showDatePickerDialog" />
 
     
@@ -54,6 +58,7 @@
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content"
     android:text="@string/time" 
+    android:contentDescription="@string/time"
     android:onClick="showTimePickerDialog" />
 
 </LinearLayout>
