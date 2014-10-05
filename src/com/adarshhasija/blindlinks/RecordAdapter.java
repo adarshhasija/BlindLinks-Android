@@ -61,9 +61,11 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> {
 		if(record != null) {
 			if(record.getString("status").equals("accepted")) {
 				viewHolder.iconView.setImageResource(R.drawable.ic_action_accept);
+				viewHolder.iconView.setContentDescription("Icon: Accepted");
 			}
 			else if(record.getString("status").equals("rejected")) {
 				viewHolder.iconView.setImageResource(R.drawable.ic_action_cancel);
+				viewHolder.iconView.setContentDescription("Icon: Rejected");
 			}
 			
 			Calendar c = Calendar.getInstance();
@@ -85,9 +87,11 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> {
 				final_date = monthString + " " + Integer.toString(record_date);
 			}
 			viewHolder.dateView.setText(final_date);
-			//viewHolder.amountView.setText((record.getNumber("amount")).toString());
+			viewHolder.dateView.setContentDescription("Last modified: "+final_date);
 			viewHolder.studentView.setText(record.getString("student"));
+			viewHolder.studentView.setContentDescription("Student: "+record.getString("student"));
 			viewHolder.subjectView.setText(record.getString("subject"));
+			viewHolder.subjectView.setContentDescription("Subject: "+record.getString("subject"));
 			//viewHolder.categoryView.setTag(record);
 			
 		}

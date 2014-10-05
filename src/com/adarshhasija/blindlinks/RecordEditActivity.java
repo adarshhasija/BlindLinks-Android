@@ -62,7 +62,7 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 		public void done(ParseException e) {
 			if(e == null) {
 				ParseQuery<ParseInstallation> pushQuery = ParseInstallation.getQuery();
-				pushQuery.whereEqualTo("email", ParseUser.getCurrentUser().getUsername());
+				pushQuery.whereEqualTo("phoneNumber", ParseUser.getCurrentUser().getString("phoneNumber"));
 				
 				JSONObject jsonObj=new JSONObject();
 	        	try {
@@ -133,6 +133,8 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 
 		MainApplication mainApplication = (MainApplication) getBaseContext().getApplicationContext();
 		record = mainApplication.getSelectedRecord();
+		
+		Spinner s1 = (Spinner) findViewById(R.id.user); s1.setFocusable(true); s1.setFocusableInTouchMode(true); s1.requestFocus();
 		
 	/*	ParseQuery<ParseObject> query = ParseQuery.getQuery("User");
 		query.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);

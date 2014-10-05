@@ -23,13 +23,7 @@
 
         <requestFocus />
     </AutoCompleteTextView>  -->
-    
-    <Spinner
-    android:id="@+id/user"
-    android:contentDescription="@string/user"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content" 
-    android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing" /> 
+
 
     <EditText
         android:id="@+id/student"
@@ -47,14 +41,26 @@
         android:layout_height="wrap_content"
         android:ems="12"
         android:contentDescription="@string/subject"
-        android:hint="@string/subject" 
+        android:hint="@string/subject"
+        android:inputType="text" 
         android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing" />
+    
+    <Spinner
+    android:id="@+id/user"
+    android:contentDescription="@string/select_volunteer"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:focusable="true"
+    android:focusableInTouchMode="true" 
+    android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing" />
 
     
     <Button
         android:id="@+id/datePicker" 
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content"
+    android:focusable="true"
+    android:focusableInTouchMode="true" 
     android:text="@string/date" 
     android:contentDescription="@string/date"
     android:onClick="showDatePickerDialog"

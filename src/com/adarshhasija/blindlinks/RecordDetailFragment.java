@@ -88,9 +88,11 @@ public class RecordDetailFragment extends Fragment {
 			if(e == null) {
 				((TextView) getActivity().findViewById(R.id.status))
 				.setText("Status: " + record.getString("status").toUpperCase());
+				((TextView) getActivity().findViewById(R.id.status))
+				.setContentDescription("Status: " + record.getString("status").toUpperCase());
 				
 				ParseQuery<ParseInstallation> pushQuery = ParseInstallation.getQuery();
-				pushQuery.whereEqualTo("email", ParseUser.getCurrentUser().getUsername());
+				pushQuery.whereEqualTo("phoneNumber", ParseUser.getCurrentUser().getString("phoneNumber"));
 				
 				JSONObject jsonObj=new JSONObject();
 	        	try {
@@ -171,10 +173,16 @@ public class RecordDetailFragment extends Fragment {
 	@Override
 	public void onResume() {
 		if(record != null) {
+			String studentDescription = "Student: "+record.getString("student");
+			String subjectDescription = "Subject: "+record.getString("subject");
 			((TextView) getActivity().findViewById(R.id.student))
-			.setText(record.getString("student"));
+			.setText(studentDescription);
+			((TextView) getActivity().findViewById(R.id.student))
+			.setContentDescription(studentDescription);
 			((TextView) getActivity().findViewById(R.id.subject))
-			.setText(record.getString("subject"));
+			.setText(subjectDescription);
+			((TextView) getActivity().findViewById(R.id.subject))
+			.setContentDescription(subjectDescription);
 		
 			Date d = record.getDate("dateTime");
 			Calendar c = Calendar.getInstance();
@@ -188,10 +196,14 @@ public class RecordDetailFragment extends Fragment {
 					minuteString + " " +
 					c.getDisplayName(Calendar.AM_PM, Calendar.LONG, Locale.US);
 			((TextView) getActivity().findViewById(R.id.date))
-			.setText("Date: " + dateString);
+			.setText("Date and Time: " + dateString);
+			((TextView) getActivity().findViewById(R.id.date))
+			.setContentDescription("Date and Time: " + dateString);
 			
 			((TextView) getActivity().findViewById(R.id.status))
 			.setText("Status: " + record.getString("status").toUpperCase());
+			((TextView) getActivity().findViewById(R.id.status))
+			.setContentDescription("Status: " + record.getString("status").toUpperCase());
 		}
 		
 		super.onResume();

@@ -3,6 +3,10 @@
     android:id="@+id/record_detail_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="@dimen/com_parse_ui_vertical_margin"
+    android:paddingLeft="@dimen/com_parse_ui_horizontal_margin"
+    android:paddingRight="@dimen/com_parse_ui_horizontal_margin"
+    android:paddingBottom="@dimen/com_parse_ui_vertical_margin"
     android:orientation="vertical"
     android:layout_marginLeft="10dp"
     tools:context=".RecordDetailActivity"
@@ -14,7 +18,8 @@
         android:layout_height="wrap_content"
         android:text="@string/student_name"
         android:contentDescription="@string/student_name"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing" />
 
     <TextView
         android:id="@+id/subject"
@@ -22,7 +27,8 @@
         android:layout_height="wrap_content"
         android:text="@string/subject"
         android:contentDescription="@string/subject"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing" />
 
     <TextView
         android:id="@+id/date"
@@ -30,15 +36,16 @@
         android:layout_height="wrap_content"
         android:text="@string/date"
         android:contentDescription="@string/date"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing" />
     
     <TextView
         android:id="@+id/status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/status"
-        android:contentDescription="@string/status"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:contentDescription="@string/status_new"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing" />
 
     
 </LinearLayout>    
