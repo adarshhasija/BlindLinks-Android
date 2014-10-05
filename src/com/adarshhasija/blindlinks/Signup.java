@@ -1,6 +1,10 @@
 package com.adarshhasija.blindlinks;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import com.adarshhasija.blindlinks.R;
 import com.parse.ParseException;
@@ -10,6 +14,9 @@ import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.parse.SignUpCallback;
 
+import android.accounts.Account;
+import android.accounts.AccountAuthenticatorActivity;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -17,14 +24,17 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class Signup extends Activity {
+public class Signup extends AccountAuthenticatorActivity {
 	
+	private Map<String, String> isoMap = new HashMap<String, String>();
 	private MenuItem progressButton;
 	private MenuItem signupButton;
 	private SignUpCallback signUpCallback = new SignUpCallback() {
@@ -32,20 +42,117 @@ public class Signup extends Activity {
 		@Override
 		public void done(ParseException e) {
 			progressButton.setVisible(false);
-			signupButton.setVisible(true);
 			if (e == null) {
-				//Create a new installation object for push notifications
-				EditText emailWidget = (EditText) findViewById(R.id.email);
-				String email = emailWidget.getText().toString();
-				ParseInstallation installation = ParseInstallation.getCurrentInstallation();
-				installation.put("email", email);
-				installation.saveInBackground();
+				EditText phoneNumberWidget = (EditText) findViewById(R.id.phone_number);
+				String phoneNumber = phoneNumberWidget.getText().toString();
+				EditText firstNameWidget = (EditText) findViewById(R.id.first_name);
+				EditText lastNameWidget = (EditText) findViewById(R.id.last_name);
+				String firstName = firstNameWidget.getText().toString();
+				String lastName = lastNameWidget.getText().toString();
+				firstName = firstName.substring(0, 1).toUpperCase(Locale.US) + firstName.substring(1);
+				lastName = lastName.substring(0, 1).toUpperCase(Locale.US) + lastName.substring(1);
+				
+			/*	//Create a local account
+				Account account = new Account(phoneNumber, "com.adarshhasija.blindlinks");  
+				AccountManager mAccountManager = AccountManager.get(Signup.this);
+				Bundle userdata = new Bundle();
+				userdata.putString("name", firstName + " " + lastName);
+				if (mAccountManager.addAccountExplicitly(account, null, userdata)) {
+			    	Bundle result = new Bundle();
+			        result.putString(AccountManager.KEY_ACCOUNT_NAME, "Blind Links");
+			        result.putString(AccountManager.KEY_ACCOUNT_TYPE, "com.adarshhasija.blindlinks");
+			        result.putString("someKey", "stringData");
+			        setAccountAuthenticatorResult(result);
+			    } */
+				
 				finish();
 			 } else {
 			    	Toast.makeText(Signup.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+			    	progressButton.setVisible(false);
 			 }
 		}
 		
+	};
+	private View.OnClickListener signupCickListener = new View.OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			Spinner countriesSpinner = (Spinner) findViewById(R.id.countries_spinner);
+			EditText phoneNumberWidget = (EditText) findViewById(R.id.phone_number);
+			EditText passwordWidget = (EditText) findViewById(R.id.password);
+			EditText passwordConfirmWidget = (EditText) findViewById(R.id.password_confirm);
+			EditText firstNameWidget = (EditText) findViewById(R.id.first_name);
+			EditText lastNameWidget = (EditText) findViewById(R.id.last_name);
+			
+			String phoneNumber = phoneNumberWidget.getText().toString();
+			String userName = phoneNumber; //the username will be the phone number without the country code
+			String password = passwordWidget.getText().toString();
+			String passwordConfirm = passwordConfirmWidget.getText().toString();
+			String firstName = firstNameWidget.getText().toString();
+			String lastName = lastNameWidget.getText().toString();
+			
+			ConnectivityManager cm = (ConnectivityManager) getSystemService(Signup.this.CONNECTIVITY_SERVICE);
+			if(cm.getActiveNetworkInfo() == null) {
+				Toast.makeText(Signup.this, "No internet connection", Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+		/*	if(!email.matches("^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$")) {
+				Toast.makeText(Signup.this, "Email address is invalid", Toast.LENGTH_SHORT).show();
+				return false;
+			}	*/
+			if(phoneNumber.length() < 1) {
+				Toast.makeText(Signup.this, "You have not entered a phone number", Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			if(!password.equals(passwordConfirm)) {
+				Toast.makeText(Signup.this, "Password and password confirm do not match", Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			if(firstName.isEmpty()) {
+				Toast.makeText(Signup.this, "You have not entered a first name", Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			if(lastName.isEmpty()) {
+				Toast.makeText(Signup.this, "You have not entered a last name", Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			firstName = firstName.substring(0, 1).toUpperCase(Locale.US) + firstName.substring(1);
+			lastName = lastName.substring(0, 1).toUpperCase(Locale.US) + lastName.substring(1);
+			phoneNumber = phoneNumber.replaceAll("[^\\d+]", "");
+			String countryCode = "+";
+			if(phoneNumber.indexOf("+", 0) == -1) {
+				String country = countriesSpinner.getSelectedItem().toString();
+				String countryISO = isoMap.get(country);
+				countryCode = Iso2Phone.getPhone(countryISO);
+				phoneNumber = countryCode + phoneNumber;
+			}
+			
+			//signupButton.setVisible(false);
+			progressButton.setActionView(R.layout.action_progressbar);
+            progressButton.expandActionView();
+			progressButton.setVisible(true);
+			
+			//Create a new installation object for push notifications
+			ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+			installation.put("phoneNumber", phoneNumber);
+			installation.saveInBackground();
+			
+			final ParseUser user = new ParseUser();
+			user.setUsername(userName);
+			user.setPassword(password);
+			user.put("phoneNumber", phoneNumber);
+			user.put("countryCode", countryCode);
+			user.put("firstName", firstName);
+			user.put("lastName", lastName);
+			user.signUpInBackground(signUpCallback);
+			
+			return;
+		}
 	};
 
 	@Override
@@ -53,6 +160,28 @@ public class Signup extends Activity {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.signup);
+		
+		Spinner spinner = (Spinner) findViewById(R.id.countries_spinner);	
+		String[] isoCountries = Locale.getISOCountries();
+		ArrayList<String> countries = new ArrayList<String>();
+		for(String countryISO : isoCountries) {
+			Locale locale = new Locale("en", countryISO);
+            String name = locale.getDisplayCountry();
+            countries.add(name);
+            isoMap.put(name, countryISO);
+		}
+		Collections.sort(countries);
+		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, countries);
+		
+		dataAdapter
+        .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spinner.setAdapter(dataAdapter);
+		Locale current = getResources().getConfiguration().locale;
+		spinner.setSelection(countries.indexOf(current.getDisplayCountry()));
+		
+		Button signupButton = (Button) findViewById(R.id.signup);
+		signupButton.setOnClickListener(signupCickListener);
 	}
 	
 	
@@ -64,7 +193,7 @@ public class Signup extends Activity {
 		progressButton = (MenuItem)menu.findItem(R.id.progress);
 		progressButton.setVisible(false);
 		
-		signupButton = (MenuItem)menu.findItem(R.id.signup);
+	/*	signupButton = (MenuItem)menu.findItem(R.id.signup);
 		signupButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 
 			@Override
@@ -124,9 +253,9 @@ public class Signup extends Activity {
 				user.signUpInBackground(signUpCallback);
 				
 				return false;
-			}
+			}  
 			
-		});
+		}); */
 		
 		return super.onCreateOptionsMenu(menu);
 	}

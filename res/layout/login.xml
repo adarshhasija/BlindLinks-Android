@@ -2,24 +2,29 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="@dimen/com_parse_ui_vertical_margin"
+    android:paddingLeft="@dimen/com_parse_ui_horizontal_margin"
+    android:paddingRight="@dimen/com_parse_ui_horizontal_margin"
+    android:paddingBottom="@dimen/com_parse_ui_vertical_margin"
     android:orientation="vertical" >
 
     <EditText
-        android:id="@+id/email"
-        android:hint="@string/email"
+        android:id="@+id/phone_number"
+        android:hint="@string/phone_number"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:ems="10"
         android:contentDescription="@string/email"
-        android:inputType="textEmailAddress" >
+        android:inputType="number" >
 
         <requestFocus />
     </EditText>
 
     <EditText
         android:id="@+id/password"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/email"
@@ -28,6 +33,17 @@
         android:hint="@string/password"
         android:contentDescription="@string/password"
         android:inputType="textPassword" />
+    
+    <Button
+        android:id="@+id/login"
+        android:contentDescription="@string/login"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:textSize="18sp"
+        android:textColor="#FFFFFFFF"
+        android:background="#FF0000FF"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing"
+        android:text="@string/login" />
 
 
 </LinearLayout>

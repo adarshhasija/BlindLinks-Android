@@ -2,12 +2,15 @@
 <resources>
 
     <string name="app_name">Blind Links</string>
+    <string name="login">LOGIN</string>
+    <string name="signup">SIGNUP</string>
     <string name="title_record_detail">Record Detail</string>
     <string name="search_title">Search students</string>
     <string name="search_hint">Enter name</string>
     <string name="search_results">Search Results</string>
     <string name="save">Save</string>
     <string name="email">Email</string>
+    <string name="phone_number">Phone number</string>
     <string name="password">Password</string>
     <string name="password_confirm">Password confirm</string>
     <string name="user">User</string>

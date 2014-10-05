@@ -2,18 +2,29 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="@dimen/com_parse_ui_vertical_margin"
+    android:paddingLeft="@dimen/com_parse_ui_horizontal_margin"
+    android:paddingRight="@dimen/com_parse_ui_horizontal_margin"
+    android:paddingBottom="@dimen/com_parse_ui_vertical_margin"
     android:orientation="vertical" >
     
+    <Spinner
+    		android:id="@+id/countries_spinner"
+    		android:layout_width="fill_parent"
+    		android:layout_height="wrap_content" 
+    		android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing" />
+    
     <EditText
-        android:id="@+id/email"
+        android:id="@+id/phone_number"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing"
         android:layout_below="@+id/signingUpLbl"
         android:layout_centerHorizontal="true"
         android:ems="10"
-        android:hint="@string/email"
-        android:contentDescription="@string/email"
-        android:inputType="textEmailAddress" >
+        android:hint="@string/phone_number"
+        android:contentDescription="@string/phone_number"
+        android:inputType="number" >
 
         <requestFocus />
     </EditText>
@@ -24,6 +35,7 @@
         android:hint="@string/password"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing"
         android:layout_alignLeft="@+id/email"
         android:layout_below="@+id/email"
         android:contentDescription="@string/password"
@@ -35,6 +47,7 @@
         android:hint="@string/password_confirm"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing"
         android:layout_alignLeft="@+id/password"
         android:layout_below="@+id/password"
         android:ems="10"
@@ -46,6 +59,7 @@
         android:hint="@string/first_name"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing"
         android:layout_alignLeft="@+id/password"
         android:ems="10"
         android:contentDescription="@string/first_name"
@@ -56,10 +70,22 @@
         android:hint="@string/last_name"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing"
         android:layout_alignLeft="@+id/password"
         android:ems="10"
         android:contentDescription="@string/last_name"
         android:inputType="text" />
+    
+    <Button
+        android:id="@+id/signup"
+        android:contentDescription="@string/login"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:textSize="18sp"
+        android:textColor="#FFFFFFFF"
+        android:background="#FF0000FF"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing"
+        android:text="@string/signup" />
 
 
 </LinearLayout>

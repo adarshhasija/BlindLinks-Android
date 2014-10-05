@@ -3,8 +3,11 @@ package com.adarshhasija.blindlinks;
 import com.adarshhasija.blindlinks.R;
 import com.parse.LogInCallback;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParseUser;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -21,6 +24,7 @@ import android.widget.Toast;
 
 public class Login extends Activity {
 	
+	private boolean shouldSignupBeVisible = true;
 	private MenuItem progressButton;
 	private MenuItem loginButton;
 	private MenuItem signupButton;
@@ -30,16 +34,58 @@ public class Login extends Activity {
 		public void done(ParseUser user, ParseException e) {
 			progressButton.setVisible(false);
 			signupButton.setVisible(true);
-			loginButton.setVisible(true);
 			
 			if (user != null) {
 				Intent mainIntent = new Intent(Login.this, RecordListActivity.class);
 				startActivity(mainIntent);
 		    } else {
 		    	Toast.makeText(Login.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+		    	progressButton.setVisible(false);
+		    	if(shouldSignupBeVisible == true) signupButton.setVisible(true);
 		    }
 		}
 		
+	};
+	private View.OnClickListener loginCickListener = new View.OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			EditText phoneNumberWidget = (EditText) findViewById(R.id.phone_number);
+			EditText passwordWidget = (EditText) findViewById(R.id.password);
+			
+			String phoneNumber = phoneNumberWidget.getText().toString();
+			String password = passwordWidget.getText().toString();
+			
+			ConnectivityManager cm = (ConnectivityManager) getSystemService(Login.this.CONNECTIVITY_SERVICE);
+			if(cm.getActiveNetworkInfo() == null) {
+				Toast.makeText(Login.this, "No internet connection", Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+		/*	if(!email.matches("^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$")) {
+				Toast.makeText(Login.this, "Email address is invalid", Toast.LENGTH_SHORT).show();
+				return false;
+			} */
+			if(phoneNumber.length() < 1) {
+				Toast.makeText(Login.this, "You have not entered a phone number", Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			if(password.isEmpty()) {
+				Toast.makeText(Login.this, "You have not entered a password", Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			//loginButton.setVisible(false);
+			signupButton.setVisible(false);
+			progressButton.setActionView(R.layout.action_progressbar);
+            progressButton.expandActionView();
+			progressButton.setVisible(true);
+			
+			ParseUser.logInInBackground(phoneNumber, password, logInCallback);
+			
+			return;
+		}
 	};
 
 	@Override
@@ -48,7 +94,8 @@ public class Login extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login);
 		
-		
+		Button loginButton = (Button) findViewById(R.id.login);
+		loginButton.setOnClickListener(loginCickListener);
 	}
 
 	@Override
@@ -71,7 +118,7 @@ public class Login extends Activity {
 		progressButton = (MenuItem)menu.findItem(R.id.progress);
 		progressButton.setVisible(false);
 		
-		loginButton = (MenuItem)menu.findItem(R.id.login);
+	/*	loginButton = (MenuItem)menu.findItem(R.id.login);
 		loginButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 
 			@Override
@@ -109,7 +156,7 @@ public class Login extends Activity {
 				return false;
 			}
 			
-		});
+		});	*/
 		
 		signupButton = (MenuItem)menu.findItem(R.id.signup);
 		signupButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
@@ -123,6 +170,12 @@ public class Login extends Activity {
 			}
 			
 		});
+		ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+		String phoneNumber = installation.getString("phoneNumber");
+		if(phoneNumber != null) {
+			signupButton.setVisible(false);
+			shouldSignupBeVisible = false;
+		}
 		
 		return super.onCreateOptionsMenu(menu);
 	}

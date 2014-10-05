@@ -8,12 +8,13 @@
         <item android:id="@+id/progress"
           android:showAsAction="ifRoom" />
         
-        <item android:id="@+id/login"
+    <!--    <item android:id="@+id/login"
           android:title="Login"
-          android:showAsAction="ifRoom" />
+          android:showAsAction="ifRoom" /> -->
         
         <item android:id="@+id/signup"
-          android:title="New User? Sign Up" />
+          android:title="Signup" 
+          android:showAsAction="ifRoom" />
         
     </menu>
 
