@@ -67,6 +67,10 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> {
 				viewHolder.iconView.setImageResource(R.drawable.ic_action_cancel);
 				viewHolder.iconView.setContentDescription("Icon: Rejected");
 			}
+			else {
+				viewHolder.iconView.setImageResource(R.drawable.ic_action_event);
+				viewHolder.iconView.setContentDescription("Icon: Scheduled");
+			}
 			
 			Calendar c = Calendar.getInstance();
 			int cur_date = c.get(Calendar.DATE);

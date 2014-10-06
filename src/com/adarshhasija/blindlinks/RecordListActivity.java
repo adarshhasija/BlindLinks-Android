@@ -70,13 +70,13 @@ public class RecordListActivity extends FragmentActivity implements
 	 * the item with the given ID was selected.
 	 */
 	@Override
-	public void onItemSelected(String id) {
+	public void onItemSelected(int requestCode) {
 		if (mTwoPane) {
 			// In two-pane mode, show the detail view in this activity by
 			// adding or replacing the detail fragment using a
 			// fragment transaction.
 			Bundle arguments = new Bundle();
-			arguments.putString(RecordDetailFragment.ARG_ITEM_ID, id);
+			arguments.putInt(RecordDetailFragment.ARG_ITEM_ID, requestCode);
 			RecordDetailFragment fragment = new RecordDetailFragment();
 			fragment.setArguments(arguments);
 			getSupportFragmentManager().beginTransaction()
@@ -86,9 +86,16 @@ public class RecordListActivity extends FragmentActivity implements
 			// In single-pane mode, simply start the detail activity
 			// for the selected item ID.
 			Intent detailIntent = new Intent(this, RecordDetailActivity.class);
-			detailIntent.putExtra(RecordDetailFragment.ARG_ITEM_ID, id);
-			startActivity(detailIntent);
+			detailIntent.putExtra(RecordDetailFragment.ARG_ITEM_ID, requestCode);
+			startActivityForResult(detailIntent, requestCode);
 		}
+	}
+
+	@Override
+	protected void onActivityResult(int arg0, int arg1, Intent arg2) {
+		super.onActivityResult(arg0, arg1, arg2);
+		((RecordListFragment) getSupportFragmentManager().findFragmentById(
+				R.id.record_list)).onActivityResult(arg0, arg1, arg2);
 	}
 	
 }

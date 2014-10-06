@@ -82,7 +82,7 @@ public class RecordListFragment extends ListFragment {
 		/**
 		 * Callback for when an item has been selected.
 		 */
-		public void onItemSelected(String id);
+		public void onItemSelected(int requestCode);
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class RecordListFragment extends ListFragment {
 	 */
 	private static Callbacks sDummyCallbacks = new Callbacks() {
 		@Override
-		public void onItemSelected(String id) {
+		public void onItemSelected(int requestCode) {
 		}
 	};
 
@@ -166,7 +166,6 @@ public class RecordListFragment extends ListFragment {
 			ParseObject record = mainApplication.getModifiedRecord();
 			if(record != null) {
 				RecordAdapter adapter = (RecordAdapter) getListAdapter();
-				
 				//random large number for insert
 				if(requestCode == 50000) {
 					adapter.insert(record, 0);
@@ -177,7 +176,7 @@ public class RecordListFragment extends ListFragment {
 				}
 				adapter.notifyDataSetChanged();
 				getListView().scrollTo(0, 0);  //scroll to top after done
-				mainApplication.setModifiedRecord(null);
+				mainApplication.setModifiedRecord(null);	
 			}
 		}
 		super.onActivityResult(requestCode, resultCode, data);
@@ -226,7 +225,8 @@ public class RecordListFragment extends ListFragment {
 		mainApplication.setSelectedRecord((ParseObject) getListAdapter().getItem(position));
 		// Notify the active callbacks interface (the activity, if the
 		// fragment is attached to one) that an item has been selected.
-		mCallbacks.onItemSelected(DummyContent.ITEMS.get(position).id);
+		//THIS MEANS NOTHING NOW
+		mCallbacks.onItemSelected(position);
 	}
 
 	@Override

@@ -111,6 +111,7 @@ public final class R {
         public static final int date=0x7f060019;
         public static final int email=0x7f060008;
         public static final int first_name=0x7f06000e;
+        public static final int icon_scheduled=0x7f06001f;
         public static final int last_name=0x7f06000f;
         public static final int login=0x7f060001;
         public static final int new_record=0x7f060015;
@@ -126,7 +127,7 @@ public final class R {
         public static final int select_volunteer=0x7f06000d;
         public static final int signup=0x7f060002;
         public static final int starting_balance=0x7f060010;
-        public static final int status=0x7f06001e;
+        public static final int status_new=0x7f06001e;
         public static final int student_name=0x7f06001c;
         public static final int subject=0x7f06001d;
         public static final int time=0x7f06001a;

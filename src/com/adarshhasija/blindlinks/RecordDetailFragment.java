@@ -107,6 +107,8 @@ public class RecordDetailFragment extends Fragment {
 				push.setData(jsonObj);
 				//push.setMessage("From the client");
 				push.sendInBackground();
+				
+				setResultForReturn();
 			}
 			else {
 				Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -150,23 +152,6 @@ public class RecordDetailFragment extends Fragment {
 		}
 		queryUser.findInBackground(setTitleFindCallback);
 	}
-	
-
-
-	@Override
-	public void onDestroy() {
-		Bundle bundle = new Bundle();
-		bundle.putString("student", record.getString("student"));
-		bundle.putString("subject", record.getString("subject"));
-		bundle.putString("status", record.getString("status"));
-		ParseProxyObject ppo = new ParseProxyObject(record);
-		//returnIntent.putExtras(bundle);
-		Intent returnIntent = new Intent();
-		returnIntent.putExtra("parseObject", ppo);
-		getActivity().setResult(getActivity().RESULT_OK,returnIntent);
-		
-		super.onDestroy();
-	}
 
 
 
@@ -204,6 +189,8 @@ public class RecordDetailFragment extends Fragment {
 			.setText("Status: " + record.getString("status").toUpperCase());
 			((TextView) getActivity().findViewById(R.id.status))
 			.setContentDescription("Status: " + record.getString("status").toUpperCase());
+			
+			setResultForReturn();
 		}
 		
 		super.onResume();
@@ -307,6 +294,23 @@ public class RecordDetailFragment extends Fragment {
 		if(record.getString("status").equals("rejected")) { cancelButton.setVisible(false); }
 
 		super.onCreateOptionsMenu(menu, inflater);
+	}
+	
+	private void setResultForReturn() 
+	{
+		Bundle bundle = new Bundle();
+		bundle.putString("student", record.getString("student"));
+		bundle.putString("subject", record.getString("subject"));
+		bundle.putString("status", record.getString("status"));
+		ParseProxyObject ppo = new ParseProxyObject(record);
+		//returnIntent.putExtras(bundle);
+		Intent returnIntent = new Intent();
+		returnIntent.putExtra("parseObject", ppo);
+		Log.d("Detail", "************"+getActivity().RESULT_OK);
+		getActivity().setResult(getActivity().RESULT_OK,returnIntent);
+		
+		MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
+		mainApplication.setModifiedRecord(record);
 	}
 	
 	
