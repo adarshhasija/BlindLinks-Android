@@ -161,9 +161,9 @@ public class RecordListFragment extends ListFragment {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
+		ParseObject record = mainApplication.getModifiedRecord();
 		if(resultCode == getActivity().RESULT_OK) {
-			MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
-			ParseObject record = mainApplication.getModifiedRecord();
 			if(record != null) {
 				RecordAdapter adapter = (RecordAdapter) getListAdapter();
 				//random large number for insert
@@ -175,10 +175,17 @@ public class RecordListFragment extends ListFragment {
 					adapter.insert(record, 0);
 				}
 				adapter.notifyDataSetChanged();
-				getListView().scrollTo(0, 0);  //scroll to top after done
-				mainApplication.setModifiedRecord(null);	
+				getListView().scrollTo(0, 0);  //scroll to top after done	
 			}
 		}
+		else if(resultCode == getActivity().RESULT_CANCELED) {
+			if(requestCode > -1 && requestCode != 50000) {
+				RecordAdapter adapter = (RecordAdapter) getListAdapter();
+				adapter.remove(record);
+				adapter.notifyDataSetChanged();
+			}
+		}
+		mainApplication.setModifiedRecord(null);
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 

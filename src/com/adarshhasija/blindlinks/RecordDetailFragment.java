@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -28,7 +29,10 @@ import android.widget.Toast;
 
 import com.adarshhasija.blindlinks.dummy.DummyContent;
 import com.adarshhasija.blindlinks.R;
+import com.parse.DeleteCallback;
 import com.parse.FindCallback;
+import com.parse.FunctionCallback;
+import com.parse.ParseCloud;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
@@ -91,9 +95,6 @@ public class RecordDetailFragment extends Fragment {
 				((TextView) getActivity().findViewById(R.id.status))
 				.setContentDescription("Status: " + record.getString("status").toUpperCase());
 				
-				ParseQuery<ParseInstallation> pushQuery = ParseInstallation.getQuery();
-				pushQuery.whereEqualTo("phoneNumber", ParseUser.getCurrentUser().getString("phoneNumber"));
-				
 				JSONObject jsonObj=new JSONObject();
 	        	try {
 					jsonObj.put("action", "com.adarshhasija.blindlinks.intent.RECEIVE");
@@ -102,17 +103,40 @@ public class RecordDetailFragment extends Fragment {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+	        /*	ParseQuery<ParseInstallation> pushQuery = ParseInstallation.getQuery();
+	    		pushQuery.whereEqualTo("phoneNumber", ParseUser.getCurrentUser().getString("phoneNumber"));
 				ParsePush push = new ParsePush();
 				push.setQuery(pushQuery); // Set our Installation query
-				push.setData(jsonObj);
-				//push.setMessage("From the client");
-				push.sendInBackground();
+				push.setData(jsonObj); 
+				push.setMessage("From the client");
+				push.sendInBackground();	*/	
+				HashMap<String, Object> params = new HashMap<String, Object>();
+				params.put("recipientPhoneNumber", otherUser.getString("phoneNumber"));
+				params.put("data", jsonObj);
+				ParseCloud.callFunctionInBackground("sendPushToUser", params, new FunctionCallback<String>() {
+				   public void done(String success, ParseException e) {
+				       if (e == null) {
+				          // Push sent successfully
+				       }
+				       else {
+				    	   Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+				       }
+				   }
+				});
 				
 				setResultForReturn();
 			}
 			else {
 				Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
 			}
+		}
+		
+	};
+	private DeleteCallback deleteCallback = new DeleteCallback() {
+
+		@Override
+		public void done(ParseException arg0) {
+			getActivity().finish();
 		}
 		
 	};
@@ -158,6 +182,17 @@ public class RecordDetailFragment extends Fragment {
 	@Override
 	public void onResume() {
 		if(record != null) {
+			ParseUser currentUser = ParseUser.getCurrentUser();
+			ParseUser user = record.getParseUser("user");
+			String createdBy = null;
+			
+			if(user.getObjectId().equals(currentUser.getObjectId())) {
+				createdBy = "Record created by: "+currentUser.getString("firstName") + " " + currentUser.getString("lastName");
+			}
+			else if(user.getObjectId().equals(otherUser.getObjectId())) {
+				createdBy = "Record created by: "+otherUser.getString("firstName") + " " + otherUser.getString("lastName");
+			}
+			
 			String studentDescription = "Student: "+record.getString("student");
 			String subjectDescription = "Subject: "+record.getString("subject");
 			((TextView) getActivity().findViewById(R.id.student))
@@ -168,16 +203,23 @@ public class RecordDetailFragment extends Fragment {
 			.setText(subjectDescription);
 			((TextView) getActivity().findViewById(R.id.subject))
 			.setContentDescription(subjectDescription);
+			((TextView) getActivity().findViewById(R.id.created_by))
+			.setText(createdBy);
+			((TextView) getActivity().findViewById(R.id.created_by))
+			.setContentDescription(createdBy);
 		
 			Date d = record.getDate("dateTime");
 			Calendar c = Calendar.getInstance();
 			c.setTime(d);
+			int hour = c.get(Calendar.HOUR_OF_DAY);
+			if(hour > 12) hour = hour - 12;
+			else if(hour == 0) hour = 12;
 			int minute = c.get(Calendar.MINUTE);
 			String minuteString = (minute < 10)?"0"+Integer.toString(minute):Integer.toString(minute);
 			String dateString = c.get(Calendar.DATE) + " " + 
 					c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US) + " " +
 					c.get(Calendar.YEAR) + " " +
-					c.get(Calendar.HOUR) + ":" +
+					hour + ":" +
 					minuteString + " " +
 					c.getDisplayName(Calendar.AM_PM, Calendar.LONG, Locale.US);
 			((TextView) getActivity().findViewById(R.id.date))
@@ -215,9 +257,42 @@ public class RecordDetailFragment extends Fragment {
 		progressButton = (MenuItem)menu.findItem(R.id.progress);
 		progressButton.setVisible(false);
 		
+		MenuItem deleteButton = (MenuItem)menu.findItem(R.id.delete);
 		MenuItem editButton = (MenuItem)menu.findItem(R.id.edit);
 		final MenuItem acceptButton = (MenuItem)menu.findItem(R.id.accept);
 		final MenuItem cancelButton = (MenuItem)menu.findItem(R.id.cancel);
+		
+		deleteButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+
+			@Override
+			public boolean onMenuItemClick(MenuItem arg0) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		        builder.setMessage("Are you sure?")
+		               .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		                   public void onClick(DialogInterface dialog, int id) {
+		                	   setResultForDeleted();
+		                	   record.deleteEventually(deleteCallback);
+		                   }
+		               })
+		               .setNegativeButton("No", new DialogInterface.OnClickListener() {
+		                   public void onClick(DialogInterface dialog, int id) {
+		                       // User cancelled the dialog
+		                   }
+		               });
+		        builder.show();
+		        
+				return false;
+			}
+			
+		});
+		ParseUser recordUser = record.getParseUser("user");
+		ParseUser currentUser = ParseUser.getCurrentUser();
+		//If this is the recipient, delete button is not visible
+		//Only the sending user is allowed to delete
+		if(!currentUser.getObjectId().equals(recordUser.getObjectId())) {
+			deleteButton.setVisible(false);
+		}
+		
 		
 		editButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 			
@@ -298,16 +373,22 @@ public class RecordDetailFragment extends Fragment {
 	
 	private void setResultForReturn() 
 	{
-		Bundle bundle = new Bundle();
+	/*	Bundle bundle = new Bundle();
 		bundle.putString("student", record.getString("student"));
 		bundle.putString("subject", record.getString("subject"));
 		bundle.putString("status", record.getString("status"));
 		ParseProxyObject ppo = new ParseProxyObject(record);
 		//returnIntent.putExtras(bundle);
 		Intent returnIntent = new Intent();
-		returnIntent.putExtra("parseObject", ppo);
-		Log.d("Detail", "************"+getActivity().RESULT_OK);
-		getActivity().setResult(getActivity().RESULT_OK,returnIntent);
+		returnIntent.putExtra("parseObject", ppo); */
+		getActivity().setResult(getActivity().RESULT_OK);
+		
+		MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
+		mainApplication.setModifiedRecord(record);
+	}
+	
+	private void setResultForDeleted() {
+		getActivity().setResult(getActivity().RESULT_CANCELED);
 		
 		MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
 		mainApplication.setModifiedRecord(record);

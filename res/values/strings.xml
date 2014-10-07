@@ -33,6 +33,7 @@
     <string name="subject">Subject</string>
     <string name="status_new">Status: NEW</string>
     <string name="icon_scheduled">Icon: Scheduled</string>
+    <string name="created_by">Record created by</string>
     <string-array name="credit_debit">
         <item>Credit</item>
         <item>Debit</item>

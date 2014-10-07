@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -14,6 +15,9 @@ import org.json.JSONObject;
 
 import com.adarshhasija.blindlinks.R;
 import com.parse.FindCallback;
+import com.parse.FunctionCallback;
+import com.parse.ParseACL;
+import com.parse.ParseCloud;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
@@ -55,14 +59,12 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 	private ArrayList<String> userList;
 	private Calendar dateTime;
 	private MenuItem progressButton;
-	private MenuItem saveButton;
+	private MenuItem sendButton;
 	private SaveCallback saveCallback = new SaveCallback() {
 
 		@Override
 		public void done(ParseException e) {
 			if(e == null) {
-				ParseQuery<ParseInstallation> pushQuery = ParseInstallation.getQuery();
-				pushQuery.whereEqualTo("phoneNumber", ParseUser.getCurrentUser().getString("phoneNumber"));
 				
 				JSONObject jsonObj=new JSONObject();
 	        	try {
@@ -72,15 +74,30 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+	      /*  	ParseQuery<ParseInstallation> pushQuery = ParseInstallation.getQuery();
+				pushQuery.whereEqualTo("phoneNumber", ParseUser.getCurrentUser().getString("phoneNumber"));
 				ParsePush push = new ParsePush();
 				push.setQuery(pushQuery); // Set our Installation query
 				push.setData(jsonObj);
-				//push.setMessage("From the client");
-				push.sendInBackground();
+				push.sendInBackground();	*/
+	        	
+	        	HashMap<String, Object> params = new HashMap<String, Object>();
+				params.put("recipientPhoneNumber", otherUser.getString("phoneNumber"));
+				params.put("data", jsonObj);
+				ParseCloud.callFunctionInBackground("sendPushToUser", params, new FunctionCallback<String>() {
+				   public void done(String success, ParseException e) {
+				       if (e == null) {
+				          // Push sent successfully
+				       }
+				       else {
+				    	   Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+				       }
+				   }
+				});
 				
 				
 				progressButton.setVisible(false);
-				saveButton.setVisible(true);
+				sendButton.setVisible(true);
 				finish();
 			}
 			else {
@@ -134,8 +151,6 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 		MainApplication mainApplication = (MainApplication) getBaseContext().getApplicationContext();
 		record = mainApplication.getSelectedRecord();
 		
-		Spinner s1 = (Spinner) findViewById(R.id.user); s1.setFocusable(true); s1.setFocusableInTouchMode(true); s1.requestFocus();
-		
 	/*	ParseQuery<ParseObject> query = ParseQuery.getQuery("User");
 		query.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
 		query.findInBackground(new FindCallback<ParseObject>() {
@@ -176,7 +191,9 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 		int year = c.get(Calendar.YEAR);
         String month = c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
         int day = c.get(Calendar.DAY_OF_MONTH);
-        int hour = c.get(Calendar.HOUR);
+        int hour = c.get(Calendar.HOUR_OF_DAY);
+        if(hour > 12) hour = hour - 12;
+        else if(hour == 0) hour = 12;
         int minute = c.get(Calendar.MINUTE);
         String am_pm = c.getDisplayName(Calendar.AM_PM, Calendar.LONG, Locale.US);
         //String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
@@ -215,7 +232,9 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 			year = c.get(Calendar.YEAR);
 	        month = c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
 	        day = c.get(Calendar.DAY_OF_MONTH);
-	        hour = c.get(Calendar.HOUR);
+	        hour = c.get(Calendar.HOUR_OF_DAY);
+	        if(hour > 12) hour = hour - 12;
+	        else if(hour == 0) hour = 12;
 	        minute = c.get(Calendar.MINUTE);
 	        am_pm = c.getDisplayName(Calendar.AM_PM, Calendar.LONG, Locale.US);
 			datePicker.setText(day+" "+month+" "+year);
@@ -241,8 +260,8 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 		progressButton = (MenuItem)menu.findItem(R.id.progress);
 		progressButton.setVisible(false);
 		
-		saveButton = (MenuItem)menu.findItem(R.id.save);
-		saveButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+		sendButton = (MenuItem)menu.findItem(R.id.send);
+		sendButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 			
 			@Override
 			public boolean onMenuItemClick(MenuItem item) {
@@ -269,7 +288,7 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 					return false;
 				}
 				
-				saveButton.setVisible(false);
+				sendButton.setVisible(false);
 				progressButton.setActionView(R.layout.action_progressbar);
 	            progressButton.expandActionView();
 				progressButton.setVisible(true);

@@ -40,6 +40,14 @@
         android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing" />
     
     <TextView
+        android:id="@+id/created_by"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/created_by"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_marginTop="@dimen/com_parse_ui_large_vertical_spacing" />
+    
+    <TextView
         android:id="@+id/status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
