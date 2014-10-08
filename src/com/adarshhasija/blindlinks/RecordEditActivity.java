@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import com.adarshhasija.blindlinks.R;
 import com.parse.FindCallback;
 import com.parse.FunctionCallback;
+import com.parse.GetCallback;
 import com.parse.ParseACL;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
@@ -55,6 +56,7 @@ import android.widget.Toast;
 public class RecordEditActivity extends FragmentActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
 	
 	private ParseObject record=null;
+	private ParseUser otherUser=null;
 	private ArrayList<ParseUser> userObjects;
 	private ArrayList<String> userList;
 	private Calendar dateTime;
@@ -90,7 +92,7 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 				          // Push sent successfully
 				       }
 				       else {
-				    	   Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+				    	   Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
 				       }
 				   }
 				});
@@ -141,6 +143,13 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 		}
 		
 	};
+	private GetCallback getUserCallback = new GetCallback<ParseUser>() {
+		
+		@Override
+        public void done(ParseUser user, ParseException e) {
+            otherUser = user;
+          }
+      };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -151,26 +160,20 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 		MainApplication mainApplication = (MainApplication) getBaseContext().getApplicationContext();
 		record = mainApplication.getSelectedRecord();
 		
-	/*	ParseQuery<ParseObject> query = ParseQuery.getQuery("User");
-		query.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
-		query.findInBackground(new FindCallback<ParseObject>() {
-			@Override
-			public void done(List<ParseObject> list, ParseException e) {
-				if (e == null) {
-		            userList = new ArrayList<String>();
-		            for(ParseObject obj : list) {
-		            	userObjects.add(obj); //This is needed later when saving
-		            	userList.add(obj.getString("firstName")+" "+obj.getString("lastName"));	
-		            }
-		            //AutoCompleteTextView categoryView = (AutoCompleteTextView) findViewById(R.id.user); 
-		            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_list_item_1, userList);
-		            //categoryView.setAdapter(adapter);
-		        } else {
-		            Log.d("score", "Error: " + e.getMessage());
-		        }
-				
-			}
-		}); */
+		ParseUser user = record.getParseUser("user");
+		ParseUser recipient = record.getParseUser("recipient");
+		ParseUser currentUser = ParseUser.getCurrentUser();
+		ParseUser userToFetch;
+		
+		//If they are not the same, this means currentUser is the recipient, so display the user in title
+		if(!user.getObjectId().equals(currentUser.getObjectId())) {
+			userToFetch = user;
+		}
+		//If they are the same, currentUser is the user and recipient should be displayed
+		else {
+			userToFetch = recipient;
+		}
+		userToFetch.fetchIfNeededInBackground(getUserCallback);
 
 	}
 	

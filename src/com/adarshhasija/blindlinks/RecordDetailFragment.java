@@ -32,6 +32,7 @@ import com.adarshhasija.blindlinks.R;
 import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.FunctionCallback;
+import com.parse.GetCallback;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
@@ -61,6 +62,10 @@ public class RecordDetailFragment extends Fragment {
 	private ParseObject record;
 	private ParseUser otherUser;
 	private MenuItem progressButton;
+	private MenuItem deleteButton;
+	private MenuItem editButton;
+	private MenuItem acceptButton;
+	private MenuItem cancelButton;
 	/**
 	 * Mandatory empty constructor for the fragment manager to instantiate the
 	 * fragment (e.g. upon screen orientation changes).
@@ -68,19 +73,24 @@ public class RecordDetailFragment extends Fragment {
 	public RecordDetailFragment() {
 	}
 	
-	private FindCallback setTitleFindCallback = new FindCallback() {
+	
+	/*
+	 * Our Parse callbacks
+	 * 
+	 * 
+	 */
+	private GetCallback getUserCallback = new GetCallback<ParseUser>() {
 
 		@Override
-		public void done(List arg0, ParseException arg1) {
-			if (arg1 == null) {
-				ParseUser user = (ParseUser) arg0.get(0);
+		public void done(ParseUser user, ParseException e) {
+			if (e == null) {
 				otherUser = user;
 				if(getActivity() != null) {
 					getActivity().setTitle(user.getString("firstName") + " " + user.getString("lastName"));
 				}
 				
 		    } else {
-		    	Toast.makeText(getActivity(), arg1.getMessage(), Toast.LENGTH_SHORT).show();
+		    	Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
 		    }
 		}
 		
@@ -106,7 +116,7 @@ public class RecordDetailFragment extends Fragment {
 	        /*	ParseQuery<ParseInstallation> pushQuery = ParseInstallation.getQuery();
 	    		pushQuery.whereEqualTo("phoneNumber", ParseUser.getCurrentUser().getString("phoneNumber"));
 				ParsePush push = new ParsePush();
-				push.setQuery(pushQuery); // Set our Installation query
+				push.setQuery(pushQuery); 
 				push.setData(jsonObj); 
 				push.setMessage("From the client");
 				push.sendInBackground();	*/	
@@ -140,6 +150,114 @@ public class RecordDetailFragment extends Fragment {
 		}
 		
 	};
+	
+	/*
+	 * Action bar button
+	 * Private functions
+	 * 
+	 * 
+	 */
+	private void deletePressed()
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage("Are you sure?")
+               .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                	   setResultForDeleted();
+                	   record.deleteEventually(deleteCallback);
+                   }
+               })
+               .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                       // User cancelled the dialog
+                   }
+               });
+        builder.show();
+	}
+	
+	private void editPressed()
+	{
+		//Pass the ParseObject as a global variable
+		MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
+		mainApplication.setSelectedRecord(record);
+		
+		//Bundle bundle = new Bundle();
+		//bundle.putLong("id", media.getId());
+		Intent newIntent = new Intent(getActivity(),RecordEditActivity.class);
+    	//newIntent.putExtras(bundle);
+    	startActivityForResult(newIntent, 0);
+	}
+	
+	private void acceptPressed()
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage("Accept invitation?")
+               .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                	   acceptButton.setVisible(false);
+                	   cancelButton.setVisible(true);
+                	   record.put("status", "accepted");
+                	   record.put("status_by", ParseUser.getCurrentUser());
+                	   record.saveInBackground(saveCallback);
+                   }
+               })
+               .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                       // User cancelled the dialog
+                   }
+               });
+        builder.show();
+	}
+	
+	private void cancelPressed()
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage("Reject invitation?")
+               .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                	   cancelButton.setVisible(false);
+                	   acceptButton.setVisible(true);
+                	   record.put("status", "rejected");
+                	   record.put("status_by", ParseUser.getCurrentUser());
+                	   record.saveInBackground(saveCallback);
+                   }
+               })
+               .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
+                       // User cancelled the dialog
+                   }
+               });
+        builder.show();
+	}
+	
+	
+	/*
+	 * Set results for return private functions
+	 * 
+	 */
+	private void setResultForReturn() 
+	{
+	/*	Bundle bundle = new Bundle();
+		bundle.putString("student", record.getString("student"));
+		bundle.putString("subject", record.getString("subject"));
+		bundle.putString("status", record.getString("status"));
+		ParseProxyObject ppo = new ParseProxyObject(record);
+		//returnIntent.putExtras(bundle);
+		Intent returnIntent = new Intent();
+		returnIntent.putExtra("parseObject", ppo); */
+		getActivity().setResult(getActivity().RESULT_OK);
+		
+		MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
+		mainApplication.setModifiedRecord(record);
+	}
+	
+	private void setResultForDeleted() 
+	{
+		getActivity().setResult(getActivity().RESULT_CANCELED);
+		
+		MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
+		mainApplication.setModifiedRecord(record);
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -162,19 +280,17 @@ public class RecordDetailFragment extends Fragment {
 		ParseUser user = record.getParseUser("user");
 		ParseUser recipient = record.getParseUser("recipient");
 		ParseUser currentUser = ParseUser.getCurrentUser();
-		
-		ParseQuery<ParseUser> queryUser = ParseUser.getQuery();
-		queryUser.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
+		ParseUser userToFetch;
 		
 		//If they are not the same, this means currentUser is the recipient, so display the user in title
 		if(!user.getObjectId().equals(currentUser.getObjectId())) {
-			queryUser.whereEqualTo("objectId", user.getObjectId());
+			userToFetch = user;
 		}
 		//If they are the same, currentUser is the user and recipient should be displayed
 		else {
-			queryUser.whereEqualTo("objectId", recipient.getObjectId());
+			userToFetch = recipient;
 		}
-		queryUser.findInBackground(setTitleFindCallback);
+		userToFetch.fetchIfNeededInBackground(getUserCallback);
 	}
 
 
@@ -249,6 +365,29 @@ public class RecordDetailFragment extends Fragment {
 		
 		super.onActivityResult(requestCode, resultCode, data);
 	}
+	
+	
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle presses on the action bar items
+	    switch (item.getItemId()) {
+	        case R.id.delete:
+	            deletePressed();
+	            return true;
+	        case R.id.edit:
+	            editPressed();
+	            return true;
+	        case R.id.accept:
+	        	acceptPressed();
+	        	return true;
+	        case R.id.cancel:
+	        	cancelPressed();
+	        	return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
+	}
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -257,34 +396,11 @@ public class RecordDetailFragment extends Fragment {
 		progressButton = (MenuItem)menu.findItem(R.id.progress);
 		progressButton.setVisible(false);
 		
-		MenuItem deleteButton = (MenuItem)menu.findItem(R.id.delete);
-		MenuItem editButton = (MenuItem)menu.findItem(R.id.edit);
-		final MenuItem acceptButton = (MenuItem)menu.findItem(R.id.accept);
-		final MenuItem cancelButton = (MenuItem)menu.findItem(R.id.cancel);
+		deleteButton = (MenuItem)menu.findItem(R.id.delete);
+		editButton = (MenuItem)menu.findItem(R.id.edit);
+		acceptButton = (MenuItem)menu.findItem(R.id.accept);
+		cancelButton = (MenuItem)menu.findItem(R.id.cancel);
 		
-		deleteButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-
-			@Override
-			public boolean onMenuItemClick(MenuItem arg0) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		        builder.setMessage("Are you sure?")
-		               .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-		                   public void onClick(DialogInterface dialog, int id) {
-		                	   setResultForDeleted();
-		                	   record.deleteEventually(deleteCallback);
-		                   }
-		               })
-		               .setNegativeButton("No", new DialogInterface.OnClickListener() {
-		                   public void onClick(DialogInterface dialog, int id) {
-		                       // User cancelled the dialog
-		                   }
-		               });
-		        builder.show();
-		        
-				return false;
-			}
-			
-		});
 		ParseUser recordUser = record.getParseUser("user");
 		ParseUser currentUser = ParseUser.getCurrentUser();
 		//If this is the recipient, delete button is not visible
@@ -292,106 +408,10 @@ public class RecordDetailFragment extends Fragment {
 		if(!currentUser.getObjectId().equals(recordUser.getObjectId())) {
 			deleteButton.setVisible(false);
 		}
-		
-		
-		editButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-			
-			@Override
-			public boolean onMenuItemClick(MenuItem item) {
-				//Pass the ParseObject as a global variable
-				MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
-				mainApplication.setSelectedRecord(record);
-				
-				//Bundle bundle = new Bundle();
-				//bundle.putLong("id", media.getId());
-				Intent newIntent = new Intent(getActivity(),RecordEditActivity.class);
-		    	//newIntent.putExtras(bundle);
-		    	startActivityForResult(newIntent, 0); 
-
-				return false;
-			}
-		});
-		
-		acceptButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-			
-			@Override
-			public boolean onMenuItemClick(final MenuItem item) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		        builder.setMessage("Accept invitation?")
-		               .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-		                   public void onClick(DialogInterface dialog, int id) {
-		                	   item.setVisible(false);
-		                	   cancelButton.setVisible(true);
-		                	   record.put("status", "accepted");
-		                	   record.put("status_by", ParseUser.getCurrentUser());
-		                	   record.saveInBackground(saveCallback);
-		                   }
-		               })
-		               .setNegativeButton("No", new DialogInterface.OnClickListener() {
-		                   public void onClick(DialogInterface dialog, int id) {
-		                       // User cancelled the dialog
-		                   }
-		               });
-		        builder.show(); 
-
-				return false;
-			}
-		});
 		if(record.getString("status").equals("accepted")) { acceptButton.setVisible(false); }
-		
-		
-		cancelButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-			
-			@Override
-			public boolean onMenuItemClick(final MenuItem item) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		        builder.setMessage("Reject invitation?")
-		               .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-		                   public void onClick(DialogInterface dialog, int id) {
-		                	   item.setVisible(false);
-		                	   acceptButton.setVisible(true);
-		                	   record.put("status", "rejected");
-		                	   record.put("status_by", ParseUser.getCurrentUser());
-		                	   record.saveInBackground(saveCallback);
-		                   }
-		               })
-		               .setNegativeButton("No", new DialogInterface.OnClickListener() {
-		                   public void onClick(DialogInterface dialog, int id) {
-		                       // User cancelled the dialog
-		                   }
-		               });
-		        builder.show();
-				
-
-				return false;
-			}
-		});
 		if(record.getString("status").equals("rejected")) { cancelButton.setVisible(false); }
-
+		
 		super.onCreateOptionsMenu(menu, inflater);
-	}
-	
-	private void setResultForReturn() 
-	{
-	/*	Bundle bundle = new Bundle();
-		bundle.putString("student", record.getString("student"));
-		bundle.putString("subject", record.getString("subject"));
-		bundle.putString("status", record.getString("status"));
-		ParseProxyObject ppo = new ParseProxyObject(record);
-		//returnIntent.putExtras(bundle);
-		Intent returnIntent = new Intent();
-		returnIntent.putExtra("parseObject", ppo); */
-		getActivity().setResult(getActivity().RESULT_OK);
-		
-		MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
-		mainApplication.setModifiedRecord(record);
-	}
-	
-	private void setResultForDeleted() {
-		getActivity().setResult(getActivity().RESULT_CANCELED);
-		
-		MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
-		mainApplication.setModifiedRecord(record);
 	}
 	
 	
