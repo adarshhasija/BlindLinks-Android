@@ -14,21 +14,15 @@
         android:contentDescription="@string/icon_scheduled"
         android:src="@drawable/ic_action_event" />
 
-    <TextView
-        android:id="@+id/subject"
-        android:layout_width="fill_parent"
-        android:layout_height="26dip"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginLeft="10dp"
-        android:layout_toRightOf="@id/icon"
-        android:ellipsize="marquee"
-        android:singleLine="true"
-        android:text="Subject"
-        android:contentDescription="Subject"
-        android:textSize="12sp" />
-    
-    <TextView
+  <LinearLayout
+      android:id="@+id/mainContent"
+      android:orientation="vertical"
+      android:layout_centerVertical="true"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="10dp"
+      android:layout_toRightOf="@id/icon">
+      <TextView
         android:id="@+id/student"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -42,16 +36,45 @@
         android:text="Student name"
         android:contentDescription="Student name"
         android:textSize="16sp" />
+      
+      <TextView
+        android:id="@+id/subject"
+        android:layout_width="fill_parent"
+        android:layout_height="26dip"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="5dp"
+        android:layout_toRightOf="@id/icon"
+        android:ellipsize="marquee"
+        android:singleLine="true"
+        android:text="Subject"
+        android:contentDescription="Subject"
+        android:textSize="14sp" />
+      
+      <TextView
+        android:id="@+id/recordDateTime"
+        android:layout_width="fill_parent"
+        android:layout_height="26dip"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="5dp"
+        android:layout_toRightOf="@id/icon"
+        android:ellipsize="marquee"
+        android:singleLine="true"
+        android:text="Date and time"
+        android:contentDescription="Date and time"
+        android:textSize="14sp" />
+      
+  </LinearLayout>
     
     <TextView
-        android:id="@+id/date"
+        android:id="@+id/updatedAtDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerInParent="true"
         android:layout_alignWithParentIfMissing="true"
         android:layout_marginRight="10dp"
-        android:layout_above="@id/subject"
         android:gravity="center_vertical"
         android:text="Date"
         android:contentDescription="Date"

@@ -26,8 +26,66 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> {
 	static class ViewHolderRecord {
 	    TextView studentView;
 	    TextView subjectView;
-	    TextView dateView;
+	    TextView dateTimeView;
+	    TextView updatedAtDateView;
 	    ImageView iconView;
+	}
+	
+	/*
+	 * private function to controller what is and isnt visible
+	 * 
+	 */
+	private void visibilitySettings(ViewHolderRecord viewHolder)
+	{
+		viewHolder.updatedAtDateView.setVisibility(View.GONE);
+		viewHolder.subjectView.setVisibility(View.GONE);
+	}
+	
+	/*
+	 * Private function to handle logic for setting dateTime value as string
+	 * 
+	 */
+	private String getDateValueAsString(Date dateTime) 
+	{
+		Calendar c = Calendar.getInstance();
+		int cur_date = c.get(Calendar.DATE);
+		c.setTime(dateTime);
+		int record_date = c.get(Calendar.DATE);
+		int month = c.get(Calendar.MONTH);
+		String monthString = c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
+		int year = c.get(Calendar.YEAR);
+
+		String final_date;
+		if(cur_date == record_date) {
+			final_date = "TODAY";
+		}
+		else if(record_date == cur_date - 1) {
+			final_date = "YESTERDAY";
+		}
+		else if(record_date == cur_date + 1) {
+			final_date = "TOMORROW";
+		}
+		else {
+			final_date = monthString + " " + Integer.toString(record_date);
+		}
+		
+		return final_date;
+	}
+	
+	private int getStatusIcon(ParseObject record, ViewHolderRecord viewHolder)
+	{
+		int imageResource;
+		
+		if(record.getString("status").equals("accepted")) {
+			imageResource = R.drawable.ic_action_accept;
+		}
+		else if(record.getString("status").equals("rejected")) {
+			imageResource = R.drawable.ic_action_cancel;
+		}
+		else {
+			imageResource = R.drawable.ic_action_event;
+		}
+		return imageResource;
 	}
 	
 	public RecordAdapter(Context context, int resource, List<ParseObject> values) {
@@ -47,57 +105,37 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> {
 			convertView = inflater.inflate(R.layout.record_row_layout, parent, false);
 			
 			viewHolder = new ViewHolderRecord();
+			viewHolder.iconView = (ImageView) convertView.findViewById(R.id.icon);
 			viewHolder.studentView = (TextView) convertView.findViewById(R.id.student);
 			viewHolder.subjectView = (TextView) convertView.findViewById(R.id.subject);
-			viewHolder.dateView = (TextView) convertView.findViewById(R.id.date);
-			viewHolder.iconView = (ImageView) convertView.findViewById(R.id.icon);
+			viewHolder.dateTimeView = (TextView) convertView.findViewById(R.id.recordDateTime);
+			viewHolder.updatedAtDateView = (TextView) convertView.findViewById(R.id.updatedAtDate);
 			convertView.setTag(viewHolder);
 		}
 		else {
 			viewHolder = (ViewHolderRecord) convertView.getTag();
 		}
 		
+		visibilitySettings(viewHolder);
+		
 	    ParseObject record = recordList.get(position);
 		if(record != null) {
-			if(record.getString("status").equals("accepted")) {
-				viewHolder.iconView.setImageResource(R.drawable.ic_action_accept);
-				viewHolder.iconView.setContentDescription("Icon: Accepted");
-			}
-			else if(record.getString("status").equals("rejected")) {
-				viewHolder.iconView.setImageResource(R.drawable.ic_action_cancel);
-				viewHolder.iconView.setContentDescription("Icon: Rejected");
-			}
-			else {
-				viewHolder.iconView.setImageResource(R.drawable.ic_action_event);
-				viewHolder.iconView.setContentDescription("Icon: Scheduled");
-			}
-			
-			Calendar c = Calendar.getInstance();
-			int cur_date = c.get(Calendar.DATE);
-			c.setTime(record.getUpdatedAt());
-			int record_date = c.get(Calendar.DATE);
-			int month = c.get(Calendar.MONTH);
-			String monthString = c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
-			int year = c.get(Calendar.YEAR);
+			int imageResource = getStatusIcon(record, viewHolder);
+			viewHolder.iconView.setImageResource(imageResource);
+			viewHolder.iconView.setContentDescription("Icon: "+record.getString("status"));
 
-			String final_date;
-			if(cur_date == record_date) {
-				final_date = "TODAY";
-			}
-			else if(record_date == cur_date - 1) {
-				final_date = "YESTERDAY";
-			}
-			else {
-				final_date = monthString + " " + Integer.toString(record_date);
-			}
-			viewHolder.dateView.setText(final_date);
-			viewHolder.dateView.setContentDescription("Last modified: "+final_date);
 			viewHolder.studentView.setText(record.getString("student"));
 			viewHolder.studentView.setContentDescription("Student: "+record.getString("student"));
 			viewHolder.subjectView.setText(record.getString("subject"));
 			viewHolder.subjectView.setContentDescription("Subject: "+record.getString("subject"));
-			//viewHolder.categoryView.setTag(record);
+			String recordDateTime = getDateValueAsString(record.getDate("dateTime"));
+			viewHolder.dateTimeView.setText(recordDateTime);
+			viewHolder.dateTimeView.setContentDescription("Appointment on: "+recordDateTime);
 			
+			String updatedAt = getDateValueAsString(record.getUpdatedAt());
+			viewHolder.updatedAtDateView.setText(updatedAt);
+			viewHolder.updatedAtDateView.setContentDescription("Last modified: "+updatedAt);
+			//viewHolder.categoryView.setTag(record);
 		}
 	    
 	/*    String type = record.getType();

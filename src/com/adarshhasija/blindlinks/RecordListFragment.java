@@ -104,6 +104,12 @@ public class RecordListFragment extends ListFragment {
 	
 	//private RecordAdapter recordAdapter=null;
 	public static ArrayList<ParseObject> recordsList = new ArrayList<ParseObject>();
+	
+	
+	/*
+	 * Parse callbacks
+	 * 
+	 */
 	private FindCallback<ParseObject> populateListCallback = new FindCallback<ParseObject>() {
 
 		@Override
@@ -130,6 +136,79 @@ public class RecordListFragment extends ListFragment {
 		}
 		
 	};
+	
+	/*
+	 * Action bar buttons
+	 * Private functions
+	 * 
+	 */
+	private void searchPressed() {
+		
+	};
+	
+	private void addPressed() {
+		Intent intent = new Intent(getActivity(), RecordEditActivity.class);
+		Calendar c = Calendar.getInstance();
+		int index = 50000; //random very large integer to show insert
+		startActivityForResult(intent, index);
+	};
+	
+	private void refreshPressed() {
+		refreshing=true;
+		toggleProgressBarVisibility();
+		populateList();
+	};
+	
+	private void logoutPressed() {
+		ParseUser.logOut();
+		Intent loginIntent = new Intent(getActivity(), Login.class);
+		startActivity(loginIntent);
+		getActivity().finish();
+	};
+	
+	
+	/*
+	 * Private functions
+	 * 
+	 * 
+	 */
+	private void populateList() {
+		ParseQuery<ParseObject> queryUser = ParseQuery.getQuery("Record");
+		queryUser.whereEqualTo("user", ParseUser.getCurrentUser());
+		queryUser.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
+		
+		ParseQuery<ParseObject> queryRecipient = ParseQuery.getQuery("Record");
+		queryRecipient.whereEqualTo("recipient", ParseUser.getCurrentUser());
+		queryRecipient.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
+		
+		List<ParseQuery<ParseObject>> queries = new ArrayList<ParseQuery<ParseObject>>();
+        queries.add(queryUser);
+        queries.add(queryRecipient);
+		ParseQuery<ParseObject> mainQuery = ParseQuery.or(queries);
+		mainQuery.findInBackground(populateListCallback);
+	}
+	
+	private void toggleProgressBarVisibility() {
+		if(!refreshing) return;
+		
+		if(!progressButton.isVisible()) {
+			progressButton.setVisible(true);
+			//searchButton.setVisible(false);
+			addButton.setVisible(false);
+			refreshButton.setVisible(false);
+			logoutButton.setVisible(false);
+		}
+		else {
+			progressButton.setVisible(false);
+			//searchButton.setVisible(true);
+			addButton.setVisible(true);
+			refreshButton.setVisible(true);
+			logoutButton.setVisible(true);
+		}
+	}
+	
+	
+	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -266,6 +345,29 @@ public class RecordListFragment extends ListFragment {
 
 		mActivatedPosition = position;
 	}
+	
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle presses on the action bar items
+	    switch (item.getItemId()) {
+	        case R.id.search:
+	            searchPressed();
+	            return true;
+	        case R.id.add:
+	            addPressed();
+	            return true;
+	        case R.id.refresh:
+	        	refreshPressed();
+	        	return true;
+	        case R.id.logout:
+	        	logoutPressed();
+	        	return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
+	}
+	
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -286,80 +388,10 @@ public class RecordListFragment extends ListFragment {
 	    searchButton.setVisible(false);
 		
 		addButton = (MenuItem)menu.findItem(R.id.add);
-		addButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-			
-			@Override
-			public boolean onMenuItemClick(MenuItem item) {
-				Intent intent = new Intent(getActivity(), RecordEditActivity.class);
-				Calendar c = Calendar.getInstance();
-				int index = 50000; //random very large integer to show insert
-				startActivityForResult(intent, index);
-
-				return false;
-			}
-		});
-		
 		refreshButton = (MenuItem)menu.findItem(R.id.refresh);
-		refreshButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-			
-			@Override
-			public boolean onMenuItemClick(MenuItem item) {
-				refreshing=true;
-				toggleProgressBarVisibility();
-				populateList();
-				return false;
-			}
-		});
-		
 		logoutButton = (MenuItem)menu.findItem(R.id.logout);
-		logoutButton.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-			
-			@Override
-			public boolean onMenuItemClick(MenuItem item) {
-				ParseUser.logOut();
-				Intent loginIntent = new Intent(getActivity(), Login.class);
-				startActivity(loginIntent);
-				getActivity().finish();
-				return false;
-			}
-		});
 		
 		super.onCreateOptionsMenu(menu, inflater);
-	}
-	
-	private void populateList() {
-		ParseQuery<ParseObject> queryUser = ParseQuery.getQuery("Record");
-		queryUser.whereEqualTo("user", ParseUser.getCurrentUser());
-		queryUser.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
-		
-		ParseQuery<ParseObject> queryRecipient = ParseQuery.getQuery("Record");
-		queryRecipient.whereEqualTo("recipient", ParseUser.getCurrentUser());
-		queryRecipient.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
-		
-		List<ParseQuery<ParseObject>> queries = new ArrayList<ParseQuery<ParseObject>>();
-        queries.add(queryUser);
-        queries.add(queryRecipient);
-		ParseQuery<ParseObject> mainQuery = ParseQuery.or(queries);
-		mainQuery.findInBackground(populateListCallback);
-	}
-	
-	private void toggleProgressBarVisibility() {
-		if(!refreshing) return;
-		
-		if(!progressButton.isVisible()) {
-			progressButton.setVisible(true);
-			//searchButton.setVisible(false);
-			addButton.setVisible(false);
-			refreshButton.setVisible(false);
-			logoutButton.setVisible(false);
-		}
-		else {
-			progressButton.setVisible(false);
-			//searchButton.setVisible(true);
-			addButton.setVisible(true);
-			refreshButton.setVisible(true);
-			logoutButton.setVisible(true);
-		}
 	}
 	
 	

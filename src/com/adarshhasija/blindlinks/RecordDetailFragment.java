@@ -348,7 +348,6 @@ public class RecordDetailFragment extends Fragment {
 			((TextView) getActivity().findViewById(R.id.status))
 			.setContentDescription("Status: " + record.getString("status").toUpperCase());
 			
-			setResultForReturn();
 		}
 		
 		super.onResume();
@@ -361,6 +360,7 @@ public class RecordDetailFragment extends Fragment {
 			MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
 			record = mainApplication.getModifiedRecord();
 			mainApplication.setModifiedRecord(null);
+			setResultForReturn();
 		}
 		
 		super.onActivityResult(requestCode, resultCode, data);
