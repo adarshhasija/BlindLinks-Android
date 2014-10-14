@@ -16,6 +16,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -115,10 +117,6 @@ public class RecordListFragment extends ListFragment {
 		@Override
 		public void done(List<ParseObject> list, ParseException e) {
 			if (e == null) {
-	          /*  for(ParseObject obj : list) {
-	            	recordsList.add(obj);
-	            } */
-	            
 	            Collections.sort(list, new Comparator<ParseObject>() {
 	  			  public int compare(ParseObject o1, ParseObject o2) {
 	  				  return o2.getUpdatedAt().compareTo(o1.getUpdatedAt()); //descending
@@ -142,9 +140,24 @@ public class RecordListFragment extends ListFragment {
 	 * Private functions
 	 * 
 	 */
-	private void searchPressed() {
+	private SearchView.OnQueryTextListener onQueryTextListener = new SearchView.OnQueryTextListener() {
+
+		@Override
+		public boolean onQueryTextChange(String newText) {
+			RecordAdapter adapter = (RecordAdapter) getListAdapter();
+			adapter.getFilter().filter(newText);
+			return false;
+		}
+
+		@Override
+		public boolean onQueryTextSubmit(String query) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
 		
 	};
+	
 	
 	private void addPressed() {
 		Intent intent = new Intent(getActivity(), RecordEditActivity.class);
@@ -173,6 +186,27 @@ public class RecordListFragment extends ListFragment {
 	 * 
 	 */
 	private void populateList() {
+		List<ParseQuery<ParseObject>> queries = getQueryForLocalDatastore();
+		ParseQuery<ParseObject> mainQuery = ParseQuery.or(queries);
+		mainQuery.findInBackground(populateListCallback);
+	}
+	
+	private List<ParseQuery<ParseObject>> getQueryForLocalDatastore() {
+		ParseQuery<ParseObject> queryUser = ParseQuery.getQuery("Record");
+		queryUser.whereEqualTo("user", ParseUser.getCurrentUser());
+		queryUser.fromLocalDatastore();
+		
+		ParseQuery<ParseObject> queryRecipient = ParseQuery.getQuery("Record");
+		queryRecipient.whereEqualTo("recipient", ParseUser.getCurrentUser());
+		queryRecipient.fromLocalDatastore();
+		
+		List<ParseQuery<ParseObject>> queries = new ArrayList<ParseQuery<ParseObject>>();
+		queries.add(queryUser);
+		queries.add(queryRecipient);
+		return queries;
+	}
+	
+	private List<ParseQuery<ParseObject>> getQueryForCloud() {
 		ParseQuery<ParseObject> queryUser = ParseQuery.getQuery("Record");
 		queryUser.whereEqualTo("user", ParseUser.getCurrentUser());
 		queryUser.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
@@ -182,10 +216,9 @@ public class RecordListFragment extends ListFragment {
 		queryRecipient.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
 		
 		List<ParseQuery<ParseObject>> queries = new ArrayList<ParseQuery<ParseObject>>();
-        queries.add(queryUser);
-        queries.add(queryRecipient);
-		ParseQuery<ParseObject> mainQuery = ParseQuery.or(queries);
-		mainQuery.findInBackground(populateListCallback);
+		queries.add(queryUser);
+		queries.add(queryRecipient);
+		return queries;
 	}
 	
 	private void toggleProgressBarVisibility() {
@@ -352,7 +385,6 @@ public class RecordListFragment extends ListFragment {
 		// Handle presses on the action bar items
 	    switch (item.getItemId()) {
 	        case R.id.search:
-	            searchPressed();
 	            return true;
 	        case R.id.add:
 	            addPressed();
@@ -382,10 +414,12 @@ public class RecordListFragment extends ListFragment {
 	           (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
 	    SearchView searchView =
 	            (SearchView) menu.findItem(R.id.search).getActionView();
-	    searchView.setSearchableInfo(
-	            searchManager.getSearchableInfo(getActivity().getComponentName()));
+	    searchView.setOnQueryTextListener(onQueryTextListener);
 	    searchButton = menu.findItem(R.id.search);
-	    searchButton.setVisible(false);
+	    
+	    //uncomment this to set search to go to a new results page
+	    //searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
+	    
 		
 		addButton = (MenuItem)menu.findItem(R.id.add);
 		refreshButton = (MenuItem)menu.findItem(R.id.refresh);

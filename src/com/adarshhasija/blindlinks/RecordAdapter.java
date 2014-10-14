@@ -1,5 +1,6 @@
 package com.adarshhasija.blindlinks;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -16,13 +17,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class RecordAdapter extends ArrayAdapter<ParseObject> {
+public class RecordAdapter extends ArrayAdapter<ParseObject> implements Filterable {
 
 	private final Context context;
-	private final List<ParseObject> recordList;
+	private List<ParseObject> recordList;
+	private final List<ParseObject> backupList; //used when filtering is happening
 	static class ViewHolderRecord {
 	    TextView studentView;
 	    TextView subjectView;
@@ -30,6 +34,58 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> {
 	    TextView updatedAtDateView;
 	    ImageView iconView;
 	}
+	
+	/*
+	 * my custom Filter
+	 * 
+	 * 
+	 */
+	Filter filter = new Filter() {
+
+		@Override
+		protected FilterResults performFiltering(CharSequence constraint) {
+			//If recordList size is less, filtering has happened
+			//restore original before continuing
+			if(recordList.size() < backupList.size()) {
+				restoreOriginalList();
+			}
+			FilterResults filterResults = new FilterResults();   
+	         ArrayList<ParseObject> tempList=new ArrayList<ParseObject>();
+	         //constraint is the result from text you want to filter against. 
+	         //objects is your data set you will filter from
+	         if(constraint != null && recordList !=null) {
+	             int length=recordList.size();
+	             int i=0;
+	                while(i<length){
+	                    ParseObject record=recordList.get(i);
+	                    String student = record.getString("student").toLowerCase();
+	                    if(student.contains(constraint)) {
+	                    	tempList.add(record);
+	                    }
+	                    i++;
+	                }
+	                //following two lines is very important
+	                //as publish result can only take FilterResults objects
+	                filterResults.values = tempList;
+	                filterResults.count = tempList.size();
+	          }
+	          return filterResults;
+		}
+
+		@Override
+		protected void publishResults(CharSequence constraint,
+				FilterResults results) {
+			recordList = (ArrayList<ParseObject>) results.values;
+	          if (recordList.size() > 0) {
+	           notifyDataSetChanged();
+	          } else {
+	              notifyDataSetInvalidated();
+	          }
+			
+		}
+		
+	};
+	
 	
 	/*
 	 * private function to controller what is and isnt visible
@@ -92,11 +148,17 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> {
 		super(context, resource, values);
 		this.context = context;
 		this.recordList = values;
+		this.backupList = new ArrayList<ParseObject>(values);
+	}
+
+	@Override
+	public int getCount() {
+		return recordList != null?recordList.size() : 0;
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		
+
 		ViewHolderRecord viewHolder;
 		
 		if(convertView == null) {
@@ -152,6 +214,16 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> {
 	    } */
 
 		return convertView;
+	}
+
+	@Override
+	public Filter getFilter() {
+		return filter;
+	}
+	
+	private void restoreOriginalList() {
+		recordList.clear();
+		recordList.addAll(backupList);
 	}
 
 	

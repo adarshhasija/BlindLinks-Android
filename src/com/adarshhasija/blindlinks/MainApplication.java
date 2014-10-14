@@ -91,6 +91,7 @@ public class MainApplication extends Application{
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		//Parse.enableLocalDatastore(this);
 		Parse.initialize(this, "9f3p730Ynsj9hLbeEuGxGC9Nifwmh5Co0NCAsbi5", "MogP0et66o0SlSgS2XXFNJhVqnlvICy3L3don29q");
 		PushService.setDefaultPushCallback(this, RecordListActivity.class);
 	}

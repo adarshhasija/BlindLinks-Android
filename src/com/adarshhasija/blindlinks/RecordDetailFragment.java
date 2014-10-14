@@ -58,7 +58,7 @@ public class RecordDetailFragment extends Fragment {
 	/**
 	 * The dummy content this fragment is presenting.
 	 */
-	private DummyContent.DummyItem mItem;
+	private DummyContent.DummyItem mItem; 
 	private ParseObject record;
 	private ParseUser otherUser;
 	private MenuItem progressButton;
@@ -100,6 +100,8 @@ public class RecordDetailFragment extends Fragment {
 		@Override
 		public void done(ParseException e) {
 			if(e == null) {
+				Toast.makeText(getActivity(), "Status successfully changed to "+record.getString("status"), Toast.LENGTH_SHORT).show();
+				
 				((TextView) getActivity().findViewById(R.id.status))
 				.setText("Status: " + record.getString("status").toUpperCase());
 				((TextView) getActivity().findViewById(R.id.status))

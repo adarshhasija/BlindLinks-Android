@@ -3,7 +3,12 @@ package com.adarshhasija.blindlinks;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.parse.GetCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -18,6 +23,30 @@ import android.util.Log;
 public class PushNotificationHandler extends BroadcastReceiver {
 	private Context context=null;
 	private JSONObject json=null;
+	private SaveCallback saveCallback = new SaveCallback() {
+
+		@Override
+		public void done(ParseException e) {
+			if(e == null) {
+				generateNotification();
+			} else {
+				e.printStackTrace();
+			}
+		}
+		
+	};
+	private GetCallback getCallback = new GetCallback() {
+
+		@Override
+		public void done(ParseObject object, ParseException e) {
+			if(e == null) {
+				object.pinInBackground("Records", saveCallback);
+			} else {
+				e.printStackTrace();
+			}
+		}
+		
+	};
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
@@ -25,8 +54,19 @@ public class PushNotificationHandler extends BroadcastReceiver {
 			json = new JSONObject(intent.getExtras().getString("com.parse.Data"));
 			this.context = context;
 			this.json = json;
-			generateNotification();
+			//saveRecord(); 
 		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void saveRecord() {
+		try {
+			String objectId = json.getString("objectId");
+			ParseQuery<ParseObject> query = ParseQuery.getQuery("Record");
+			query.getInBackground(objectId, getCallback);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

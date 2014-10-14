@@ -70,6 +70,14 @@
                 android:value=".RecordListActivity" />
         </activity>
         <activity
+            android:name="com.adarshhasija.blindlinks.SelectContact"
+            android:label="@string/select_contact"
+            android:parentActivityName="com.adarshhasija.blindlinks.RecordListActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".RecordListActivity" />
+        </activity>
+        <activity
             android:name="com.adarshhasija.blindlinks.SearchResultsListActivity"
             android:label="@string/search_results"
             android:parentActivityName="com.adarshhasija.blindlinks.RecordListActivity" >
