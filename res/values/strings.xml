@@ -6,7 +6,7 @@
     <string name="signup">SIGNUP</string>
     <string name="select_contact">Select Contact</string>
     <string name="title_record_detail">Record Detail</string>
-    <string name="search_title">Search users</string>
+    <string name="search_title">Search</string>
     <string name="search_hint">Enter name</string>
     <string name="search_results">Search Results</string>
     <string name="save">Save</string>

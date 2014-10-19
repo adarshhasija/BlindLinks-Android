@@ -61,8 +61,12 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 	private ArrayList<ParseUser> userObjects;
 	private ArrayList<String> userList;
 	private Calendar dateTime;
+	
+	//MenuItems
 	private MenuItem progressButton;
 	private MenuItem sendButton;
+	
+	//UI Items
 	private Spinner userWidget;
 	private EditText studentWidget;
 	private EditText subjectWidget;
@@ -100,7 +104,8 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 				ParseCloud.callFunctionInBackground("sendPushToUser", params, new FunctionCallback<String>() {
 				   public void done(String success, ParseException e) {
 				       if (e == null) {
-				          // Push sent successfully
+				    	   toggleProgressButton();
+				    	   finish();
 				       }
 				       else {
 				    	   Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -109,8 +114,6 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 				});
 				
 				
-				toggleProgressButton();
-				finish();
 			}
 			else {
 				Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -118,6 +121,8 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 		}
 		
 	};
+	//Populate the select recipient spinner. 
+	//Currently not in use as user is select from the select contact page
 	private FindCallback populateSpinnerFindCallback = new FindCallback<ParseUser>() {
 
 		@Override
@@ -171,18 +176,20 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 		{
 			toggleProgressButton();
 			
-			ParseUser selectedUser=null;
-			if(userWidget.getVisibility() != View.GONE) {
-				selectedUser = userObjects.get((int)userWidget.getSelectedItemId());
-			}
 			if(record == null) {
 				record = new ParseObject("Record");
 				record.put("user", ParseUser.getCurrentUser());
 			}
 
+			//We are not fetching the user from the spinner, it comes from the select contact page
+	/*		ParseUser selectedUser=null;
+			if(userWidget.getVisibility() != View.GONE) {
+				selectedUser = userObjects.get((int)userWidget.getSelectedItemId());
+			}
 			if(selectedUser != null) {
 				record.put("recipient", userObjects.get((int)userWidget.getSelectedItemId()));
-			}
+			}	*/
+			record.put("recipient", otherUser);
 			record.put("student", student);
 			record.put("subject", subject);
 			Date finalDate = dateTime.getTime();
@@ -349,6 +356,13 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 			}
 			userToFetch.fetchIfNeededInBackground(getUserCallback);
 		}
+		else if(record == null) {
+			//There is no record as we are creating a new record
+			//Get the chosen recipient as passed in from the select contacts screen
+			otherUser = mainApplication.getUserForNewRecord();
+			setTitle(otherUser.getString("firstName") + " " + otherUser.getString("lastName"));
+			mainApplication.setUserForNewRecord(null);
+		}
 
 	}
 	
@@ -357,6 +371,8 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 	@Override
 	protected void onResume() {
 		userWidget = (Spinner) findViewById(R.id.user);
+		userWidget.setVisibility(View.GONE); //As we are display the chosen contact in the title, this is not needed now
+		
 		studentWidget = ((EditText) findViewById(R.id.student));
 		subjectWidget = ((EditText) findViewById(R.id.subject));
 		datePicker = ((Button) findViewById(R.id.datePicker));
@@ -364,7 +380,7 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 		
 		ParseQuery<ParseUser> querySpinner = ParseUser.getQuery();
 		querySpinner.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
-		querySpinner.findInBackground(populateSpinnerFindCallback);
+		//querySpinner.findInBackground(populateSpinnerFindCallback);
 		
 		Calendar c = Calendar.getInstance();
 		int year = c.get(Calendar.YEAR);
@@ -424,6 +440,12 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 		super.onResume();
 	}
 	
+	@Override
+	public void onBackPressed() {
+		setResult(RESULT_CANCELED);
+		super.onBackPressed();
+	}
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle presses on the action bar items

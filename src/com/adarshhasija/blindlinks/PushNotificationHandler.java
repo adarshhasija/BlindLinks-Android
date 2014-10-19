@@ -23,6 +23,9 @@ import android.util.Log;
 public class PushNotificationHandler extends BroadcastReceiver {
 	private Context context=null;
 	private JSONObject json=null;
+	
+	//This is the callback after a successful save to the local datastore
+	//Called from GetCallback
 	private SaveCallback saveCallback = new SaveCallback() {
 
 		@Override
@@ -35,6 +38,8 @@ public class PushNotificationHandler extends BroadcastReceiver {
 		}
 		
 	};
+	
+	//This callback gets the record for saving in the local datastore
 	private GetCallback getCallback = new GetCallback() {
 
 		@Override
@@ -54,6 +59,9 @@ public class PushNotificationHandler extends BroadcastReceiver {
 			json = new JSONObject(intent.getExtras().getString("com.parse.Data"));
 			this.context = context;
 			this.json = json;
+			generateNotification();
+			
+			//UNCOMMENT THIS IF YOU WANT OFFLINE STORAGE
 			//saveRecord(); 
 		} catch (JSONException e) {
 			e.printStackTrace();

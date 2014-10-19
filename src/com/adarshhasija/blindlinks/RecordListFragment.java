@@ -126,7 +126,7 @@ public class RecordListFragment extends ListFragment {
 	            setListAdapter(recordAdapter);
 	            if(refreshing) {
 	            	toggleProgressBarVisibility();
-	            	refreshing = true;
+	            	refreshing = false;
 	            }
 	        } else {
 	            Log.d("score", "Error: " + e.getMessage());
@@ -160,7 +160,7 @@ public class RecordListFragment extends ListFragment {
 	
 	
 	private void addPressed() {
-		Intent intent = new Intent(getActivity(), RecordEditActivity.class);
+		Intent intent = new Intent(getActivity(), SelectContactForNewRecord.class);
 		Calendar c = Calendar.getInstance();
 		int index = 50000; //random very large integer to show insert
 		startActivityForResult(intent, index);
@@ -186,7 +186,8 @@ public class RecordListFragment extends ListFragment {
 	 * 
 	 */
 	private void populateList() {
-		List<ParseQuery<ParseObject>> queries = getQueryForLocalDatastore();
+		//List<ParseQuery<ParseObject>> queries = getQueryForLocalDatastore();
+		List<ParseQuery<ParseObject>> queries = getQueryForCloud();
 		ParseQuery<ParseObject> mainQuery = ParseQuery.or(queries);
 		mainQuery.findInBackground(populateListCallback);
 	}
@@ -226,14 +227,14 @@ public class RecordListFragment extends ListFragment {
 		
 		if(!progressButton.isVisible()) {
 			progressButton.setVisible(true);
-			//searchButton.setVisible(false);
+			searchButton.setVisible(false);
 			addButton.setVisible(false);
 			refreshButton.setVisible(false);
 			logoutButton.setVisible(false);
 		}
 		else {
 			progressButton.setVisible(false);
-			//searchButton.setVisible(true);
+			searchButton.setVisible(true);
 			addButton.setVisible(true);
 			refreshButton.setVisible(true);
 			logoutButton.setVisible(true);

@@ -105,7 +105,8 @@ public final class R {
         public static final int record_edit_activity=0x7f090002;
         public static final int record_search=0x7f090003;
         public static final int records_list_activity=0x7f090004;
-        public static final int signup=0x7f090005;
+        public static final int select_contact=0x7f090005;
+        public static final int signup=0x7f090006;
     }
     public static final class string {
         public static final int additional_details=0x7f060017;
