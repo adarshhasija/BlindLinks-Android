@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.adarshhasija.blindlinks"
+    package="com.adarshhasija.ahelp"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -19,11 +19,11 @@
 	<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 	
 	<permission android:protectionLevel="signature"
-    	android:name="com.adarshhasija.blindlinks.permission.C2D_MESSAGE" />
-	<uses-permission android:name="com.adarshhasija.blindlinks.permission.C2D_MESSAGE" />
+    	android:name="com.adarshhasija.ahelp.permission.C2D_MESSAGE" />
+	<uses-permission android:name="com.adarshhasija.ahelp.permission.C2D_MESSAGE" />
 
     <application
-        android:name="com.adarshhasija.blindlinks.MainApplication"
+        android:name="com.adarshhasija.ahelp.MainApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
@@ -31,7 +31,7 @@
         <meta-data android:name="android.app.default_searchable"
             android:value=".SearchResultsListActivity" />
         <activity
-            android:name="com.adarshhasija.blindlinks.MainActivity"
+            android:name="com.adarshhasija.ahelp.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,21 +40,21 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.adarshhasija.blindlinks.Login"
+            android:name="com.adarshhasija.ahelp.Login"
             android:windowSoftInputMode="stateVisible"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name="com.adarshhasija.blindlinks.Signup"
+            android:name="com.adarshhasija.ahelp.Signup"
             android:windowSoftInputMode="stateVisible"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name="com.adarshhasija.blindlinks.BankDetails"
+            android:name="com.adarshhasija.ahelp.BankDetails"
             android:label="@string/bank_details" >
         </activity>
         <activity
-            android:name="com.adarshhasija.blindlinks.RecordListActivity"
+            android:name="com.adarshhasija.ahelp.RecordListActivity"
             android:label="@string/app_name"
             android:configChanges="orientation"
     		android:screenOrientation="portrait" >
@@ -62,25 +62,25 @@
                    android:value=".SearchResultListActivity" />
         </activity>
         <activity
-            android:name="com.adarshhasija.blindlinks.RecordDetailActivity"
+            android:name="com.adarshhasija.ahelp.RecordDetailActivity"
             android:label="@string/title_record_detail"
-            android:parentActivityName="com.adarshhasija.blindlinks.RecordListActivity" >
+            android:parentActivityName="com.adarshhasija.ahelp.RecordListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".RecordListActivity" />
         </activity>
         <activity
-            android:name="com.adarshhasija.blindlinks.SelectContactForNewRecord"
+            android:name="com.adarshhasija.ahelp.SelectContactForNewRecord"
             android:label="@string/select_contact"
-            android:parentActivityName="com.adarshhasija.blindlinks.RecordListActivity" >
+            android:parentActivityName="com.adarshhasija.ahelp.RecordListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".RecordListActivity" />
         </activity>
         <activity
-            android:name="com.adarshhasija.blindlinks.SearchResultsListActivity"
+            android:name="com.adarshhasija.ahelp.SearchResultsListActivity"
             android:label="@string/search_results"
-            android:parentActivityName="com.adarshhasija.blindlinks.RecordListActivity" >
+            android:parentActivityName="com.adarshhasija.ahelp.RecordListActivity" >
             <intent-filter>
         		<action android:name="android.intent.action.SEARCH" />
     		</intent-filter>
@@ -88,7 +88,7 @@
                    android:resource="@xml/searchable"/>
         </activity>
         <activity
-            android:name="com.adarshhasija.blindlinks.RecordEditActivity"
+            android:name="com.adarshhasija.ahelp.RecordEditActivity"
             android:label="@string/new_record" 
             android:windowSoftInputMode="stateVisible" >
         </activity>
@@ -102,9 +102,9 @@
 		    <action android:name="android.intent.action.USER_PRESENT" />
 		  </intent-filter>
 		</receiver>
-		<receiver android:name="com.adarshhasija.blindlinks.PushNotificationHandler" android:exported="false">
+		<receiver android:name="com.adarshhasija.ahelp.PushNotificationHandler" android:exported="false">
 		  <intent-filter>
-		    <action android:name="com.adarshhasija.blindlinks.intent.RECEIVE" />
+		    <action android:name="com.adarshhasija.ahelp.intent.RECEIVE" />
 		  </intent-filter>
 		</receiver>
 		<receiver android:name="com.parse.GcmBroadcastReceiver"
@@ -116,7 +116,7 @@
 		    <!--
 		      IMPORTANT: Change "com.parse.starter" to match your app's package name.
 		    -->
-		    <category android:name="com.adarshhasija.blindlinks" />
+		    <category android:name="com.adarshhasija.ahelp" />
 		  </intent-filter>
 		</receiver>
         

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Blind Links</string>
+    <string name="app_name">aHelp</string>
     <string name="login">LOGIN</string>
     <string name="signup">SIGNUP</string>
     <string name="select_contact">Select Contact</string>
@@ -11,7 +11,7 @@
     <string name="search_results">Search Results</string>
     <string name="save">Save</string>
     <string name="email">Email</string>
-    <string name="phone_number">Phone number</string>
+    <string name="phone_number">Phone number (no country code)</string>
     <string name="password">Password</string>
     <string name="password_confirm">Password confirm</string>
     <string name="user">User</string>

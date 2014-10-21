@@ -23,7 +23,7 @@
 
     <fragment
         android:id="@+id/record_list"
-        android:name="com.adarshhasija.blindlinks.RecordListFragment"
+        android:name="com.adarshhasija.ahelp.RecordListFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
