@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -77,6 +78,8 @@ public class Signup extends AccountAuthenticatorActivity {
 		
 		@Override
 		public void onClick(View v) {
+			hideSoftKeyboard();
+			
 			Spinner countriesSpinner = (Spinner) findViewById(R.id.countries_spinner);
 			EditText phoneNumberWidget = (EditText) findViewById(R.id.phone_number);
 			EditText passwordWidget = (EditText) findViewById(R.id.password);
@@ -154,6 +157,16 @@ public class Signup extends AccountAuthenticatorActivity {
 			return;
 		}
 	};
+	
+	/**
+	 * Hides the soft keyboard
+	 */
+	public void hideSoftKeyboard() {
+	    if(getCurrentFocus()!=null) {
+	        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+	        inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+	    }
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

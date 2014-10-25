@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -35,13 +36,13 @@ public class Login extends Activity {
 			progressButton.setVisible(false);
 			if(shouldSignupBeVisible) {
 				signupButton.setVisible(true);
-			}
-			
-			ParseInstallation installation = ParseInstallation.getCurrentInstallation();
-			installation.put("phoneNumber", user.getString("phoneNumber"));
-			installation.saveInBackground(); 
+			} 
 			
 			if (user != null) {
+				ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+				installation.put("phoneNumber", user.getString("phoneNumber"));
+				installation.saveInBackground(); 
+				
 				Intent mainIntent = new Intent(Login.this, RecordListActivity.class);
 				startActivity(mainIntent);
 		    } else {
@@ -56,6 +57,8 @@ public class Login extends Activity {
 		
 		@Override
 		public void onClick(View v) {
+			hideSoftKeyboard();
+			
 			EditText phoneNumberWidget = (EditText) findViewById(R.id.phone_number);
 			EditText passwordWidget = (EditText) findViewById(R.id.password);
 			
@@ -93,6 +96,16 @@ public class Login extends Activity {
 			return;
 		}
 	};
+	
+	/**
+	 * Hides the soft keyboard
+	 */
+	public void hideSoftKeyboard() {
+	    if(getCurrentFocus()!=null) {
+	        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+	        inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+	    }
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
