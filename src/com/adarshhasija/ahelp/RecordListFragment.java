@@ -145,7 +145,9 @@ public class RecordListFragment extends ListFragment {
 		@Override
 		public boolean onQueryTextChange(String newText) {
 			RecordAdapter adapter = (RecordAdapter) getListAdapter();
-			adapter.getFilter().filter(newText);
+			if(adapter != null) {
+				adapter.getFilter().filter(newText);
+			}
 			return false;
 		}
 
@@ -248,10 +250,15 @@ public class RecordListFragment extends ListFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
+	}
+	
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
 		
 		populateList();
 	}
-	
+
 	@Override
 	public void onStart() {
 		TextView emptyView = new TextView(getActivity());

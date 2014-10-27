@@ -282,6 +282,16 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 	    newFragment.show(getSupportFragmentManager(), "datePicker");
 	}
 	
+	/**
+	 * Hides the soft keyboard
+	 */
+	public void hideSoftKeyboard() {
+	    if(getCurrentFocus()!=null) {
+	        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+	        inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+	    }
+	}
+	
 	
 	/*
 	 * Picker dialog set listeners
@@ -451,6 +461,7 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 		// Handle presses on the action bar items
 	    switch (item.getItemId()) {
 	        case R.id.send:
+	        	hideSoftKeyboard();
 	            sendPressed();
 	        	return true;
 	        default:
