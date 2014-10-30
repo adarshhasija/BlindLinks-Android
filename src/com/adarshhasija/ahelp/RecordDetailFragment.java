@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.adarshhasija.ahelp.RecordAdapter.ViewHolderRecord;
 import com.adarshhasija.ahelp.dummy.DummyContent;
 import com.adarshhasija.ahelp.R;
 import com.parse.DeleteCallback;
@@ -79,7 +80,7 @@ public class RecordDetailFragment extends Fragment {
 	 * 
 	 * 
 	 */
-	private GetCallback getUserCallback = new GetCallback<ParseUser>() {
+	private GetCallback<ParseUser> getUserCallback = new GetCallback<ParseUser>() {
 
 		@Override
 		public void done(ParseUser user, ParseException e) {
@@ -197,7 +198,7 @@ public class RecordDetailFragment extends Fragment {
                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                    public void onClick(DialogInterface dialog, int id) {
                 	   acceptButton.setVisible(false);
-                	   cancelButton.setVisible(true);
+                	   cancelButton.setVisible(false);
                 	   record.put("status", "accepted");
                 	   record.put("status_by", ParseUser.getCurrentUser());
                 	   record.saveInBackground(saveCallback);
@@ -218,7 +219,7 @@ public class RecordDetailFragment extends Fragment {
                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                    public void onClick(DialogInterface dialog, int id) {
                 	   cancelButton.setVisible(false);
-                	   acceptButton.setVisible(true);
+                	   acceptButton.setVisible(false);
                 	   record.put("status", "rejected");
                 	   record.put("status_by", ParseUser.getCurrentUser());
                 	   record.saveInBackground(saveCallback);
@@ -260,6 +261,20 @@ public class RecordDetailFragment extends Fragment {
 		MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
 		mainApplication.setModifiedRecord(record);
 	}
+	
+	/*
+	 * private function to controller what is and isnt visible
+	 * 
+	 */
+	private void visibilitySettings()
+	{
+		//((TextView) getActivity().findViewById(R.id.student)).setVisibility(View.GONE);
+		//((TextView) getActivity().findViewById(R.id.subject)).setVisibility(View.GONE);
+		//((TextView) getActivity().findViewById(R.id.date)).setVisibility(View.GONE);
+		((TextView) getActivity().findViewById(R.id.created_by))
+		.setVisibility(View.GONE);
+		
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -300,7 +315,7 @@ public class RecordDetailFragment extends Fragment {
 	@Override
 	public void onResume() {
 		if(record != null) {
-			ParseUser currentUser = ParseUser.getCurrentUser();
+		/*	ParseUser currentUser = ParseUser.getCurrentUser();
 			ParseUser user = record.getParseUser("user");
 			String createdBy = null;
 			
@@ -309,7 +324,8 @@ public class RecordDetailFragment extends Fragment {
 			}
 			else if(user.getObjectId().equals(otherUser.getObjectId())) {
 				createdBy = "Record created by: "+otherUser.getString("firstName") + " " + otherUser.getString("lastName");
-			}
+			}	*/
+			visibilitySettings();
 			
 			String studentDescription = "Student: "+record.getString("student");
 			String subjectDescription = "Subject: "+record.getString("subject");
@@ -321,10 +337,6 @@ public class RecordDetailFragment extends Fragment {
 			.setText(subjectDescription);
 			((TextView) getActivity().findViewById(R.id.subject))
 			.setContentDescription(subjectDescription);
-			((TextView) getActivity().findViewById(R.id.created_by))
-			.setText(createdBy);
-			((TextView) getActivity().findViewById(R.id.created_by))
-			.setContentDescription(createdBy);
 		
 			Date d = record.getDate("dateTime");
 			Calendar c = Calendar.getInstance();
@@ -410,8 +422,13 @@ public class RecordDetailFragment extends Fragment {
 		if(!currentUser.getObjectId().equals(recordUser.getObjectId())) {
 			deleteButton.setVisible(false);
 		}
-		if(record.getString("status").equals("accepted")) { acceptButton.setVisible(false); }
-		if(record.getString("status").equals("rejected")) { cancelButton.setVisible(false); }
+		boolean currentUserStatusBy = ((ParseUser)record.get("status_by")).getObjectId().equals(currentUser.getObjectId());
+		boolean statusAccepted = record.getString("status").equals("accepted");
+		boolean statusRejected = record.getString("status").equals("rejected");
+		if(currentUserStatusBy || statusAccepted || statusRejected) { 
+			acceptButton.setVisible(false);
+			cancelButton.setVisible(false);
+		}
 		
 		super.onCreateOptionsMenu(menu, inflater);
 	}

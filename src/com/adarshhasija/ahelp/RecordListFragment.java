@@ -251,13 +251,6 @@ public class RecordListFragment extends ListFragment {
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
 	}
-	
-	@Override
-	public void onActivityCreated(Bundle savedInstanceState) {
-		super.onActivityCreated(savedInstanceState);
-		
-		populateList();
-	}
 
 	@Override
 	public void onStart() {
@@ -301,8 +294,10 @@ public class RecordListFragment extends ListFragment {
 		else if(resultCode == getActivity().RESULT_CANCELED) {
 			if(requestCode > -1 && requestCode != 50000) {
 				RecordAdapter adapter = (RecordAdapter) getListAdapter();
-				adapter.remove(record);
-				adapter.notifyDataSetChanged();
+				if(adapter != null && record != null) {
+					adapter.remove(record);
+					adapter.notifyDataSetChanged();
+				}
 			}
 		}
 		mainApplication.setModifiedRecord(null);
@@ -331,6 +326,7 @@ public class RecordListFragment extends ListFragment {
 					"Activity must implement fragment's callbacks.");
 		}
 
+		populateList();
 		mCallbacks = (Callbacks) activity;
 	}
 
