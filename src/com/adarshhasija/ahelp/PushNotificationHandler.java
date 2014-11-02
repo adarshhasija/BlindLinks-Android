@@ -56,16 +56,19 @@ public class PushNotificationHandler extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		try {
-			json = new JSONObject(intent.getExtras().getString("com.parse.Data"));
-			this.context = context;
-			this.json = json;
-			generateNotification();
+		ParseUser currentUser = ParseUser.getCurrentUser();
+		if(currentUser != null) {
+			try {
+				json = new JSONObject(intent.getExtras().getString("com.parse.Data"));
+				this.context = context;
+				this.json = json;
+				generateNotification();
 			
-			//UNCOMMENT THIS IF YOU WANT OFFLINE STORAGE
-			//saveRecord(); 
-		} catch (JSONException e) {
-			e.printStackTrace();
+				//UNCOMMENT THIS IF YOU WANT OFFLINE STORAGE
+				//saveRecord(); 
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	

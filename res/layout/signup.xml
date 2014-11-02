@@ -78,7 +78,7 @@
     
     <Button
         android:id="@+id/signup"
-        android:contentDescription="@string/login"
+        android:contentDescription="@string/signup"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:textSize="18sp"

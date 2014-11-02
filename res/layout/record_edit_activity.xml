@@ -31,7 +31,6 @@
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
         android:ems="12"
-        android:contentDescription="@string/student_name"
         android:hint="@string/student_name" 
         android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing" />
     
@@ -40,8 +39,16 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:ems="12"
-        android:contentDescription="@string/subject"
         android:hint="@string/subject"
+        android:inputType="text" 
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing" />
+    
+    <EditText
+        android:id="@+id/location"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:ems="12"
+        android:hint="@string/location"
         android:inputType="text" 
         android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing" />
     

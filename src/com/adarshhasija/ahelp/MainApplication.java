@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import com.parse.Parse;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParsePush;
 import com.parse.ParseUser;
@@ -13,6 +14,7 @@ import com.parse.SaveCallback;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -21,6 +23,7 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.util.Log;
 
 public class MainApplication extends Application{
+
 
 	private ParseObject selectedRecord=null; //This is to move selected objects forward from the main list as PO is not parcelable
 	private ParseObject modifiedRecord=null; //This is to move modified objects back to the main list as PO is not parcelable

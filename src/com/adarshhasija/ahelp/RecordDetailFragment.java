@@ -198,7 +198,7 @@ public class RecordDetailFragment extends Fragment {
                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                    public void onClick(DialogInterface dialog, int id) {
                 	   acceptButton.setVisible(false);
-                	   cancelButton.setVisible(false);
+                	   cancelButton.setVisible(true);
                 	   record.put("status", "accepted");
                 	   record.put("status_by", ParseUser.getCurrentUser());
                 	   record.saveInBackground(saveCallback);
@@ -219,7 +219,7 @@ public class RecordDetailFragment extends Fragment {
                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                    public void onClick(DialogInterface dialog, int id) {
                 	   cancelButton.setVisible(false);
-                	   acceptButton.setVisible(false);
+                	   acceptButton.setVisible(true);
                 	   record.put("status", "rejected");
                 	   record.put("status_by", ParseUser.getCurrentUser());
                 	   record.saveInBackground(saveCallback);
@@ -329,6 +329,10 @@ public class RecordDetailFragment extends Fragment {
 			
 			String studentDescription = "Student: "+record.getString("student");
 			String subjectDescription = "Subject: "+record.getString("subject");
+			String locationDescription = "Location: Location not provided";
+			if(record.getString("location") != null) {
+				locationDescription = "Location: " + record.getString("location");
+			}
 			((TextView) getActivity().findViewById(R.id.student))
 			.setText(studentDescription);
 			((TextView) getActivity().findViewById(R.id.student))
@@ -337,6 +341,10 @@ public class RecordDetailFragment extends Fragment {
 			.setText(subjectDescription);
 			((TextView) getActivity().findViewById(R.id.subject))
 			.setContentDescription(subjectDescription);
+			((TextView) getActivity().findViewById(R.id.location))
+			.setText(locationDescription);
+			((TextView) getActivity().findViewById(R.id.location))
+			.setContentDescription(locationDescription);
 		
 			Date d = record.getDate("dateTime");
 			Calendar c = Calendar.getInstance();
@@ -425,8 +433,12 @@ public class RecordDetailFragment extends Fragment {
 		boolean currentUserStatusBy = ((ParseUser)record.get("status_by")).getObjectId().equals(currentUser.getObjectId());
 		boolean statusAccepted = record.getString("status").equals("accepted");
 		boolean statusRejected = record.getString("status").equals("rejected");
-		if(currentUserStatusBy || statusAccepted || statusRejected) { 
+		if(statusAccepted) { 
 			acceptButton.setVisible(false);
+			cancelButton.setVisible(true);
+		}
+		else if(statusRejected) {
+			acceptButton.setVisible(true);
 			cancelButton.setVisible(false);
 		}
 		

@@ -29,6 +29,15 @@
         android:contentDescription="@string/subject"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing" />
+    
+    <TextView
+        android:id="@+id/location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/location"
+        android:contentDescription="@string/location"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing" />
 
     <TextView
         android:id="@+id/date"

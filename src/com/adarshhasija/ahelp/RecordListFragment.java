@@ -326,7 +326,9 @@ public class RecordListFragment extends ListFragment {
 					"Activity must implement fragment's callbacks.");
 		}
 
-		populateList();
+		if(getActivity() != null) {
+			populateList();
+		}
 		mCallbacks = (Callbacks) activity;
 	}
 

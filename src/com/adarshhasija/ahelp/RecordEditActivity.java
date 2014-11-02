@@ -70,6 +70,7 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 	private Spinner userWidget;
 	private EditText studentWidget;
 	private EditText subjectWidget;
+	private EditText locationWidget;
 	private Button datePicker;
 	private Button timePicker;
 	
@@ -171,6 +172,7 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
     {
     	String student = studentWidget.getText().toString();
 		String subject = subjectWidget.getText().toString();
+		String location = locationWidget.getText().toString();
 		
 		if(validate())
 		{
@@ -192,6 +194,7 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 			record.put("recipient", otherUser);
 			record.put("student", student);
 			record.put("subject", subject);
+			record.put("location", location);
 			Date finalDate = dateTime.getTime();
 			record.put("dateTime", finalDate);
 			record.put("status", "edited");
@@ -221,6 +224,7 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
     {
     	String student = studentWidget.getText().toString();
 		String subject = subjectWidget.getText().toString();
+		String location = locationWidget.getText().toString();
 		
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(getBaseContext().CONNECTIVITY_SERVICE);
 		if(cm.getActiveNetworkInfo() == null) {
@@ -235,6 +239,11 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 		
 		if(subject.isEmpty()) {
 			Toast.makeText(getBaseContext(), "You have not entered a subject", Toast.LENGTH_SHORT).show();
+			return false;
+		}
+		
+		if(location.isEmpty()) {
+			Toast.makeText(getBaseContext(), "You have not entered a location", Toast.LENGTH_SHORT).show();
 			return false;
 		}
 		
@@ -385,6 +394,7 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 		
 		studentWidget = ((EditText) findViewById(R.id.student));
 		subjectWidget = ((EditText) findViewById(R.id.subject));
+		locationWidget = ((EditText) findViewById(R.id.location));
 		datePicker = ((Button) findViewById(R.id.datePicker));
 		timePicker = ((Button) findViewById(R.id.timePicker));
 		
@@ -429,10 +439,12 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
     		userToFetch.fetchIfNeededInBackground(getUserCallback);
 			String studentString = record.getString("student");
 			String subjectString = record.getString("subject");
+			String locationString = record.getString("location");
 			c.setTime(record.getDate("dateTime"));
 			
 			studentWidget.setText(studentString);
 			subjectWidget.setText(subjectString);
+			locationWidget.setText(locationString);
 			
 			year = c.get(Calendar.YEAR);
 	        month = c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
