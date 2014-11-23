@@ -117,11 +117,22 @@ public class SelectContactForNewRecord extends ListActivity {
 		
 		MainApplication mainApplication = (MainApplication) getBaseContext().getApplicationContext();
         HashMap<String, String> localContacts = mainApplication.getUpdatedDeviceContactsList();
+        String phoneNumber;
+        String phoneNumberWithZero;
+        String phoneNumberNoPrefix;
         for(ParseUser user : list) {
-        	if(localContacts.containsKey(user.getString("phoneNumber"))) {
+        	//This covers all the combination for an India number
+        	phoneNumber = user.getString("phoneNumber");
+        	phoneNumberWithZero = "0" + phoneNumber.substring(3);
+        	phoneNumberNoPrefix = phoneNumber.substring(3);
+        	
+        	if(localContacts.containsKey(phoneNumber) || 
+        			localContacts.containsKey(phoneNumberWithZero) ||
+        				localContacts.containsKey(phoneNumberNoPrefix)) {
         		userObjects.add(user); //This is needed later when saving
         		userList.add(user.getString("firstName")+" "+user.getString("lastName"));
         	}
+
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_list_item_1, userList);
         setListAdapter(adapter); 

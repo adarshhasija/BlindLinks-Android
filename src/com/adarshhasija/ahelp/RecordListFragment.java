@@ -10,10 +10,13 @@ import java.util.Locale;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.app.ActionBar.OnNavigationListener;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.text.Editable;
@@ -29,6 +32,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.parse.FindCallback;
 import com.parse.Parse;
@@ -84,7 +88,7 @@ public class RecordListFragment extends ListFragment {
 		/**
 		 * Callback for when an item has been selected.
 		 */
-		public void onItemSelected(int requestCode);
+		public void onItemSelected(int requestCode, ParseProxyObject data);
 	}
 
 	/**
@@ -92,8 +96,11 @@ public class RecordListFragment extends ListFragment {
 	 * nothing. Used only when this fragment is not attached to an activity.
 	 */
 	private static Callbacks sDummyCallbacks = new Callbacks() {
+
 		@Override
-		public void onItemSelected(int requestCode) {
+		public void onItemSelected(int requestCode, ParseProxyObject data) {
+			// TODO Auto-generated method stub
+			
 		}
 	};
 
@@ -162,10 +169,26 @@ public class RecordListFragment extends ListFragment {
 	
 	
 	private void addPressed() {
-		Intent intent = new Intent(getActivity(), SelectContactForNewRecord.class);
-		Calendar c = Calendar.getInstance();
-		int index = 50000; //random very large integer to show insert
-		startActivityForResult(intent, index);
+		ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(getActivity().CONNECTIVITY_SERVICE);
+		if(cm.getActiveNetworkInfo() == null) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+			builder.setTitle("WARNING");
+			builder.setMessage("No internet connection.\n You must be connected to the internet to send scribe requests")
+			       .setCancelable(false)
+			       .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+			           public void onClick(DialogInterface dialog, int id) {
+
+			           }
+			       });
+			AlertDialog alert = builder.create();
+			alert.show();
+		}
+		else {
+			Intent intent = new Intent(getActivity(), RecordEditActivity.class);
+			Calendar c = Calendar.getInstance();
+			int index = 50000; //random very large integer to show insert
+			startActivityForResult(intent, index);
+		}
 	};
 	
 	private void refreshPressed() {
@@ -351,7 +374,8 @@ public class RecordListFragment extends ListFragment {
 		// Notify the active callbacks interface (the activity, if the
 		// fragment is attached to one) that an item has been selected.
 		//THIS MEANS NOTHING NOW
-		mCallbacks.onItemSelected(position);
+		ParseProxyObject data=null;
+		mCallbacks.onItemSelected(position, data);
 	}
 
 	@Override

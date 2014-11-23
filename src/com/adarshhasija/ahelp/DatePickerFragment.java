@@ -26,7 +26,7 @@ public class DatePickerFragment extends DialogFragment {
         try {
             mListener = (OnDateSetListener) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnTimeSetListener");
+            throw new ClassCastException(activity.toString() + " must implement OnDateSetListener");
         }
     }
 	

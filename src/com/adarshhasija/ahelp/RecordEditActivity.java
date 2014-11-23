@@ -30,6 +30,7 @@ import com.parse.SaveCallback;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.ListActivity;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -43,18 +44,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-public class RecordEditActivity extends FragmentActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
+public class RecordEditActivity extends ListActivity { //extends FragmentActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
 	
 	private ParseObject record=null;
 	private ParseUser otherUser=null;
@@ -272,7 +276,7 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
     	}
     }
     
-    public void showTimePickerDialog(View v) {
+/*    public void showTimePickerDialog(View v) {
 	    DialogFragment newFragment = new TimePickerFragment();
 	    Bundle args = new Bundle();
 	    args.putInt("hourOfDay", dateTime.get(Calendar.HOUR_OF_DAY));
@@ -289,7 +293,7 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 	    args.putInt("dayOfMonth", dateTime.get(Calendar.DAY_OF_MONTH));
 	    newFragment.setArguments(args);
 	    newFragment.show(getSupportFragmentManager(), "datePicker");
-	}
+	}	*/
 	
 	/**
 	 * Hides the soft keyboard
@@ -307,7 +311,26 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 	 * 
 	 * 
 	 */
-	@Override
+	private AdapterView.OnItemClickListener itemClickedListener = new AdapterView.OnItemClickListener() {
+
+	      @Override
+	      public void onItemClick(AdapterView<?> parent, final View view,
+	          int position, long id) {
+	    	  switch (position) {
+		        case 0:
+		        	Intent intent = new Intent(RecordEditActivity.this, MonthYearPickerActivity.class);
+					startActivityForResult(intent, position);
+		            return;
+		        default:
+		            return;
+		    }
+	      }
+
+	    };
+	
+	
+	
+/*	@Override
 	public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 		dateTime.set(dateTime.get(Calendar.YEAR), 
 						dateTime.get(Calendar.MONTH), 
@@ -345,7 +368,7 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 		
 		Button datePicker = ((Button) findViewById(R.id.datePicker));
 		datePicker.setText(dayOfMonth+" "+month+" "+year);
-	}
+	} */
 	
 	
       
@@ -354,7 +377,20 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.record_edit_activity);
+		//setContentView(R.layout.record_edit_activity);
+		
+/*		final ListView listview = (ListView) findViewById(R.id.listview);
+	    String[] labels = new String[] { "Date", "Time", "Location", "Subject", "Additional Notes", "Send to"};
+	    String[] content = new String[] { "Android", "ABC", "iPhone", "WindowsMobile", "eg: Student name, student phone number", "Win"};
+	    final ArrayList<String> labelsList = new ArrayList<String>();
+	    final ArrayList<String> contentList = new ArrayList<String>();
+	    for (int i = 0; i < labels.length; ++i) {
+	      labelsList.add(labels[i]);
+	      contentList.add(content[i]);
+	    }
+	    
+	    final RecordEditAdapter editAdapter = new RecordEditAdapter(this, 0, labelsList, contentList);
+	        listview.setAdapter(editAdapter);	*/
 
 		MainApplication mainApplication = (MainApplication) getBaseContext().getApplicationContext();
 		record = mainApplication.getSelectedRecord();
@@ -375,13 +411,28 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 			}
 			userToFetch.fetchIfNeededInBackground(getUserCallback);
 		}
-		else if(record == null) {
+	/*	else if(record == null) {
 			//There is no record as we are creating a new record
 			//Get the chosen recipient as passed in from the select contacts screen
 			otherUser = mainApplication.getUserForNewRecord();
 			setTitle(otherUser.getString("firstName") + " " + otherUser.getString("lastName"));
 			mainApplication.setUserForNewRecord(null);
-		}
+		}	*/
+		
+		//final ListView listview = (ListView) findViewById(R.id.listview);
+	    String[] labels = new String[] { "Date", "Time", "Location", "Subject", "Additional Notes", "Send to"};
+	    String[] content = new String[] { "Plus", "Win", "iPhone", "WindowsMobile", "eg: Student name, student phone number", "Win"};
+	    final ArrayList<String> labelsList = new ArrayList<String>();
+	    final ArrayList<String> contentList = new ArrayList<String>();
+	    for (int i = 0; i < labels.length; ++i) {
+	      labelsList.add(labels[i]);
+	      contentList.add(content[i]);
+	    }
+	    
+	    final RecordEditAdapter editAdapter = new RecordEditAdapter(this, 0, contentList);
+	        //listview.setAdapter(editAdapter);
+	        //listview.setOnItemClickListener(itemClickedListener);
+	    	setListAdapter(editAdapter);
 
 	}
 	
@@ -389,14 +440,14 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 
 	@Override
 	protected void onResume() {
-		userWidget = (Spinner) findViewById(R.id.user);
+	/*	userWidget = (Spinner) findViewById(R.id.user);
 		userWidget.setVisibility(View.GONE); //As we are display the chosen contact in the title, this is not needed now
 		
 		studentWidget = ((EditText) findViewById(R.id.student));
 		subjectWidget = ((EditText) findViewById(R.id.subject));
 		locationWidget = ((EditText) findViewById(R.id.location));
 		datePicker = ((Button) findViewById(R.id.datePicker));
-		timePicker = ((Button) findViewById(R.id.timePicker));
+		timePicker = ((Button) findViewById(R.id.timePicker)); */
 		
 		ParseQuery<ParseUser> querySpinner = ParseUser.getQuery();
 		querySpinner.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
@@ -411,11 +462,11 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
         else if(hour == 0) hour = 12;
         int minute = c.get(Calendar.MINUTE);
         String am_pm = c.getDisplayName(Calendar.AM_PM, Calendar.LONG, Locale.US);
-        //String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
         
-        datePicker.setText(day+" "+month+" "+year);
-		if(minute < 10) timePicker.setText(hour+":0"+minute+" "+am_pm);
-		else timePicker.setText(hour+":"+minute+" "+am_pm);
+        //datePicker.setText(day+" "+month+" "+year);
+        String timeText = "";
+		if(minute < 10) timeText = hour+":0"+minute+" "+am_pm;
+		else timeText = hour+":"+minute+" "+am_pm;
         
         //set private variable dateTime
         dateTime = c;
@@ -457,11 +508,59 @@ public class RecordEditActivity extends FragmentActivity implements DatePickerDi
 			datePicker.setText(day+" "+month+" "+year);
 			if(minute < 10) timePicker.setText(hour+":0"+minute+" "+am_pm);
 			else timePicker.setText(hour+":"+minute+" "+am_pm);
-		} 
+		}
         
 		super.onResume();
 	}
 	
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		super.onListItemClick(l, v, position, id);
+		
+		Intent intent = new Intent(RecordEditActivity.this, MonthYearPickerActivity.class);
+		startActivityForResult(intent, position);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		
+		if(resultCode == Activity.RESULT_OK) {
+			RecordEditAdapter adapter = (RecordEditAdapter) getListAdapter();
+			
+			switch(requestCode) {
+				case 0:
+					Bundle extras = data.getExtras();
+					dateTime.set(Calendar.YEAR, extras.getInt("year"));
+					dateTime.set(Calendar.MONTH, extras.getInt("month"));
+					dateTime.set(Calendar.DAY_OF_MONTH, extras.getInt("dayOfMonth"));
+					dateTime.set(Calendar.HOUR_OF_DAY, extras.getInt("hourOfDay"));
+					dateTime.set(Calendar.MINUTE, extras.getInt("minute"));
+					
+					String monthString = dateTime.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
+					int hourOfDay = dateTime.get(Calendar.HOUR_OF_DAY);
+					if(hourOfDay > 12) hourOfDay = hourOfDay - 12;
+			        else if(hourOfDay == 0) hourOfDay = 12;
+					
+					int minute = dateTime.get(Calendar.MINUTE);
+			        String minuteString = "";
+			        if(minute == 0) minuteString = "00";
+			        else minuteString = Integer.toString(minute);
+			        
+					String am_pm = dateTime.getDisplayName(Calendar.AM_PM, Calendar.LONG, Locale.US);
+					String dateTimeString = dateTime.get(Calendar.DAY_OF_MONTH) + " " + monthString + " " + dateTime.get(Calendar.YEAR) +
+											"  " + hourOfDay + ":" + minuteString + " " + am_pm;
+					
+					adapter.remove(adapter.getItem(0));
+					adapter.insert(dateTimeString, 0);
+					adapter.notifyDataSetChanged();
+					return;
+				default:
+					return;
+			}	
+		}
+	}
+
 	@Override
 	public void onBackPressed() {
 		setResult(RESULT_CANCELED);

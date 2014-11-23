@@ -23,8 +23,23 @@
 
         <requestFocus />
     </AutoCompleteTextView>  -->
+    
+    <ListView
+            android:id="@+id/listview"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
 
-
+	<EditText
+        android:id="@+id/notes"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:maxLines="5"
+        android:ems="12"
+        android:hint="@string/notes" 
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing" />
+    
+    
     <EditText
         android:id="@+id/student"
         android:layout_width="fill_parent"

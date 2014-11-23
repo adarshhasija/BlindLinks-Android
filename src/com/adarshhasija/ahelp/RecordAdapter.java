@@ -93,8 +93,7 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> implements Filterab
 	 */
 	private void visibilitySettings(ViewHolderRecord viewHolder)
 	{
-		viewHolder.updatedAtDateView.setVisibility(View.GONE);
-		viewHolder.subjectView.setVisibility(View.GONE);
+		//viewHolder.locationView.setVisibility(View.GONE);
 	}
 	
 	/*
@@ -185,19 +184,17 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> implements Filterab
 		if(record != null) {
 			int imageResource = getStatusIcon(record, viewHolder);
 			viewHolder.iconView.setImageResource(imageResource);
-			viewHolder.iconView.setContentDescription("Icon: "+record.getString("status"));
 
 			viewHolder.studentView.setText(record.getString("student"));
-			viewHolder.studentView.setContentDescription("Student: "+record.getString("student"));
 			viewHolder.subjectView.setText(record.getString("subject"));
-			viewHolder.subjectView.setContentDescription("Subject: "+record.getString("subject"));
 			String recordDateTime = getDateValueAsString(record.getDate("dateTime"));
 			viewHolder.dateTimeView.setText(recordDateTime);
-			viewHolder.dateTimeView.setContentDescription("Appointment on: "+recordDateTime);
 			
 			String updatedAt = getDateValueAsString(record.getUpdatedAt());
 			viewHolder.updatedAtDateView.setText(updatedAt);
 			viewHolder.updatedAtDateView.setContentDescription("Last modified: "+updatedAt);
+			convertView.setContentDescription("Appointment with "+record.getString("student") +
+													"on " + recordDateTime + ". Current status is: "+ record.getString("status"));
 			//viewHolder.categoryView.setTag(record);
 		}
 	    

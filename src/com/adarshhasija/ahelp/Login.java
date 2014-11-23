@@ -85,13 +85,20 @@ public class Login extends Activity {
 				return;
 			}
 			
-			//loginButton.setVisible(false);
+			//we should just be passing the local number on
+			if(phoneNumber.startsWith("0")) {
+				phoneNumber = phoneNumber.substring(1);
+			}
+			if(phoneNumber.startsWith("+91")) {
+				phoneNumber = phoneNumber.substring(3);
+			}
+			
 			signupButton.setVisible(false);
 			progressButton.setActionView(R.layout.action_progressbar);
             progressButton.expandActionView();
 			progressButton.setVisible(true);
 			
-			ParseUser.logInInBackground(phoneNumber, password, logInCallback);
+			ParseUser.logInInBackground(phoneNumber, password, logInCallback); 
 			
 			return;
 		}

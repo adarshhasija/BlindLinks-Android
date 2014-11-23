@@ -4,12 +4,17 @@
     <string name="app_name">aHelp</string>
     <string name="login">LOGIN</string>
     <string name="signup">SIGNUP</string>
+    <string name="ok">OK</string>
     <string name="select_contact">Select Contact</string>
+    <string name="select_location">Select Location</string>
+    <string name="hint_enter_location">Enter Location</string>
+    <string name="menu_new_location">New location</string>
     <string name="title_record_detail">Record Detail</string>
     <string name="search_title">Search</string>
     <string name="search_hint">Enter name</string>
     <string name="search_results">Search Results</string>
     <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
     <string name="email">Email</string>
     <string name="phone_number">Phone number (no country code)</string>
     <string name="password">Password</string>
@@ -23,7 +28,7 @@
     <string name="rupees">Rs</string>
     <string name="paise">paise</string>
     <string name="category">Category(eg: books)</string>
-    <string name="new_record">New Record</string>
+    <string name="new_exam">New Exam</string>
     <string name="additional_details">Additional details(optional)</string>
     <string name="archives">Archives</string>
     <string name="amount">Amount</string>
@@ -35,10 +40,19 @@
     <string name="location">Location</string>
     <string name="status_new">Status: NEW</string>
     <string name="icon_scheduled">Icon: Scheduled</string>
+    
+    <!-- Exam notes section -->
+    <string name="notes">Notes. eg: Student name, student number</string>
+    <string name="select_month_year">Select month and year</string>
+    <string name="select_date">Select date</string>
+    <string name="select_time">Select time</string>
+    
     <string name="created_by">Record created by</string>
     <string-array name="credit_debit">
         <item>Credit</item>
         <item>Debit</item>
     </string-array>
+        <string name="message">Message</string>
+        <string name="record">Record</string>
 
 </resources>

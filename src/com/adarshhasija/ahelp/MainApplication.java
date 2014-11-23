@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.parse.Parse;
+import com.parse.ParseACL;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
@@ -132,7 +133,10 @@ public class MainApplication extends Application{
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		//Parse.enableLocalDatastore(getApplicationContext());
 		Parse.initialize(this, "9f3p730Ynsj9hLbeEuGxGC9Nifwmh5Co0NCAsbi5", "MogP0et66o0SlSgS2XXFNJhVqnlvICy3L3don29q");
+		ParseACL defaultACL = new ParseACL();
+		ParseACL.setDefaultACL(defaultACL, true);
 		PushService.setDefaultPushCallback(this, RecordListActivity.class);
 	}
 	

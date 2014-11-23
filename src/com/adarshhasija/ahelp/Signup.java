@@ -128,14 +128,16 @@ public class Signup extends AccountAuthenticatorActivity {
 			lastName = lastName.substring(0, 1).toUpperCase(Locale.US) + lastName.substring(1);
 			phoneNumber = phoneNumber.replaceAll("[^\\d+]", "");
 			String countryCode = "+";
+			if(phoneNumber.startsWith("0")) {
+				phoneNumber = phoneNumber.substring(1);
+			}
 			if(phoneNumber.indexOf("+", 0) == -1) {
 				String country = countriesSpinner.getSelectedItem().toString();
 				String countryISO = isoMap.get(country);
 				countryCode = Iso2Phone.getPhone(countryISO);
 				phoneNumber = countryCode + phoneNumber;
 			}
-			
-			//signupButton.setVisible(false);
+
 			progressButton.setActionView(R.layout.action_progressbar);
             progressButton.expandActionView();
 			progressButton.setVisible(true);
