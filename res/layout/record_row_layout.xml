@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="?android:attr/listPreferredItemHeightLarge"
+    android:layout_height="@dimen/record_row_height"
     android:orientation="vertical" >
     
   <ImageView
@@ -23,7 +23,7 @@
       android:layout_marginLeft="10dp"
       android:layout_toRightOf="@id/icon">
       <TextView
-        android:id="@+id/student"
+        android:id="@+id/user"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/icon"
@@ -63,6 +63,20 @@
         android:singleLine="true"
         android:text="Date and time"
         android:contentDescription="Date and time"
+        android:textSize="14sp" />
+      
+      <TextView
+        android:id="@+id/lastAction"
+        android:layout_width="fill_parent"
+        android:layout_height="26dip"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="5dp"
+        android:layout_toRightOf="@id/icon"
+        android:ellipsize="marquee"
+        android:singleLine="true"
+        android:text="Last action"
+        android:contentDescription="Last action"
         android:textSize="14sp" />
       
   </LinearLayout>

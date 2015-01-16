@@ -24,6 +24,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +38,7 @@ import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.FunctionCallback;
 import com.parse.GetCallback;
+import com.parse.ParseACL;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
@@ -62,6 +67,7 @@ public class RecordDetailFragment extends Fragment {
 	 */
 	private DummyContent.DummyItem mItem; 
 	private ParseObject record;
+	private ParseObject exam;
 	private ParseUser otherUser;
 	private MenuItem progressButton;
 	private MenuItem deleteButton;
@@ -104,10 +110,10 @@ public class RecordDetailFragment extends Fragment {
 			if(e == null) {
 				Toast.makeText(getActivity(), "Status successfully changed to "+record.getString("status"), Toast.LENGTH_SHORT).show();
 				
-				((TextView) getActivity().findViewById(R.id.status))
+		/*		((TextView) getActivity().findViewById(R.id.status))
 				.setText("Status: " + record.getString("status").toUpperCase());
 				((TextView) getActivity().findViewById(R.id.status))
-				.setContentDescription("Status: " + record.getString("status").toUpperCase());
+				.setContentDescription("Status: " + record.getString("status").toUpperCase());	*/
 				
 				JSONObject jsonObj=new JSONObject();
 	        	try {
@@ -149,7 +155,8 @@ public class RecordDetailFragment extends Fragment {
 	private DeleteCallback deleteCallback = new DeleteCallback() {
 
 		@Override
-		public void done(ParseException arg0) {
+		public void done(ParseException e) {
+			getActivity().setResult(getActivity().RESULT_OK);
 			getActivity().finish();
 		}
 		
@@ -167,8 +174,17 @@ public class RecordDetailFragment extends Fragment {
         builder.setMessage("Are you sure?")
                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                    public void onClick(DialogInterface dialog, int id) {
-                	   setResultForDeleted();
-                	   record.deleteEventually(deleteCallback);
+                	   if(record.getParseUser("createdBy").equals(ParseUser.getCurrentUser())) { //They can delete the entire event
+                		   record.deleteEventually();
+                		   record.unpinInBackground("Event", deleteCallback);
+                	   }
+                	   else {  //Simply remove the read access
+                		   ParseACL recordAcl = record.getACL();
+                		   recordAcl.setReadAccess(ParseUser.getCurrentUser(), false);
+                		   record.setACL(recordAcl);
+                		   record.saveEventually();
+                		   record.unpinInBackground("Event", deleteCallback);
+                	   }
                    }
                })
                .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -179,59 +195,58 @@ public class RecordDetailFragment extends Fragment {
         builder.show();
 	}
 	
-	private void editPressed()
-	{
-		//Pass the ParseObject as a global variable
-		MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
-		mainApplication.setSelectedRecord(record);
+	/*
+	 * private functions
+	 * 
+	 * 
+	 */
+	private void setExamDetails() {
+		ParseUser creator = record.getParseUser("createdBy");
+		Date dateTime = exam.getDate("dateTime");
 		
-		//Bundle bundle = new Bundle();
-		//bundle.putLong("id", media.getId());
-		Intent newIntent = new Intent(getActivity(),RecordEditActivity.class);
-    	//newIntent.putExtras(bundle);
-    	startActivityForResult(newIntent, 0);
-	}
-	
-	private void acceptPressed()
-	{
-		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage("Accept invitation?")
-               .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                   public void onClick(DialogInterface dialog, int id) {
-                	   acceptButton.setVisible(false);
-                	   cancelButton.setVisible(true);
-                	   record.put("status", "accepted");
-                	   record.put("status_by", ParseUser.getCurrentUser());
-                	   record.saveInBackground(saveCallback);
-                   }
-               })
-               .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                   public void onClick(DialogInterface dialog, int id) {
-                       // User cancelled the dialog
-                   }
-               });
-        builder.show();
-	}
-	
-	private void cancelPressed()
-	{
-		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage("Reject invitation?")
-               .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                   public void onClick(DialogInterface dialog, int id) {
-                	   cancelButton.setVisible(false);
-                	   acceptButton.setVisible(true);
-                	   record.put("status", "rejected");
-                	   record.put("status_by", ParseUser.getCurrentUser());
-                	   record.saveInBackground(saveCallback);
-                   }
-               })
-               .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                   public void onClick(DialogInterface dialog, int id) {
-                       // User cancelled the dialog
-                   }
-               });
-        builder.show();
+		Calendar c = Calendar.getInstance();
+		c.setTime(dateTime);
+		int hour = c.get(Calendar.HOUR_OF_DAY);
+		if(hour > 12) hour = hour - 12;
+		else if(hour == 0) hour = 12;
+		int minute = c.get(Calendar.MINUTE);
+		String minuteString = (minute < 10)?"0"+Integer.toString(minute):Integer.toString(minute);
+		String dateTimeString = c.get(Calendar.DATE) + " " + 
+				c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US) + " " +
+				c.get(Calendar.YEAR) + " " +
+				hour + ":" +
+				minuteString + " " +
+				c.getDisplayName(Calendar.AM_PM, Calendar.LONG, Locale.US);
+		
+		ParseObject examLocation = exam.getParseObject("location");
+		String subject = exam.getString("subject");
+		String notes = exam.getString("notes");
+		if(notes == null) {
+			notes = "No additional notes";
+		}
+		try {
+			creator.fetchFromLocalDatastore();
+			examLocation.fetchFromLocalDatastore();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String contentDescription = "Exam set by "+creator.getString("firstName") + " " + creator.getString("lastName") +
+									" on " + dateTimeString + " at " + examLocation.getString("title") + ".";
+		
+		((TextView) getActivity().findViewById(R.id.user))
+		.setText(creator.getString("firstName") + " " + creator.getString("lastName"));
+		((TextView) getActivity().findViewById(R.id.recordDateTime))
+		.setText(dateTimeString);
+		((TextView) getActivity().findViewById(R.id.location))
+		.setText(examLocation.getString("title"));
+		((TextView) getActivity().findViewById(R.id.subject))
+		.setText(subject);
+		((TextView) getActivity().findViewById(R.id.notes))
+		.setText(notes);
+		
+		RelativeLayout examLayout = ((RelativeLayout) getActivity().findViewById(R.id.exam));
+		examLayout.setContentDescription(contentDescription);
 	}
 	
 	
@@ -241,41 +256,15 @@ public class RecordDetailFragment extends Fragment {
 	 */
 	private void setResultForReturn() 
 	{
-	/*	Bundle bundle = new Bundle();
-		bundle.putString("student", record.getString("student"));
-		bundle.putString("subject", record.getString("subject"));
-		bundle.putString("status", record.getString("status"));
-		ParseProxyObject ppo = new ParseProxyObject(record);
-		//returnIntent.putExtras(bundle);
+		Bundle bundle = new Bundle();
+		bundle.putString("parseId", record.getObjectId());
+		bundle.putString("uuid", record.getString("uuid"));
 		Intent returnIntent = new Intent();
-		returnIntent.putExtra("parseObject", ppo); */
-		getActivity().setResult(getActivity().RESULT_OK);
-		
-		MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
-		mainApplication.setModifiedRecord(record);
+		returnIntent.putExtras(bundle);
+		getActivity().setResult(getActivity().RESULT_OK, returnIntent);
 	}
 	
-	private void setResultForDeleted() 
-	{
-		getActivity().setResult(getActivity().RESULT_CANCELED);
-		
-		MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
-		mainApplication.setModifiedRecord(record);
-	}
 	
-	/*
-	 * private function to controller what is and isnt visible
-	 * 
-	 */
-	private void visibilitySettings()
-	{
-		//((TextView) getActivity().findViewById(R.id.student)).setVisibility(View.GONE);
-		//((TextView) getActivity().findViewById(R.id.subject)).setVisibility(View.GONE);
-		//((TextView) getActivity().findViewById(R.id.date)).setVisibility(View.GONE);
-		((TextView) getActivity().findViewById(R.id.created_by))
-		.setVisibility(View.GONE);
-		
-	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -283,110 +272,226 @@ public class RecordDetailFragment extends Fragment {
 		getActivity().setContentView(R.layout.fragment_record_detail);
 		setHasOptionsMenu(true);
 
-		if (getArguments().containsKey(ARG_ITEM_ID)) {
+		if (getArguments().containsKey("parseId")) {
 			// Load the dummy content specified by the fragment
 			// arguments. In a real-world scenario, use a Loader
 			// to load content from a content provider.
 			//mItem = DummyContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
-			ParseProxyObject data = (ParseProxyObject) getArguments().getSerializable("data");
-		}
-		
-		MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
-		record = mainApplication.getSelectedRecord();
-		mainApplication.setSelectedRecord(null);
-		
-		ParseUser user = record.getParseUser("user");
-		ParseUser recipient = record.getParseUser("recipient");
-		ParseUser currentUser = ParseUser.getCurrentUser();
-		ParseUser userToFetch;
-		
-		//If they are not the same, this means currentUser is the recipient, so display the user in title
-		if(!user.getObjectId().equals(currentUser.getObjectId())) {
-			userToFetch = user;
-		}
-		//If they are the same, currentUser is the user and recipient should be displayed
-		else {
-			userToFetch = recipient;
-		}
-		userToFetch.fetchIfNeededInBackground(getUserCallback);
-	}
-
-
-
-	@Override
-	public void onResume() {
-		if(record != null) {
-		/*	ParseUser currentUser = ParseUser.getCurrentUser();
-			ParseUser user = record.getParseUser("user");
-			String createdBy = null;
-			
-			if(user.getObjectId().equals(currentUser.getObjectId())) {
-				createdBy = "Record created by: "+currentUser.getString("firstName") + " " + currentUser.getString("lastName");
+			String parseId = getArguments().getString("parseId");
+			ParseQuery<ParseObject> query = ParseQuery.getQuery("Record");
+			query.fromLocalDatastore();
+			try {
+				record = query.get(parseId);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			else if(user.getObjectId().equals(otherUser.getObjectId())) {
-				createdBy = "Record created by: "+otherUser.getString("firstName") + " " + otherUser.getString("lastName");
-			}	*/
-			visibilitySettings();
-			
-			String studentDescription = "Student: "+record.getString("student");
-			String subjectDescription = "Subject: "+record.getString("subject");
-			String locationDescription = "Location: Location not provided";
-			if(record.getString("location") != null) {
-				locationDescription = "Location: " + record.getString("location");
+		}
+		if (getArguments().containsKey("uuid")) {
+			String uuid = getArguments().getString("uuid");
+			ParseQuery<ParseObject> query = ParseQuery.getQuery("Event");
+			query.fromLocalDatastore();
+			query.whereEqualTo("uuid", uuid);
+			try {
+				record = query.getFirst();
+				if(record != null) {
+					exam = record.getParseObject("exam");
+					exam.fetchFromLocalDatastore();
+				}
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			((TextView) getActivity().findViewById(R.id.student))
-			.setText(studentDescription);
-			((TextView) getActivity().findViewById(R.id.student))
-			.setContentDescription(studentDescription);
-			((TextView) getActivity().findViewById(R.id.subject))
-			.setText(subjectDescription);
-			((TextView) getActivity().findViewById(R.id.subject))
-			.setContentDescription(subjectDescription);
-			((TextView) getActivity().findViewById(R.id.location))
-			.setText(locationDescription);
-			((TextView) getActivity().findViewById(R.id.location))
-			.setContentDescription(locationDescription);
-		
-			Date d = record.getDate("dateTime");
-			Calendar c = Calendar.getInstance();
-			c.setTime(d);
-			int hour = c.get(Calendar.HOUR_OF_DAY);
-			if(hour > 12) hour = hour - 12;
-			else if(hour == 0) hour = 12;
-			int minute = c.get(Calendar.MINUTE);
-			String minuteString = (minute < 10)?"0"+Integer.toString(minute):Integer.toString(minute);
-			String dateString = c.get(Calendar.DATE) + " " + 
-					c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US) + " " +
-					c.get(Calendar.YEAR) + " " +
-					hour + ":" +
-					minuteString + " " +
-					c.getDisplayName(Calendar.AM_PM, Calendar.LONG, Locale.US);
-			((TextView) getActivity().findViewById(R.id.date))
-			.setText("Date and Time: " + dateString);
-			((TextView) getActivity().findViewById(R.id.date))
-			.setContentDescription("Date and Time: " + dateString);
-			
-			((TextView) getActivity().findViewById(R.id.status))
-			.setText("Status: " + record.getString("status").toUpperCase());
-			((TextView) getActivity().findViewById(R.id.status))
-			.setContentDescription("Status: " + record.getString("status").toUpperCase());
-			
 		}
 		
-		super.onResume();
+		if(exam != null) {
+			setExamDetails();
+			
+			List<ParseObject> list = exam.getList("actions");
+			List<ParseObject> actionList = new ArrayList<ParseObject>();
+			try {
+				for(ParseObject action : list) {
+					action.fetchFromLocalDatastore();
+					actionList.add(action);
+				}
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			RelativeLayout examLayout = ((RelativeLayout) getActivity().findViewById(R.id.exam));
+			
+			ParseACL examAcl = exam.getACL();
+			if(!examAcl.getWriteAccess(ParseUser.getCurrentUser())) {
+				ImageView editView = ((ImageView) getActivity().findViewById(R.id.edit));
+				editView.setVisibility(View.GONE);
+			}
+			else {
+				examLayout.setOnClickListener(new View.OnClickListener() {
+				
+					@Override
+					public void onClick(View view) {
+						Bundle bundle = new Bundle();
+						bundle.putString("parseId", exam.getObjectId());
+						bundle.putString("uuid", exam.getString("uuid"));
+						Intent intent = new Intent(getActivity(), RecordEditActivity.class);
+						intent.putExtras(bundle);
+						startActivityForResult(intent, 1000); //this means exam being edited 
+					}
+				});
+			}
+			
+			
+			ListView actionListView = (ListView) getActivity().findViewById(R.id.actionList);
+			Collections.reverse(actionList);
+			ActionListAdapter actionAdapter = new ActionListAdapter(getActivity(), 0, actionList);
+	        actionListView.setAdapter(actionAdapter);
+	        actionListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+				@Override
+				public void onItemClick(AdapterView<?> parent, View view,
+						int position, long id) {
+					Bundle bundle = new Bundle();
+					ActionListAdapter adapter = (ActionListAdapter) parent.getAdapter();
+					ActionListAdapter.ViewHolderRecord holder =  (ActionListAdapter.ViewHolderRecord) view.getTag();
+					String parseId = holder.parseId;
+					String uuid = holder.uuid;
+					bundle.putString("parseId", parseId);
+					bundle.putString("uuid", uuid);
+					if(holder.type.equals("request")) {
+						Intent intent = new Intent(getActivity(), ActionReplyActivity.class);
+						intent.putExtras(bundle);
+						startActivityForResult(intent, position);
+					}
+					else if(holder.type.equals("examUpdate")) {
+						Intent intent = new Intent(getActivity(), ExamChangesActivity.class);
+						intent.putExtras(bundle);
+						startActivityForResult(intent, position);
+					}
+				}
+	        	
+			});
+			
+		}
 	}
 
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if(resultCode == getActivity().RESULT_OK) {
-			MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
-			record = mainApplication.getModifiedRecord();
-			mainApplication.setModifiedRecord(null);
-			setResultForReturn();
-		}
-		
 		super.onActivityResult(requestCode, resultCode, data);
+		
+		if(resultCode == getActivity().RESULT_OK) {
+			//Exam has been modified
+			if(requestCode == 1000) {
+				if(data != null) {
+					Bundle extras = data.getExtras();
+					String parseId = extras.getString("parseId");
+					String uuid = extras.getString("uuid");
+					ParseQuery examQuery = ParseQuery.getQuery("Exam");
+					examQuery.fromLocalDatastore();
+					
+					ParseObject lastAction;
+					try {
+						if(parseId != null) {
+							exam = examQuery.get(parseId);
+						}
+						else {
+							examQuery.whereEqualTo("uuid", uuid);
+							exam = examQuery.getFirst();
+						}
+						setExamDetails();
+						
+						List<ParseObject> actions = exam.getList("actions");
+						ParseObject action = actions.get(actions.size()-1);
+						
+						ListView actionListView = (ListView) getActivity().findViewById(R.id.actionList);
+						ActionListAdapter actionAdapter = (ActionListAdapter) actionListView.getAdapter();
+						actionAdapter.insert(action, 0);
+						actionAdapter.notifyDataSetChanged();
+						
+					} catch (ParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+				}
+			}
+			else if(data != null) {
+					Bundle extras = data.getExtras();
+					ParseObject newAction=null;
+					String actionParseId = extras.getString("parseId");
+					String actionUuid = extras.getString("uuid");
+					ParseQuery query = ParseQuery.getQuery("Action");
+					query.fromLocalDatastore();
+					if(actionParseId != null) {
+						try {
+							newAction = query.get(actionParseId);
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					else if(actionUuid != null) {
+						try {
+							query.whereEqualTo("uuid", actionUuid);
+							newAction = query.getFirst();
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					
+					ListView actionListView = (ListView) getActivity().findViewById(R.id.actionList);
+					ActionListAdapter actionAdapter = (ActionListAdapter) actionListView.getAdapter();
+					ParseObject oldAction = actionAdapter.getItem(requestCode);
+					
+					actionAdapter.remove(oldAction);
+					actionAdapter.insert(newAction, 0);
+					actionAdapter.notifyDataSetChanged();
+					
+					String statusString = newAction.getString("statusString");
+					if(statusString != null) {
+						ImageView iconView = (ImageView) getActivity().findViewById(R.id.icon);
+						
+						if(statusString.equals("accepted")) {
+							iconView.setImageResource(R.drawable.ic_action_accept);
+							deleteButton.setVisible(false);
+							ParseACL examAcl = exam.getACL();
+							examAcl.setWriteAccess(ParseUser.getCurrentUser(), false);
+							exam.setACL(examAcl);
+							((ImageView) getActivity().findViewById(R.id.edit)).setVisibility(View.GONE);
+							((RelativeLayout) getActivity().findViewById(R.id.exam)).setOnClickListener(null);
+						}
+						else {
+							iconView.setImageResource(R.drawable.ic_action_event);
+							deleteButton.setVisible(true);
+							ParseACL examAcl = exam.getACL();
+							examAcl.setWriteAccess(ParseUser.getCurrentUser(), true);
+							exam.setACL(examAcl);
+							((ImageView) getActivity().findViewById(R.id.edit)).setVisibility(View.VISIBLE);
+							((RelativeLayout) getActivity().findViewById(R.id.exam))
+							.setOnClickListener(new View.OnClickListener() {
+								
+								@Override
+								public void onClick(View view) {
+									Bundle bundle = new Bundle();
+									bundle.putString("parseId", exam.getObjectId());
+									bundle.putString("uuid", exam.getString("uuid"));
+									Intent intent = new Intent(getActivity(), RecordEditActivity.class);
+									intent.putExtras(bundle);
+									startActivityForResult(intent, 1000); //this means exam being edited 
+								}
+							});
+						}
+						exam.saveEventually();
+						exam.pinInBackground();
+					}
+					record.saveEventually();
+				}
+			
+			setResultForReturn();	//Exam or action has been edited
+		}
+
 	}
 	
 	
@@ -398,15 +503,6 @@ public class RecordDetailFragment extends Fragment {
 	        case R.id.delete:
 	            deletePressed();
 	            return true;
-	        case R.id.edit:
-	            editPressed();
-	            return true;
-	        case R.id.accept:
-	        	acceptPressed();
-	        	return true;
-	        case R.id.cancel:
-	        	cancelPressed();
-	        	return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
@@ -420,27 +516,14 @@ public class RecordDetailFragment extends Fragment {
 		progressButton.setVisible(false);
 		
 		deleteButton = (MenuItem)menu.findItem(R.id.delete);
-		editButton = (MenuItem)menu.findItem(R.id.edit);
-		acceptButton = (MenuItem)menu.findItem(R.id.accept);
-		cancelButton = (MenuItem)menu.findItem(R.id.cancel);
 		
-		ParseUser recordUser = record.getParseUser("user");
-		ParseUser currentUser = ParseUser.getCurrentUser();
-		//If this is the recipient, delete button is not visible
-		//Only the sending user is allowed to delete
-		if(!currentUser.getObjectId().equals(recordUser.getObjectId())) {
-			deleteButton.setVisible(false);
-		}
-		boolean currentUserStatusBy = ((ParseUser)record.get("status_by")).getObjectId().equals(currentUser.getObjectId());
-		boolean statusAccepted = record.getString("status").equals("accepted");
-		boolean statusRejected = record.getString("status").equals("rejected");
-		if(statusAccepted) { 
-			acceptButton.setVisible(false);
-			cancelButton.setVisible(true);
-		}
-		else if(statusRejected) {
-			acceptButton.setVisible(true);
-			cancelButton.setVisible(false);
+		ListView actionListView = (ListView) getActivity().findViewById(R.id.actionList);
+		ActionListAdapter actionAdapter = (ActionListAdapter) actionListView.getAdapter();
+		ParseObject lastAction = actionAdapter.getItem(0);
+		if(lastAction.getString("statusString") != null) {
+			if(lastAction.getString("statusString").equals("accepted")) {
+				deleteButton.setVisible(false);
+			}
 		}
 		
 		super.onCreateOptionsMenu(menu, inflater);

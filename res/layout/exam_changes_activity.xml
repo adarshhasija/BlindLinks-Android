@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+
+  <LinearLayout
+      android:id="@+id/mainContent"
+      android:orientation="vertical"
+      android:gravity="center_vertical"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="10dp"
+      android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing" >
+      <TextView
+        android:id="@+id/dateTime"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:text="Date Time"
+        android:contentDescription="Date Time"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing"
+        android:textSize="20sp" />
+      
+      <TextView
+        android:id="@+id/location"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:text="Location"
+        android:contentDescription="Location"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing"
+        android:textSize="20sp" />
+      
+      <TextView
+        android:id="@+id/subject"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:text="Subject"
+        android:contentDescription="Subject"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing"
+        android:textSize="20sp" />
+      
+      <TextView
+        android:id="@+id/notes"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:text="Notes"
+        android:contentDescription="Notes"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing"
+        android:textSize="20sp" />
+      
+  </LinearLayout>
+
+
+</RelativeLayout>

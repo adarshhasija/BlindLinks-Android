@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,23 +61,22 @@ import android.widget.Toast;
 
 public class RecordEditActivity extends ListActivity { //extends FragmentActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
 	
-	private ParseObject record=null;
-	private ParseUser otherUser=null;
-	private ArrayList<ParseUser> userObjects;
-	private ArrayList<String> userList;
+	private MainApplication mainApplication;
+	private ParseObject oldExam=null;
+
+	//Input items
+	private String parseId=null;
+	private String uuid=null;
 	private Calendar dateTime;
+	private String locationUuid;
+	private String locationParseId;
+	private String subject;
+	private String notes;
 	
 	//MenuItems
 	private MenuItem progressButton;
-	private MenuItem sendButton;
-	
-	//UI Items
-	private Spinner userWidget;
-	private EditText studentWidget;
-	private EditText subjectWidget;
-	private EditText locationWidget;
-	private Button datePicker;
-	private Button timePicker;
+	private MenuItem nextButton;
+	private MenuItem saveButton;
 	
 	/*
 	 * Parse callbacks
@@ -87,8 +87,14 @@ public class RecordEditActivity extends ListActivity { //extends FragmentActivit
 		@Override
 		public void done(ParseException e) {
 			if(e == null) {
-				
-				JSONObject jsonObj=new JSONObject();
+				Bundle bundle = new Bundle();
+				bundle.putString("parseId", parseId);
+				bundle.putString("uuid", uuid);
+				Intent returnIntent = new Intent();
+				returnIntent.putExtras(bundle);
+				setResult(Activity.RESULT_OK, returnIntent);
+				finish();
+			/*	JSONObject jsonObj=new JSONObject();
 	        	try {
 					jsonObj.put("action", "com.adarshhasija.ahelp.intent.RECEIVE");
 					jsonObj.put("objectId", record.getObjectId());
@@ -96,12 +102,6 @@ public class RecordEditActivity extends ListActivity { //extends FragmentActivit
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-	      /*  	ParseQuery<ParseInstallation> pushQuery = ParseInstallation.getQuery();
-				pushQuery.whereEqualTo("phoneNumber", ParseUser.getCurrentUser().getString("phoneNumber"));
-				ParsePush push = new ParsePush();
-				push.setQuery(pushQuery); // Set our Installation query
-				push.setData(jsonObj);
-				push.sendInBackground();	*/
 	        	
 	        	HashMap<String, Object> params = new HashMap<String, Object>();
 				params.put("recipientPhoneNumber", otherUser.getString("phoneNumber"));
@@ -116,7 +116,7 @@ public class RecordEditActivity extends ListActivity { //extends FragmentActivit
 				    	   Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
 				       }
 				   }
-				});
+				});	*/
 				
 				
 			}
@@ -126,40 +126,12 @@ public class RecordEditActivity extends ListActivity { //extends FragmentActivit
 		}
 		
 	};
-	//Populate the select recipient spinner. 
-	//Currently not in use as user is select from the select contact page
-	private FindCallback populateSpinnerFindCallback = new FindCallback<ParseUser>() {
-
-		@Override
-		public void done(List<ParseUser> list, ParseException e) {
-			if (e == null) {
-				userObjects = new ArrayList<ParseUser>();
-	            userList = new ArrayList<String>();
-	            
-	            MainApplication mainApplication = (MainApplication) getBaseContext().getApplicationContext();
-	            HashMap<String, String> localContacts = mainApplication.getUpdatedDeviceContactsList();
-	            for(ParseUser user : list) {
-	            	if(localContacts.containsKey(user.getString("phoneNumber"))) {
-	            		userObjects.add(user); //This is needed later when saving
-	            		userList.add(user.getString("firstName")+" "+user.getString("lastName"));
-	            	}
-	            }
-	            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_list_item_1, userList);
-	            Spinner userView = ((Spinner) findViewById(R.id.user));
-	            userView.setAdapter(adapter);
-	        } else {
-	            Log.d("RecordEditActivity", "Error: " + e.getMessage());
-	        }
-			
-		}
-		
-	};
 	private GetCallback getUserCallback = new GetCallback<ParseUser>() {
 		
 		@Override
         public void done(ParseUser user, ParseException e) {
 			if(e == null) {
-				otherUser = user;
+				//otherUser = user;
 				setTitle(user.getString("firstName") + " " + user.getString("lastName"));
 			}
 			else {
@@ -172,51 +144,94 @@ public class RecordEditActivity extends ListActivity { //extends FragmentActivit
      * Action bar button functions
      *   
      */
-    private void sendPressed() 
+    private void nextPressed() 
     {
-    	String student = studentWidget.getText().toString();
-		String subject = subjectWidget.getText().toString();
-		String location = locationWidget.getText().toString();
+    	if(validate()) {
+    		Bundle bundle = new Bundle();
+    		bundle.putLong("dateTime", dateTime.getTimeInMillis());
+    		bundle.putString("locationUuid", locationUuid);
+    		bundle.putString("locationParseId", locationParseId);
+    		bundle.putString("subject", subject);
+    		bundle.putString("notes", notes);
 		
-		if(validate())
-		{
-			toggleProgressButton();
+    		Intent intent = new Intent(RecordEditActivity.this, SelectContactActivity.class);
+    		intent.putExtras(bundle);
+    		startActivityForResult(intent, 50000);
+    	}
+    }
+    
+    
+    private void savePressed() {
+    	if(!validate()) {
+    		return;
+    	}
+    	ParseObject exam;
+    	ParseQuery query = ParseQuery.getQuery("Exam");
+    	query.fromLocalDatastore();
+    	try {
+    		if(parseId != null) {
+    			exam = query.get(parseId);
+    		}
+    		else {
+    			query.whereEqualTo("uuid", uuid);
+    			exam = query.getFirst();
+    		}
+    		exam.put("dateTime", dateTime.getTime());
+    		ParseObject location=null;
+    		
+    /*		ParseObject examVersioned = new ParseObject("ExamVersioned");
+    		examVersioned.put("dateTime", oldExam.getDate("dateTime"));
+    		examVersioned.put("location", oldExam.getParseObject("location"));
+    		examVersioned.put("subject", oldExam.getString("subject"));
+    		examVersioned.put("notes", oldExam.getString("notes"));
+    		examVersioned.put("uuid", UUID.randomUUID().toString());	*/
+    		
+    		ParseObject action = new ParseObject("Action");
+    		action.put("from", ParseUser.getCurrentUser());
+    		action.put("type", "examUpdate");
+    		action.put("oldDate", oldExam.getDate("dateTime"));
+    		action.put("oldLocation", oldExam.getParseObject("location"));
+    		action.put("oldSubject", oldExam.getString("subject"));
+    		if(oldExam.getString("notes") != null) {
+    			action.put("oldNotes", oldExam.getString("notes"));
+    		}
+    		action.put("newDate", dateTime.getTime());
+    		
+    		ParseQuery locationQuery = ParseQuery.getQuery("Location");
+    		locationQuery.fromLocalDatastore();
+    		if(locationParseId != null) {
+    			location = locationQuery.get(locationParseId);
+    		}
+    		else {
+    			locationQuery.whereEqualTo("uuid", locationUuid);
+    			location = locationQuery.getFirst();
+    		}
+    		if(location != null) {
+    			ParseObject examLocation = exam.getParseObject("location");
+    			examLocation.fetchFromLocalDatastore();
+    			examLocation.put("title", location.getString("title"));
+    			examLocation.put("location", location);
+    			exam.put("location", examLocation);
+    			action.put("newLocation", examLocation);
+    		}
+    		exam.put("subject", subject);
+    		action.put("newSubject", subject);
+    		if(notes != null) {
+    			exam.put("notes", notes);
+    			action.put("newNotes", notes);
+    		}
+    		else {
+    			exam.remove("notes");
+    		}
+    		exam.add("actions", action);
+    		
+    		exam.saveEventually();
+    		action.put("uuid", UUID.randomUUID().toString());
+    		exam.pinInBackground(saveCallback);
 			
-			if(record == null) {
-				record = new ParseObject("Record");
-				record.put("user", ParseUser.getCurrentUser());
-			}
-
-			//We are not fetching the user from the spinner, it comes from the select contact page
-	/*		ParseUser selectedUser=null;
-			if(userWidget.getVisibility() != View.GONE) {
-				selectedUser = userObjects.get((int)userWidget.getSelectedItemId());
-			}
-			if(selectedUser != null) {
-				record.put("recipient", userObjects.get((int)userWidget.getSelectedItemId()));
-			}	*/
-			record.put("recipient", otherUser);
-			record.put("student", student);
-			record.put("subject", subject);
-			record.put("location", location);
-			Date finalDate = dateTime.getTime();
-			record.put("dateTime", finalDate);
-			record.put("status", "edited");
-			record.put("status_by", ParseUser.getCurrentUser());
-			
-			Intent returnIntent = new Intent();
-			MainApplication mainApplication = (MainApplication) getApplicationContext();
-			mainApplication.setModifiedRecord(record);
-			Bundle bundle = new Bundle();
-			bundle.putString("student", student);
-			bundle.putString("subject", subject);
-			bundle.putString("status", "edited");
-			ParseProxyObject ppo = new ParseProxyObject(record);
-			//returnIntent.putExtras(bundle);
-			returnIntent.putExtra("parseObject", ppo);
-			setResult(RESULT_OK,returnIntent);
-			
-			record.saveInBackground(saveCallback);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
     }
     
@@ -226,34 +241,19 @@ public class RecordEditActivity extends ListActivity { //extends FragmentActivit
      */
     private boolean validate()
     {
-    	String student = studentWidget.getText().toString();
-		String subject = subjectWidget.getText().toString();
-		String location = locationWidget.getText().toString();
-		
-		ConnectivityManager cm = (ConnectivityManager) getSystemService(getBaseContext().CONNECTIVITY_SERVICE);
-		if(cm.getActiveNetworkInfo() == null) {
-			Toast.makeText(getBaseContext(), "No internet connection, cannot save", Toast.LENGTH_SHORT).show();
+		Calendar c = Calendar.getInstance();
+		if(dateTime.getTime().compareTo(c.getTime()) < 0) {
+			Toast.makeText(getBaseContext(), "You must enter a date and time that is in the future", Toast.LENGTH_SHORT).show();
 			return false;
 		}
 		
-		if(student.isEmpty()) {
-			Toast.makeText(getBaseContext(), "You have not entered a description", Toast.LENGTH_SHORT).show();
-			return false;
-		}
-		
-		if(subject.isEmpty()) {
-			Toast.makeText(getBaseContext(), "You have not entered a subject", Toast.LENGTH_SHORT).show();
-			return false;
-		}
-		
-		if(location.isEmpty()) {
+		if(locationUuid == null && locationParseId == null) {
 			Toast.makeText(getBaseContext(), "You have not entered a location", Toast.LENGTH_SHORT).show();
 			return false;
 		}
 		
-		Calendar c = Calendar.getInstance();
-		if(dateTime.getTime().compareTo(c.getTime()) < 0) {
-			Toast.makeText(getBaseContext(), "You must enter a date and time that is in the future", Toast.LENGTH_SHORT).show();
+		if(subject == null) {
+			Toast.makeText(getBaseContext(), "You have not entered a subject", Toast.LENGTH_SHORT).show();
 			return false;
 		}
     	
@@ -264,7 +264,7 @@ public class RecordEditActivity extends ListActivity { //extends FragmentActivit
     {
     	if(!progressButton.isVisible())
     	{
-    		sendButton.setVisible(false);
+    		nextButton.setVisible(false);
 			progressButton.setActionView(R.layout.action_progressbar);
             progressButton.expandActionView();
 			progressButton.setVisible(true);
@@ -272,38 +272,9 @@ public class RecordEditActivity extends ListActivity { //extends FragmentActivit
     	else 
     	{
     		progressButton.setVisible(false);
-			sendButton.setVisible(true);
+			nextButton.setVisible(true);
     	}
     }
-    
-/*    public void showTimePickerDialog(View v) {
-	    DialogFragment newFragment = new TimePickerFragment();
-	    Bundle args = new Bundle();
-	    args.putInt("hourOfDay", dateTime.get(Calendar.HOUR_OF_DAY));
-	    args.putInt("minute", dateTime.get(Calendar.MINUTE));
-	    newFragment.setArguments(args);
-	    newFragment.show(getSupportFragmentManager(), "timepicker");
-	}
-	
-	public void showDatePickerDialog(View v) {
-	    DialogFragment newFragment = new DatePickerFragment();
-	    Bundle args = new Bundle();
-	    args.putInt("year", dateTime.get(Calendar.YEAR));
-	    args.putInt("month", dateTime.get(Calendar.MONTH));
-	    args.putInt("dayOfMonth", dateTime.get(Calendar.DAY_OF_MONTH));
-	    newFragment.setArguments(args);
-	    newFragment.show(getSupportFragmentManager(), "datePicker");
-	}	*/
-	
-	/**
-	 * Hides the soft keyboard
-	 */
-	public void hideSoftKeyboard() {
-	    if(getCurrentFocus()!=null) {
-	        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-	        inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-	    }
-	}
 	
 	
 	/*
@@ -329,208 +300,193 @@ public class RecordEditActivity extends ListActivity { //extends FragmentActivit
 	    };
 	
 	
-	
-/*	@Override
-	public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-		dateTime.set(dateTime.get(Calendar.YEAR), 
-						dateTime.get(Calendar.MONTH), 
-						dateTime.get(Calendar.DAY_OF_MONTH), 
-						hourOfDay, 
-						minute);
-		
-		int hour=hourOfDay;
-		String am_pm="PM";
-		if(hourOfDay < 12) {
-			am_pm = "AM";
-			if(hourOfDay == 0)
-				hour = 12;
-		}
-		else if(hourOfDay > 12) {
-			am_pm = "PM";
-			hour = hourOfDay - 12;
-		}
-		
-		Button timePicker = ((Button) findViewById(R.id.timePicker));
-		if(minute < 10) timePicker.setText(hour+":0"+minute+" "+am_pm);
-		else timePicker.setText(hour+":"+minute+" "+am_pm);
-	}
-
-
-
-	@Override
-	public void onDateSet(DatePicker view, int year, int monthOfYear,
-			int dayOfMonth) {
-		dateTime.set(year, monthOfYear, dayOfMonth);
-		
-		Calendar c = Calendar.getInstance();
-		c.set(Calendar.MONTH, monthOfYear);
-		String month = c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
-		
-		Button datePicker = ((Button) findViewById(R.id.datePicker));
-		datePicker.setText(dayOfMonth+" "+month+" "+year);
-	} */
-	
-	
       
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		//setContentView(R.layout.record_edit_activity);
+
+		mainApplication = (MainApplication) getBaseContext().getApplicationContext();
+		ParseObject exam;
+		ParseObject examLocation;
 		
-/*		final ListView listview = (ListView) findViewById(R.id.listview);
-	    String[] labels = new String[] { "Date", "Time", "Location", "Subject", "Additional Notes", "Send to"};
-	    String[] content = new String[] { "Android", "ABC", "iPhone", "WindowsMobile", "eg: Student name, student phone number", "Win"};
-	    final ArrayList<String> labelsList = new ArrayList<String>();
+		exam = null;
+		examLocation = null;
+		dateTime = null;
+		locationUuid = null;
+		locationParseId = null;
+		subject = "eg: Maths";
+		notes = null;
+		
+		Bundle extras = getIntent().getExtras();
+		if(extras != null) {
+			parseId = extras.getString("parseId");
+			uuid = extras.getString("uuid");
+		}
+		ParseQuery query = ParseQuery.getQuery("Exam");
+		query.fromLocalDatastore();
+		if(parseId != null) {
+			try {
+				exam = query.get(parseId);
+				oldExam = new ParseObject("Exam");
+				oldExam.put("dateTime", exam.getDate("dateTime"));
+				oldExam.put("subject", exam.getString("subject"));
+				if(exam.getString("notes") != null) {
+					oldExam.put("notes", exam.getString("notes"));
+				}
+				if(exam != null) {
+					Date date = exam.getDate("dateTime");
+					examLocation = exam.getParseObject("location");
+					examLocation.fetchFromLocalDatastore();
+					
+					ParseObject oldExamLocation = new ParseObject("Location");
+					oldExamLocation.put("title", examLocation.getString("title"));
+					oldExam.put("location", oldExamLocation);
+				}
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else if(uuid != null) {
+			query.whereEqualTo("uuid", uuid);
+			try {
+				exam = query.getFirst();
+				oldExam = exam;
+				if(exam != null) {
+					examLocation = exam.getParseObject("location");
+					examLocation.fetchFromLocalDatastore();
+				}
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		if(exam != null) {
+			setTitle("Edit details");
+			
+			Date date = exam.getDate("dateTime");
+			dateTime = Calendar.getInstance();
+			dateTime.setTime(date);
+			ParseObject location = examLocation.getParseObject("location");
+			try {
+				location.fetchFromLocalDatastore();
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			locationParseId = location.getObjectId();
+			locationUuid = location.getString("uuid");
+			subject = exam.getString("subject");
+			notes = exam.getString("notes");
+		}
+		
+		String timeString = null;
+		String location = "eg: School";
+		
+		if(dateTime == null) {
+			dateTime = Calendar.getInstance();
+			int mod = dateTime.get(Calendar.MINUTE) % 15;
+			dateTime.add(Calendar.MINUTE, 15-mod);
+		}
+		int dayOfMonth = dateTime.get(Calendar.DAY_OF_MONTH);
+		String monthString = dateTime.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
+		int year = dateTime.get(Calendar.YEAR);
+		int hourOfDay = dateTime.get(Calendar.HOUR_OF_DAY);
+		if(hourOfDay > 12) hourOfDay = hourOfDay - 12;
+        else if(hourOfDay == 0) hourOfDay = 12;
+		int minute = dateTime.get(Calendar.MINUTE);
+        String minuteString = "";
+        if(minute == 0) minuteString = "00";
+        else minuteString = Integer.toString(minute);
+        String am_pm = dateTime.getDisplayName(Calendar.AM_PM, Calendar.LONG, Locale.US);
+		timeString = dayOfMonth + " " + monthString + " " + year + "  " + hourOfDay + ":" + minuteString + " " + am_pm;
+		if(locationParseId != null || locationUuid != null) {
+			location = examLocation.getString("title");
+		}
+		String notesString = null;
+		if(notes == null) {
+			notesString = "eg: student's name, student's phone number";
+		}
+		else {
+			notesString = notes;
+		}
+		
+		String[] content = new String[] { 	timeString, 
+				location, 
+				subject, 
+				notesString};
+		
+		
+        
+	    
 	    final ArrayList<String> contentList = new ArrayList<String>();
-	    for (int i = 0; i < labels.length; ++i) {
-	      labelsList.add(labels[i]);
+	    for (int i = 0; i < content.length; ++i) {
 	      contentList.add(content[i]);
 	    }
 	    
-	    final RecordEditAdapter editAdapter = new RecordEditAdapter(this, 0, labelsList, contentList);
-	        listview.setAdapter(editAdapter);	*/
-
-		MainApplication mainApplication = (MainApplication) getBaseContext().getApplicationContext();
-		record = mainApplication.getSelectedRecord();
-		
-		if(record != null) {
-			ParseUser user = record.getParseUser("user");
-			ParseUser recipient = record.getParseUser("recipient");
-			ParseUser currentUser = ParseUser.getCurrentUser();
-			ParseUser userToFetch;
-		
-			//If they are not the same, this means currentUser is the recipient, so display the user in title
-			if(!user.getObjectId().equals(currentUser.getObjectId())) {
-				userToFetch = user;
-			}
-			//If they are the same, currentUser is the user and recipient should be displayed
-			else {
-				userToFetch = recipient;
-			}
-			userToFetch.fetchIfNeededInBackground(getUserCallback);
-		}
-	/*	else if(record == null) {
-			//There is no record as we are creating a new record
-			//Get the chosen recipient as passed in from the select contacts screen
-			otherUser = mainApplication.getUserForNewRecord();
-			setTitle(otherUser.getString("firstName") + " " + otherUser.getString("lastName"));
-			mainApplication.setUserForNewRecord(null);
-		}	*/
-		
-		//final ListView listview = (ListView) findViewById(R.id.listview);
-	    String[] labels = new String[] { "Date", "Time", "Location", "Subject", "Additional Notes", "Send to"};
-	    String[] content = new String[] { "Plus", "Win", "iPhone", "WindowsMobile", "eg: Student name, student phone number", "Win"};
-	    final ArrayList<String> labelsList = new ArrayList<String>();
-	    final ArrayList<String> contentList = new ArrayList<String>();
-	    for (int i = 0; i < labels.length; ++i) {
-	      labelsList.add(labels[i]);
-	      contentList.add(content[i]);
-	    }
-	    
-	    final RecordEditAdapter editAdapter = new RecordEditAdapter(this, 0, contentList);
-	        //listview.setAdapter(editAdapter);
-	        //listview.setOnItemClickListener(itemClickedListener);
-	    	setListAdapter(editAdapter);
+	    RecordEditAdapter editAdapter = new RecordEditAdapter(this, 0, contentList);
+	    setListAdapter(editAdapter);
 
 	}
 	
-	
 
-	@Override
-	protected void onResume() {
-	/*	userWidget = (Spinner) findViewById(R.id.user);
-		userWidget.setVisibility(View.GONE); //As we are display the chosen contact in the title, this is not needed now
-		
-		studentWidget = ((EditText) findViewById(R.id.student));
-		subjectWidget = ((EditText) findViewById(R.id.subject));
-		locationWidget = ((EditText) findViewById(R.id.location));
-		datePicker = ((Button) findViewById(R.id.datePicker));
-		timePicker = ((Button) findViewById(R.id.timePicker)); */
-		
-		ParseQuery<ParseUser> querySpinner = ParseUser.getQuery();
-		querySpinner.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
-		//querySpinner.findInBackground(populateSpinnerFindCallback);
-		
-		Calendar c = Calendar.getInstance();
-		int year = c.get(Calendar.YEAR);
-        String month = c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
-        int day = c.get(Calendar.DAY_OF_MONTH);
-        int hour = c.get(Calendar.HOUR_OF_DAY);
-        if(hour > 12) hour = hour - 12;
-        else if(hour == 0) hour = 12;
-        int minute = c.get(Calendar.MINUTE);
-        String am_pm = c.getDisplayName(Calendar.AM_PM, Calendar.LONG, Locale.US);
-        
-        //datePicker.setText(day+" "+month+" "+year);
-        String timeText = "";
-		if(minute < 10) timeText = hour+":0"+minute+" "+am_pm;
-		else timeText = hour+":"+minute+" "+am_pm;
-        
-        //set private variable dateTime
-        dateTime = c;
-        
-        if(record != null) {
-        	userWidget.setVisibility(View.GONE);
-
-        	ParseUser user = record.getParseUser("user");
-    		ParseUser recipient = record.getParseUser("recipient");
-    		ParseUser currentUser = ParseUser.getCurrentUser();
-    		ParseUser userToFetch;
-    		
-    		//If they are not the same, this means currentUser is the recipient, so display the user in title
-    		if(!user.getObjectId().equals(currentUser.getObjectId())) {
-    			userToFetch = user;
-    		}
-    		//If they are the same, currentUser is the user and recipient should be displayed
-    		else {
-    			userToFetch = recipient;
-    		}
-    		userToFetch.fetchIfNeededInBackground(getUserCallback);
-			String studentString = record.getString("student");
-			String subjectString = record.getString("subject");
-			String locationString = record.getString("location");
-			c.setTime(record.getDate("dateTime"));
-			
-			studentWidget.setText(studentString);
-			subjectWidget.setText(subjectString);
-			locationWidget.setText(locationString);
-			
-			year = c.get(Calendar.YEAR);
-	        month = c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
-	        day = c.get(Calendar.DAY_OF_MONTH);
-	        hour = c.get(Calendar.HOUR_OF_DAY);
-	        if(hour > 12) hour = hour - 12;
-	        else if(hour == 0) hour = 12;
-	        minute = c.get(Calendar.MINUTE);
-	        am_pm = c.getDisplayName(Calendar.AM_PM, Calendar.LONG, Locale.US);
-			datePicker.setText(day+" "+month+" "+year);
-			if(minute < 10) timePicker.setText(hour+":0"+minute+" "+am_pm);
-			else timePicker.setText(hour+":"+minute+" "+am_pm);
-		}
-        
-		super.onResume();
-	}
 	
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
+
+		Intent intent;
+		Bundle bundle;
 		
-		Intent intent = new Intent(RecordEditActivity.this, MonthYearPickerActivity.class);
-		startActivityForResult(intent, position);
+		switch (position) {
+			case 0:
+				intent = new Intent(RecordEditActivity.this, MonthYearPickerActivity.class);
+				startActivityForResult(intent, position);
+				return;
+			case 1:
+				intent = new Intent(RecordEditActivity.this, SelectLocationActivity.class);
+				startActivityForResult(intent, position);
+				return;
+			case 2:
+				bundle = new Bundle();
+		        bundle.putString("subject", subject);
+		        
+				intent = new Intent(RecordEditActivity.this, SubjectEditActivity.class);
+				intent.putExtras(bundle);
+				startActivityForResult(intent, position);
+				return;
+			case 3:
+				bundle = new Bundle();
+		        bundle.putString("notes", notes);
+		        //Exam exam = new Exam(123, "abc");
+		        //exam.setParseId("12345");
+		        //bundle.putParcelable("parcelable", exam);
+				
+				intent = new Intent(RecordEditActivity.this, AdditionalNotesActivity.class);
+				intent.putExtras(bundle);
+				startActivityForResult(intent, position);
+				return;
+			default:
+				return;
+		}
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		
+
 		if(resultCode == Activity.RESULT_OK) {
 			RecordEditAdapter adapter = (RecordEditAdapter) getListAdapter();
+			if(data == null) {
+				return;
+			}
+			Bundle extras = data.getExtras();
 			
 			switch(requestCode) {
 				case 0:
-					Bundle extras = data.getExtras();
 					dateTime.set(Calendar.YEAR, extras.getInt("year"));
 					dateTime.set(Calendar.MONTH, extras.getInt("month"));
 					dateTime.set(Calendar.DAY_OF_MONTH, extras.getInt("dayOfMonth"));
@@ -555,6 +511,43 @@ public class RecordEditActivity extends ListActivity { //extends FragmentActivit
 					adapter.insert(dateTimeString, 0);
 					adapter.notifyDataSetChanged();
 					return;
+				case 1:
+					locationUuid = extras.getString("uuid");
+					locationParseId = extras.getString("parseId");
+					adapter.remove(adapter.getItem(1));
+					adapter.insert(extras.getString("title"), 1);
+					adapter.notifyDataSetChanged();
+					return;
+				case 2:
+					adapter.remove(adapter.getItem(2));
+					
+					if(!extras.getString("subject").isEmpty()) {
+						subject = extras.getString("subject");
+						adapter.insert(extras.getString("subject"), 2);
+					}
+					else {
+						subject = null;
+						adapter.insert("eg: Maths", 2);
+					}
+					adapter.notifyDataSetChanged();
+					return;
+				case 3:
+					adapter.remove(adapter.getItem(3));
+					
+					if(!extras.getString("notes").isEmpty()) {
+						notes = extras.getString("notes");
+						adapter.insert(extras.getString("notes"), 3);
+					}
+					else {
+						notes = null;
+						adapter.insert("eg: student's name, student's phone number", 3);
+					}
+					adapter.notifyDataSetChanged();
+					return;
+				case 50000: //This means we are returning from SelectContactActivity and new event has been successfully created
+					setResult(Activity.RESULT_OK, data);
+					finish();
+					return;
 				default:
 					return;
 			}	
@@ -562,18 +555,14 @@ public class RecordEditActivity extends ListActivity { //extends FragmentActivit
 	}
 
 	@Override
-	public void onBackPressed() {
-		setResult(RESULT_CANCELED);
-		super.onBackPressed();
-	}
-
-	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle presses on the action bar items
 	    switch (item.getItemId()) {
-	        case R.id.send:
-	        	hideSoftKeyboard();
-	            sendPressed();
+	        case R.id.next:
+	            nextPressed();
+	        	return true;
+	        case R.id.save:
+	        	savePressed();
 	        	return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
@@ -590,7 +579,17 @@ public class RecordEditActivity extends ListActivity { //extends FragmentActivit
 		progressButton = (MenuItem)menu.findItem(R.id.progress);
 		progressButton.setVisible(false);
 		
-		sendButton = (MenuItem)menu.findItem(R.id.send);
+		nextButton = (MenuItem)menu.findItem(R.id.next);
+		saveButton = (MenuItem)menu.findItem(R.id.save);
+		
+		if(parseId != null || uuid != null) {
+			nextButton.setVisible(false);
+			saveButton.setVisible(true);
+		}
+		else {
+			nextButton.setVisible(true);
+			saveButton.setVisible(false);
+		}
 		
 		return super.onCreateOptionsMenu(menu);
 	}

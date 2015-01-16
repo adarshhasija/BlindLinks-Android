@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -26,6 +27,59 @@ public class LocationListAdapter extends ArrayAdapter<ParseObject> implements Fi
 	    ImageView iconView;
 	    ImageView placeView;
 	}
+	
+	/*
+	 * my custom Filter
+	 * 
+	 * 
+	 */
+	Filter filter = new Filter() {
+
+		@Override
+		protected FilterResults performFiltering(CharSequence constraint) {
+			//If recordList size is less, filtering has happened
+			//restore original before continuing
+			if(recordList.size() < backupList.size()) {
+				restoreOriginalList();
+			}
+			FilterResults filterResults = new FilterResults();   
+	         ArrayList<ParseObject> tempList=new ArrayList<ParseObject>();
+	         //constraint is the result from text you want to filter against. 
+	         //objects is your data set you will filter from
+	         if(constraint != null && recordList !=null) {
+	             int length=recordList.size();
+	             int i=0;
+	                while(i<length){
+	                    ParseObject record=recordList.get(i);
+	                    String location = record.getString("title").toLowerCase();
+	                    if(location.contains(constraint)) {
+	                    	tempList.add(record);
+	                    }
+	                    i++;
+	                }
+	                //following two lines is very important
+	                //as publish result can only take FilterResults objects
+	                filterResults.values = tempList;
+	                filterResults.count = tempList.size();
+	          }
+	          return filterResults;
+		}
+
+		@Override
+		protected void publishResults(CharSequence constraint,
+				FilterResults results) {
+			recordList = (ArrayList<ParseObject>) results.values;
+	          if (recordList.size() > 0) {
+	           notifyDataSetChanged();
+	          } else {
+	              notifyDataSetInvalidated();
+	          }
+			
+		}
+		
+	};
+	
+	
 	
 	/*
 	 * private function to controller what is and isnt visible
@@ -59,8 +113,7 @@ public class LocationListAdapter extends ArrayAdapter<ParseObject> implements Fi
 			convertView = inflater.inflate(R.layout.location_row_layout, parent, false);
 			
 			viewHolder = new ViewHolderRecord();
-			viewHolder.iconView = (ImageView) convertView.findViewById(R.id.icon);
-			viewHolder.locationView = (TextView) convertView.findViewById(R.id.location);
+			viewHolder.locationView = (TextView) convertView.findViewById(R.id.label);
 			viewHolder.placeView = (ImageView) convertView.findViewById(R.id.place);
 			convertView.setTag(viewHolder);
 			
@@ -73,12 +126,22 @@ public class LocationListAdapter extends ArrayAdapter<ParseObject> implements Fi
 		
 	    ParseObject record = recordList.get(position);
 		if(record != null) {
-			viewHolder.locationView.setText(record.getString("name"));
-			convertView.setContentDescription(record.getString("name"));
+			viewHolder.locationView.setText(record.getString("title"));
+			convertView.setContentDescription(record.getString("title"));
 			//viewHolder.categoryView.setTag(record);
 		}
 
 		return convertView;
+	}
+	
+	@Override
+	public Filter getFilter() {
+		return filter;
+	}
+	
+	private void restoreOriginalList() {
+		recordList.clear();
+		recordList.addAll(backupList);
 	}
 
 }

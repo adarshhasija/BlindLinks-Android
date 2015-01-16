@@ -26,6 +26,7 @@ import android.util.Log;
 public class MainApplication extends Application{
 
 
+	private ParseObject parseObject=null;
 	private ParseObject selectedRecord=null; //This is to move selected objects forward from the main list as PO is not parcelable
 	private ParseObject modifiedRecord=null; //This is to move modified objects back to the main list as PO is not parcelable
 	private ParseUser userForNewRecord=null; //This is to pass a contact forward for creating a new record
@@ -104,6 +105,13 @@ public class MainApplication extends Application{
 	 * Getters and setters
 	 * 
 	 */
+	public ParseObject getParseObject() {
+		return parseObject;
+	}
+	public void setParseObject(ParseObject parseObject) {
+		this.parseObject = parseObject;
+	}
+	
 	public ParseObject getSelectedRecord() {
 		return selectedRecord;
 	}
@@ -133,10 +141,11 @@ public class MainApplication extends Application{
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		//Parse.enableLocalDatastore(getApplicationContext());
+		Parse.enableLocalDatastore(getApplicationContext());
 		Parse.initialize(this, "9f3p730Ynsj9hLbeEuGxGC9Nifwmh5Co0NCAsbi5", "MogP0et66o0SlSgS2XXFNJhVqnlvICy3L3don29q");
 		ParseACL defaultACL = new ParseACL();
 		ParseACL.setDefaultACL(defaultACL, true);
+
 		PushService.setDefaultPushCallback(this, RecordListActivity.class);
 	}
 	

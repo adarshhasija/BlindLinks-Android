@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -35,6 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.parse.FindCallback;
+import com.parse.GetCallback;
 import com.parse.Parse;
 import com.parse.ParseAnalytics;
 import com.parse.ParseException;
@@ -58,6 +60,8 @@ public class RecordListFragment extends ListFragment {
 	private MenuItem progressButton;
 	private MenuItem searchButton;
 	private MenuItem addButton;
+	private MenuItem contactsButton;
+	private MenuItem coordinatorButton;
 	private MenuItem refreshButton;
 	private MenuItem logoutButton;
 	private boolean refreshing=false;
@@ -88,7 +92,7 @@ public class RecordListFragment extends ListFragment {
 		/**
 		 * Callback for when an item has been selected.
 		 */
-		public void onItemSelected(int requestCode, ParseProxyObject data);
+		public void onItemSelected(int requestCode, Intent data);
 	}
 
 	/**
@@ -98,7 +102,7 @@ public class RecordListFragment extends ListFragment {
 	private static Callbacks sDummyCallbacks = new Callbacks() {
 
 		@Override
-		public void onItemSelected(int requestCode, ParseProxyObject data) {
+		public void onItemSelected(int requestCode, Intent data) {
 			// TODO Auto-generated method stub
 			
 		}
@@ -119,10 +123,88 @@ public class RecordListFragment extends ListFragment {
 	 * Parse callbacks
 	 * 
 	 */
-	private FindCallback<ParseObject> populateListCallback = new FindCallback<ParseObject>() {
+	private FindCallback<ParseObject> populateListCallbackLocal = new FindCallback<ParseObject>() {
 
 		@Override
-		public void done(List<ParseObject> list, ParseException e) {
+		public void done(final List<ParseObject> list, ParseException e) {
+			if (e == null) {
+				Collections.sort(list, new Comparator<ParseObject>() {
+		  			  public int compare(ParseObject o1, ParseObject o2) {
+		  				if(o2.getUpdatedAt() == null)
+		  			         if(o1.getUpdatedAt() == null)
+		  			            return 0; //equal
+		  			         else
+		  			            return -1; // null is before other strings
+		  				else // this.member != null
+		  			         if(o1.getUpdatedAt() == null)
+		  			            return 1;  // all other strings are after null
+		  			         else
+		  			        	 return o2.getUpdatedAt().compareTo(o1.getUpdatedAt()); //descending
+		  			  }
+		  			});
+				RecordAdapter recordAdapter = new RecordAdapter(getActivity(), 0, list);
+	            setListAdapter(recordAdapter);
+			/*	List<Event> eventList = new ArrayList<Event>();
+				for(ParseObject examObject : examList) {
+					try {
+						String parseId = examObject.getObjectId();
+						String uuid = examObject.getString("uuid");
+						Exam exam = new Exam(parseId, uuid);
+						
+						ParseObject locationObject = examObject.getParseObject("location");
+						locationObject.fetchFromLocalDatastore();
+						Location examLocation = new ExamLocation(locationObject.getObjectId(), locationObject.getString("uuid"));
+						
+						ParseUser user = examObject.getParseUser("createdBy");
+						user.fetchFromLocalDatastore();
+					} catch (ParseException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+				//Then get the location
+			/*	ParseQuery<ParseObject> locationQuery = ParseQuery.getQuery("ExamLocation");
+				locationQuery.fromLocalDatastore();
+				locationQuery.findInBackground(new FindCallback<ParseObject> () {
+
+					@Override
+					public void done(final List<ParseObject> examLocationList, ParseException e) {
+						if (e == null) {
+							ParseQuery<ParseObject> actionQuery = ParseQuery.getQuery("Action");
+							actionQuery.fromLocalDatastore();
+							actionQuery.findInBackground(new FindCallback<ParseObject> () {
+
+								@Override
+								public void done(List<ParseObject> actionList,
+										ParseException e) {
+									if (e == null) {
+										setupEvents(examList, examLocationList, actionList);
+									}
+									else {
+										Log.d("RecordListFragment", "Error: " + e.getMessage());
+									}
+								}
+								
+							});
+						}	
+						else {
+				            Log.d("RecordListFragment", "Error: " + e.getMessage());
+				        }
+					}	
+					
+				});	*/
+	        } else {
+	            Log.d("RecordListFragment", "Error: " + e.getMessage());
+	        }
+		}
+		
+	};
+	
+	
+	private FindCallback<ParseObject> populateListCallbackCloud = new FindCallback<ParseObject>() {
+
+		@Override
+		public void done(List<ParseObject> list, ParseException e) {		
 			if (e == null) {
 	            Collections.sort(list, new Comparator<ParseObject>() {
 	  			  public int compare(ParseObject o1, ParseObject o2) {
@@ -134,10 +216,10 @@ public class RecordListFragment extends ListFragment {
 	            if(refreshing) {
 	            	toggleProgressBarVisibility();
 	            	refreshing = false;
-	            }
+	            }		
 	        } else {
-	            Log.d("score", "Error: " + e.getMessage());
-	        }
+	            Log.d("RecordListFragment", "Error: " + e.getMessage());
+	        }	
 		}
 		
 	};
@@ -167,28 +249,26 @@ public class RecordListFragment extends ListFragment {
 		
 	};
 	
-	
+	/*
+	 * Action bar item functions
+	 * 
+	 * 
+	 * 
+	 */
 	private void addPressed() {
-		ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(getActivity().CONNECTIVITY_SERVICE);
-		if(cm.getActiveNetworkInfo() == null) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-			builder.setTitle("WARNING");
-			builder.setMessage("No internet connection.\n You must be connected to the internet to send scribe requests")
-			       .setCancelable(false)
-			       .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
-			           public void onClick(DialogInterface dialog, int id) {
-
-			           }
-			       });
-			AlertDialog alert = builder.create();
-			alert.show();
-		}
-		else {
-			Intent intent = new Intent(getActivity(), RecordEditActivity.class);
-			Calendar c = Calendar.getInstance();
-			int index = 50000; //random very large integer to show insert
-			startActivityForResult(intent, index);
-		}
+		Intent intent = new Intent(getActivity(), RecordEditActivity.class);
+		int index = 50000; //random very large integer to show insert
+		startActivityForResult(intent, index);
+	};
+	
+	private void contactsPressed() {
+		Intent intent = new Intent(getActivity(), ContactsListActivity.class);
+		startActivity(intent);
+	};
+	
+	private void coordinatorPressed() {
+		Intent intent = new Intent(getActivity(), CoordinatorListActivity.class);
+		startActivity(intent);
 	};
 	
 	private void refreshPressed() {
@@ -209,12 +289,29 @@ public class RecordListFragment extends ListFragment {
 	 * Private functions
 	 * 
 	 * 
-	 */
+	 */	
 	private void populateList() {
 		//List<ParseQuery<ParseObject>> queries = getQueryForLocalDatastore();
-		List<ParseQuery<ParseObject>> queries = getQueryForCloud();
-		ParseQuery<ParseObject> mainQuery = ParseQuery.or(queries);
-		mainQuery.findInBackground(populateListCallback);
+		//List<ParseQuery<ParseObject>> queries = getQueryForCloud();
+		//ParseQuery<ParseObject> mainQuery = ParseQuery.or(queries);
+		//mainQuery.findInBackground(populateListCallback);
+		
+		populateListLocal();
+		ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(getActivity().getBaseContext().CONNECTIVITY_SERVICE);
+		if(cm.getActiveNetworkInfo() != null) {
+			//populateListCloud();
+		}
+	}
+	
+	private void populateListLocal() {
+		ParseQuery<ParseObject> localQuery = ParseQuery.getQuery("Event");
+		localQuery.fromLocalDatastore();
+		localQuery.findInBackground(populateListCallbackLocal);
+	}
+	
+	private void populateListCloud() {
+		ParseQuery<ParseObject> cloudQuery = ParseQuery.getQuery("Event");
+		cloudQuery.findInBackground(populateListCallbackCloud);
 	}
 	
 	private List<ParseQuery<ParseObject>> getQueryForLocalDatastore() {
@@ -233,17 +330,16 @@ public class RecordListFragment extends ListFragment {
 	}
 	
 	private List<ParseQuery<ParseObject>> getQueryForCloud() {
-		ParseQuery<ParseObject> queryUser = ParseQuery.getQuery("Record");
-		queryUser.whereEqualTo("user", ParseUser.getCurrentUser());
-		queryUser.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
+		ParseQuery<ParseObject> queryExam = ParseQuery.getQuery("Exam");
+		queryExam.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
 		
-		ParseQuery<ParseObject> queryRecipient = ParseQuery.getQuery("Record");
-		queryRecipient.whereEqualTo("recipient", ParseUser.getCurrentUser());
+		ParseQuery<ParseObject> queryRecipient = ParseQuery.getQuery("Exam");
+		//queryRecipient.whereEqualTo("from", ParseUser.getCurrentUser());
 		queryRecipient.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
 		
 		List<ParseQuery<ParseObject>> queries = new ArrayList<ParseQuery<ParseObject>>();
-		queries.add(queryUser);
-		queries.add(queryRecipient);
+		queries.add(queryExam);
+		//queries.add(queryRecipient);
 		return queries;
 	}
 	
@@ -287,19 +383,45 @@ public class RecordListFragment extends ListFragment {
 	}
 
 	@Override
-	public void onResume() {
-		super.onResume();
-		RecordAdapter adapter = (RecordAdapter) getListAdapter();
-		if(adapter != null) {
-			adapter.notifyDataSetChanged();
-		}
-	}
-
-	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
-		ParseObject record = mainApplication.getModifiedRecord();
+		//MainApplication mainApplication = (MainApplication) getActivity().getApplicationContext();
+		//ParseObject record = mainApplication.getModifiedRecord();
 		if(resultCode == getActivity().RESULT_OK) {
+			if(data == null) {
+				if(requestCode > -1 && requestCode != 50000) { //delete
+					RecordAdapter adapter = (RecordAdapter) getListAdapter();
+					if(adapter != null) {
+						ParseObject parseObject = adapter.getItem(requestCode);
+						adapter.remove(parseObject);
+						adapter.notifyDataSetChanged();
+					}
+				}
+				else {	return;	}
+			}
+			ParseObject record=null;
+			Bundle extras = data.getExtras();
+			String recordParseId = extras.getString("parseId");
+			String recordUuid = extras.getString("uuid");
+			ParseQuery<ParseObject> recordQuery = ParseQuery.getQuery("Event");
+			recordQuery.fromLocalDatastore();
+			if(recordUuid != null) {
+				recordQuery.whereEqualTo("uuid", recordUuid);
+				try {
+					record = recordQuery.getFirst();
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			else {
+				try {
+					record = recordQuery.get(recordParseId);
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
 			if(record != null) {
 				RecordAdapter adapter = (RecordAdapter) getListAdapter();
 				//random large number for insert
@@ -314,16 +436,7 @@ public class RecordListFragment extends ListFragment {
 				getListView().scrollTo(0, 0);  //scroll to top after done	
 			}
 		}
-		else if(resultCode == getActivity().RESULT_CANCELED) {
-			if(requestCode > -1 && requestCode != 50000) {
-				RecordAdapter adapter = (RecordAdapter) getListAdapter();
-				if(adapter != null && record != null) {
-					adapter.remove(record);
-					adapter.notifyDataSetChanged();
-				}
-			}
-		}
-		mainApplication.setModifiedRecord(null);
+		//mainApplication.setModifiedRecord(null);
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
@@ -373,9 +486,13 @@ public class RecordListFragment extends ListFragment {
 		mainApplication.setSelectedRecord((ParseObject) getListAdapter().getItem(position));
 		// Notify the active callbacks interface (the activity, if the
 		// fragment is attached to one) that an item has been selected.
-		//THIS MEANS NOTHING NOW
-		ParseProxyObject data=null;
-		mCallbacks.onItemSelected(position, data);
+		ParseObject record = (ParseObject) getListAdapter().getItem(position);
+		Intent intent = new Intent();
+		Bundle bundle = new Bundle();
+		bundle.putString("parseId", record.getObjectId());
+		bundle.putString("uuid", record.getString("uuid"));
+		intent.putExtras(bundle);
+		mCallbacks.onItemSelected(position, intent);
 	}
 
 	@Override
@@ -419,6 +536,12 @@ public class RecordListFragment extends ListFragment {
 	        case R.id.add:
 	            addPressed();
 	            return true;
+	        case R.id.contacts:
+	        	contactsPressed();
+	        	return true;
+	        case R.id.coordinator:
+	        	coordinatorPressed();
+	        	return true;
 	        case R.id.refresh:
 	        	refreshPressed();
 	        	return true;
@@ -452,6 +575,8 @@ public class RecordListFragment extends ListFragment {
 	    
 		
 		addButton = (MenuItem)menu.findItem(R.id.add);
+		contactsButton = (MenuItem)menu.findItem(R.id.contacts);
+		coordinatorButton = (MenuItem)menu.findItem(R.id.coordinator);
 		refreshButton = (MenuItem)menu.findItem(R.id.refresh);
 		logoutButton = (MenuItem)menu.findItem(R.id.logout);
 		

@@ -1,9 +1,16 @@
 package com.adarshhasija.ahelp;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import com.adarshhasija.ahelp.R;
+import com.parse.DeleteCallback;
+import com.parse.FindCallback;
 import com.parse.LogInCallback;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import android.accounts.Account;
@@ -29,6 +36,27 @@ public class Login extends Activity {
 	private MenuItem progressButton;
 	private MenuItem loginButton;
 	private MenuItem signupButton;
+	
+	
+	/*
+	 * Parse callbacks
+	 * 
+	 * 
+	 */
+	private FindCallback<ParseUser> findCallback = new FindCallback<ParseUser>() {
+
+		@Override
+		public void done(List<ParseUser> list, ParseException e) {
+			if (e == null) {
+		        saveContacts(list);
+		    } else {
+		    	progressButton.setVisible(false);
+		    	if(shouldSignupBeVisible == true) signupButton.setVisible(true);
+		    	Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+		    }
+		}
+	};
+	
 	private LogInCallback logInCallback = new LogInCallback() {
 
 		@Override
@@ -43,8 +71,10 @@ public class Login extends Activity {
 				installation.put("phoneNumber", user.getString("phoneNumber"));
 				installation.saveInBackground(); 
 				
-				Intent mainIntent = new Intent(Login.this, RecordListActivity.class);
-				startActivity(mainIntent);
+				populateContactsList();
+				
+				//Intent mainIntent = new Intent(Login.this, RecordListActivity.class);
+				//startActivity(mainIntent);
 		    } else {
 		    	Toast.makeText(Login.this, e.getMessage(), Toast.LENGTH_SHORT).show();
 		    	progressButton.setVisible(false);
@@ -103,15 +133,60 @@ public class Login extends Activity {
 			return;
 		}
 	};
-	
-	/**
-	 * Hides the soft keyboard
+
+	/*
+	 * private functions
+	 * 
 	 */
 	public void hideSoftKeyboard() {
 	    if(getCurrentFocus()!=null) {
 	        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 	        inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
 	    }
+	}
+	
+	private void populateContactsList() {
+		ParseQuery<ParseUser> queryUsers = ParseUser.getQuery();
+		queryUsers.findInBackground(findCallback);
+	}
+	
+	private void openApp() {
+		Intent mainIntent = new Intent(Login.this, RecordListActivity.class);
+		startActivity(mainIntent);
+	}
+	
+	private void saveContacts(List<ParseUser> list) {
+		final List<ParseUser> userObjects = new ArrayList<ParseUser>();
+		
+		MainApplication mainApplication = (MainApplication) getBaseContext().getApplicationContext();
+        HashMap<String, String> localContacts = mainApplication.getUpdatedDeviceContactsList();
+        String phoneNumber;
+        String phoneNumberWithZero;
+        String phoneNumberNoPrefix;
+        for(ParseUser user : list) {
+        	//This covers all the combination for an India number
+        	phoneNumber = user.getString("phoneNumber");
+        	phoneNumberWithZero = "0" + phoneNumber.substring(3);
+        	phoneNumberNoPrefix = phoneNumber.substring(3);
+        	
+        	if(localContacts.containsKey(phoneNumber) || 
+        			localContacts.containsKey(phoneNumberWithZero) ||
+        				localContacts.containsKey(phoneNumberNoPrefix)) {
+        		userObjects.add(user); //This is needed later when saving
+        	}
+        }
+        
+        ParseUser.unpinAllInBackground(new DeleteCallback() {
+
+			@Override
+			public void done(ParseException e) {
+				if(e == null) {
+					ParseUser.pinAllInBackground(userObjects);
+					openApp();
+				}
+			}
+        	
+        });
 	}
 
 	@Override
@@ -130,6 +205,7 @@ public class Login extends Activity {
 		
 		ParseUser currentUser = ParseUser.getCurrentUser();
 		if(currentUser != null) {
+			populateContactsList();
 			Intent mainAppIntent = new Intent(this, RecordListActivity.class);
 			startActivity(mainAppIntent);
 			finish();

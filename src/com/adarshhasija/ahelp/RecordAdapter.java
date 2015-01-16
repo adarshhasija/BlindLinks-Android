@@ -2,12 +2,16 @@ package com.adarshhasija.ahelp;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import com.adarshhasija.ahelp.R;
+import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseUser;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -28,9 +32,10 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> implements Filterab
 	private List<ParseObject> recordList;
 	private final List<ParseObject> backupList; //used when filtering is happening
 	static class ViewHolderRecord {
-	    TextView studentView;
+	    TextView userView;
 	    TextView subjectView;
 	    TextView dateTimeView;
+	    TextView lastActionView;
 	    TextView updatedAtDateView;
 	    ImageView iconView;
 	}
@@ -58,7 +63,16 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> implements Filterab
 	             int i=0;
 	                while(i<length){
 	                    ParseObject record=recordList.get(i);
-	                    String student = record.getString("student").toLowerCase();
+	                    ParseUser creator = record.getParseUser("createdBy");
+	                    try {
+							creator.fetchFromLocalDatastore();
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+	                    String firstName = creator.getString("firstName").toLowerCase();
+	                    String lastName = creator.getString("lastName").toLowerCase();
+	                    String student = firstName + " " + lastName;
 	                    if(student.contains(constraint)) {
 	                    	tempList.add(record);
 	                    }
@@ -93,7 +107,8 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> implements Filterab
 	 */
 	private void visibilitySettings(ViewHolderRecord viewHolder)
 	{
-		//viewHolder.locationView.setVisibility(View.GONE);
+		viewHolder.subjectView.setVisibility(View.GONE);
+		viewHolder.updatedAtDateView.setVisibility(View.GONE);
 	}
 	
 	/*
@@ -103,12 +118,9 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> implements Filterab
 	private String getDateValueAsString(Date dateTime) 
 	{
 		Calendar c = Calendar.getInstance();
-		int cur_date = c.get(Calendar.DATE);
 		c.setTime(dateTime);
 		int record_date = c.get(Calendar.DATE);
-		int month = c.get(Calendar.MONTH);
 		String monthString = c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
-		int year = c.get(Calendar.YEAR);
 
 		String final_date;
 	/*	if(cur_date == record_date) {
@@ -128,11 +140,75 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> implements Filterab
 		return final_date;
 	}
 	
-	private int getStatusIcon(ParseObject record, ViewHolderRecord viewHolder)
+	private String examUpdateFormatted(ParseUser fromUser) {
+		try {
+			fromUser.fetchFromLocalDatastore();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if(fromUser.equals(ParseUser.getCurrentUser())) {
+			return "You changed the exam details";
+		}
+		
+		return fromUser.getString("firstName") + " changed the exam details";
+	}
+	
+	private String getLastActionFormatted(ParseObject action) {
+		try {
+			ParseUser currentUser = ParseUser.getCurrentUser();
+			ParseUser fromUser = action.getParseUser("from");
+			ParseUser toUser = action.getParseUser("to");
+			String type = action.getString("type");
+			String statusString = action.getString("statusString");
+			if(type.equals("examUpdate")) {
+				return examUpdateFormatted(fromUser);
+			}
+			fromUser.fetchFromLocalDatastore();
+			toUser.fetchFromLocalDatastore();
+			
+			String sender = fromUser.getString("firstName");
+			String receiver = toUser.getString("firstName");
+			
+			if(fromUser.equals(currentUser)) {
+				sender = "You";
+			}
+			if(toUser.equals(currentUser)) {
+				receiver = "you";
+			}
+			
+			String finalResult = sender + " requested " + receiver;
+			if(statusString != null) {
+				if(statusString.equals("accepted")) {
+					finalResult = sender + " " + statusString + " the request"; 
+				}
+			}
+			
+			return finalResult;
+			
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	private int getStatusIcon(ParseObject lastAction, ViewHolderRecord viewHolder)
 	{
 		int imageResource;
 		
-		if(record.getString("status").equals("accepted")) {
+		if(lastAction.getString("statusString") == null) {
+			imageResource = R.drawable.ic_action_event;
+		}
+		else if(lastAction.getString("statusString").equals("accepted")) {
+			imageResource = R.drawable.ic_action_accept;
+		}
+		else {
+			imageResource = R.drawable.ic_action_event;
+		}
+	/*	if(record.getString("status").equals("accepted")) {
 			imageResource = R.drawable.ic_action_accept;
 		}
 		else if(record.getString("status").equals("rejected")) {
@@ -140,7 +216,7 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> implements Filterab
 		}
 		else {
 			imageResource = R.drawable.ic_action_event;
-		}
+		}	*/
 		return imageResource;
 	}
 	
@@ -168,8 +244,9 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> implements Filterab
 			
 			viewHolder = new ViewHolderRecord();
 			viewHolder.iconView = (ImageView) convertView.findViewById(R.id.icon);
-			viewHolder.studentView = (TextView) convertView.findViewById(R.id.student);
+			viewHolder.userView = (TextView) convertView.findViewById(R.id.user);
 			viewHolder.subjectView = (TextView) convertView.findViewById(R.id.subject);
+			viewHolder.lastActionView = (TextView) convertView.findViewById(R.id.lastAction);
 			viewHolder.dateTimeView = (TextView) convertView.findViewById(R.id.recordDateTime);
 			viewHolder.updatedAtDateView = (TextView) convertView.findViewById(R.id.updatedAtDate);
 			convertView.setTag(viewHolder);
@@ -181,35 +258,53 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> implements Filterab
 		visibilitySettings(viewHolder);
 		
 	    ParseObject record = recordList.get(position);
-		if(record != null) {
-			int imageResource = getStatusIcon(record, viewHolder);
-			viewHolder.iconView.setImageResource(imageResource);
-
-			viewHolder.studentView.setText(record.getString("student"));
-			viewHolder.subjectView.setText(record.getString("subject"));
-			String recordDateTime = getDateValueAsString(record.getDate("dateTime"));
-			viewHolder.dateTimeView.setText(recordDateTime);
+	    ParseUser creator = record.getParseUser("createdBy");
+	    ParseObject exam = record.getParseObject("exam");
+	    List<ParseObject> actionList;
+	    ParseObject lastAction=null;
+	    try {
+			creator.fetchFromLocalDatastore();
+			exam.fetchFromLocalDatastore();
+			ParseObject examLocation = exam.getParseObject("location");
+			examLocation.fetchFromLocalDatastore();
+			actionList = exam.getList("actions");
+			lastAction = (ParseObject) actionList.get(actionList.size()-1); //GET THE MOST RECENT ACTION
+			lastAction.fetchFromLocalDatastore();
 			
-			String updatedAt = getDateValueAsString(record.getUpdatedAt());
-			viewHolder.updatedAtDateView.setText(updatedAt);
-			viewHolder.updatedAtDateView.setContentDescription("Last modified: "+updatedAt);
-			convertView.setContentDescription("Appointment with "+record.getString("student") +
-													"on " + recordDateTime + ". Current status is: "+ record.getString("status"));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(record != null) {
+			if(lastAction != null) {
+				int imageResource = getStatusIcon(lastAction, viewHolder);
+				viewHolder.iconView.setImageResource(imageResource);
+			}
+			
+			viewHolder.userView.setText(creator.getString("firstName") + " " + creator.getString("lastName"));
+			viewHolder.subjectView.setText(exam.getString("subject"));
+			String recordDateTime = getDateValueAsString(exam.getDate("dateTime"));
+			viewHolder.dateTimeView.setText(recordDateTime);
+			if(lastAction != null) {
+				String lastActionString = getLastActionFormatted(lastAction);
+				viewHolder.lastActionView.setText(lastActionString);
+			}
+			
+			if(record.getObjectId() != null) {
+				String updatedAt = getDateValueAsString(record.getUpdatedAt());
+				viewHolder.updatedAtDateView.setText(updatedAt);
+				viewHolder.updatedAtDateView.setContentDescription("Last modified: "+updatedAt);
+			}
+			String status = "needs scribe";
+			if(record.getBoolean("status")) {
+				status = "scribe found";
+			}
+			
+			convertView.setContentDescription(creator.getString("firstName") + " " + 
+												creator.getString("lastName") + " has an exam on " + 
+													recordDateTime + ". Current status is: "+ status);
 			//viewHolder.categoryView.setTag(record);
 		}
-	    
-	/*    String type = record.getType();
-	    if(type != null) {
-	    	if(type.equals("Debit")) {
-	    		int id = getContext().getResources().getIdentifier(getContext().getPackageName()+":drawable/down_arrow", null, null);
-	    		iconView.setImageResource(id);
-	    	}
-	    	else {
-	    		int id = getContext().getResources().getIdentifier(getContext().getPackageName()+":drawable/up_arrow", null, null);
-	    		iconView.setImageResource(id);
-	    	}
-	    	
-	    } */
 
 		return convertView;
 	}

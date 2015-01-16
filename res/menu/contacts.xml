@@ -1,0 +1,29 @@
+
+    
+    
+    
+    
+    
+    
+    <menu xmlns:android="http://schemas.android.com/apk/res/android">
+        
+        <item android:id="@+id/progress"
+            android:title="progress"
+          android:showAsAction="ifRoom" />
+        
+        <item android:id="@+id/search"
+          android:title="@string/search_title"
+          android:icon="@drawable/ic_action_search"
+          android:showAsAction="collapseActionView|ifRoom"
+          android:actionViewClass="android.widget.SearchView" />
+        
+        <item android:id="@+id/refresh"
+          android:title="Refresh" />
+        
+    </menu>
+
+
+
+
+
+

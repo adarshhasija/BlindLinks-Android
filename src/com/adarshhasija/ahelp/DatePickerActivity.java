@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.TextView;
 
 public class DatePickerActivity extends ListActivity {
 	
@@ -29,7 +30,7 @@ public class DatePickerActivity extends ListActivity {
 		dateTime.set(Calendar.YEAR, year);
 		
 		String monthString = dateTime.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
-		setTitle(monthString + " " + dateTime.get(Calendar.YEAR));
+		//setTitle(monthString + " " + dateTime.get(Calendar.YEAR));
 	}
 
 	@Override
@@ -59,13 +60,14 @@ public class DatePickerActivity extends ListActivity {
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		
-		Calendar c = Calendar.getInstance();
-		c.set(Calendar.DAY_OF_MONTH, c.get(Calendar.DAY_OF_MONTH) + position);
+		TextView labelView = (TextView) v.findViewById(R.id.label);
+		int date = Integer.parseInt(labelView.getText().toString());
+		dateTime.set(Calendar.DAY_OF_MONTH, date);
 		
 		Bundle bundle = new Bundle();
-		bundle.putInt("dayOfMonth", c.get(Calendar.DAY_OF_MONTH));
-        bundle.putInt("month", c.get(Calendar.MONTH));
-        bundle.putInt("year", c.get(Calendar.YEAR));
+		bundle.putInt("dayOfMonth", dateTime.get(Calendar.DAY_OF_MONTH));
+        bundle.putInt("month", dateTime.get(Calendar.MONTH));
+        bundle.putInt("year", dateTime.get(Calendar.YEAR));
 
         Intent intent = new Intent(this,TimePickerActivity.class);
         intent.putExtras(bundle);

@@ -66,16 +66,37 @@
                 android:value=".RecordListActivity" />
         </activity>
         <activity
-            android:name="com.adarshhasija.ahelp.SelectContactForNewRecord"
+            android:name="com.adarshhasija.ahelp.SelectContactActivity"
             android:label="@string/select_contact" >
         </activity>
         <activity
-            android:name="com.adarshhasija.ahelp.SelectLocation"
-            android:label="@string/select_location"
+            android:name="com.adarshhasija.ahelp.ContactsListActivity"
+            android:label="@string/contacts"
             android:parentActivityName="com.adarshhasija.ahelp.RecordListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".RecordListActivity" />
+        </activity>
+        <activity
+            android:name="com.adarshhasija.ahelp.CoordinatorListActivity"
+            android:label="@string/coordinator"
+            android:parentActivityName="com.adarshhasija.ahelp.RecordListActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".RecordListActivity" />
+        </activity>
+        <activity
+            android:name="com.adarshhasija.ahelp.LocationsListActivity"
+            android:label="@string/locations" >
+        </activity>
+        <activity
+            android:name="com.adarshhasija.ahelp.SubjectsListActivity"
+            android:label="@string/subjects" >
+        </activity>
+        <activity
+            android:name="com.adarshhasija.ahelp.LocationEditActivity"
+            android:label="@string/location_details" 
+            android:windowSoftInputMode="stateVisible" >
         </activity>
         <activity
             android:name="com.adarshhasija.ahelp.SearchResultsListActivity"
@@ -89,8 +110,7 @@
         </activity>
         <activity
             android:name="com.adarshhasija.ahelp.RecordEditActivity"
-            android:label="@string/new_exam" 
-            android:windowSoftInputMode="stateVisible" >
+            android:label="@string/new_record"  >
         </activity>
         <activity
             android:name="com.adarshhasija.ahelp.MonthYearPickerActivity"
@@ -104,7 +124,28 @@
             android:name="com.adarshhasija.ahelp.TimePickerActivity"
             android:label="@string/select_time" >
         </activity>
-        
+        <activity
+            android:name="com.adarshhasija.ahelp.SelectLocationActivity"
+            android:label="@string/select_location" >
+        </activity>
+        <activity
+            android:name="com.adarshhasija.ahelp.SubjectEditActivity"
+            android:label="@string/subject_details" 
+            android:windowSoftInputMode="stateVisible" >
+        </activity>
+        <activity
+            android:name="com.adarshhasija.ahelp.AdditionalNotesActivity"
+            android:label="@string/additional_notes" 
+            android:windowSoftInputMode="stateVisible" >
+        </activity>
+        <activity
+            android:name="com.adarshhasija.ahelp.ActionReplyActivity"
+            android:label="@string/reply" >
+        </activity>
+        <activity
+            android:name="com.adarshhasija.ahelp.ExamChangesActivity"
+            android:label="@string/changes" >
+        </activity>
         
         
         <service android:name="com.parse.PushService" />
@@ -131,6 +172,12 @@
 		    <category android:name="com.adarshhasija.ahelp" />
 		  </intent-filter>
 		</receiver>
+		<receiver android:name="com.adarshhasija.ahelp.CheckInternetConnection"
+        android:enabled="true" android:label="ConnectivityActionReceiver">
+        	<intent-filter>
+            	<action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+        	</intent-filter>
+    	</receiver>
         
     </application>
 

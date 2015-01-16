@@ -47,8 +47,9 @@ public class RecordDetailActivity extends FragmentActivity {
 			// Create the detail fragment and add it to the activity
 			// using a fragment transaction.
 			Bundle arguments = new Bundle();
-			arguments.putString(RecordDetailFragment.ARG_ITEM_ID, getIntent()
-					.getStringExtra(RecordDetailFragment.ARG_ITEM_ID));
+			Bundle extras = getIntent().getExtras();
+			arguments.putString("parseId", extras.getString("parseId"));
+			arguments.putString("uuid", extras.getString("uuid"));
 			RecordDetailFragment fragment = new RecordDetailFragment();
 			fragment.setArguments(arguments);
 			getSupportFragmentManager().beginTransaction()

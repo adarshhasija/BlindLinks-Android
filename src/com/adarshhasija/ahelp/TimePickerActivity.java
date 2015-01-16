@@ -33,7 +33,7 @@ public class TimePickerActivity extends ListActivity {
 		dateTime.set(Calendar.YEAR, year);
 		
 		String monthString = dateTime.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
-		setTitle(dateTime.get(Calendar.DAY_OF_MONTH) + " " + monthString + " " + dateTime.get(Calendar.YEAR));
+		//setTitle(dateTime.get(Calendar.DAY_OF_MONTH) + " " + monthString + " " + dateTime.get(Calendar.YEAR));
 	}
 
 	@Override

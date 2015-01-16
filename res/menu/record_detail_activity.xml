@@ -8,12 +8,14 @@
           android:showAsAction="ifRoom" />
         
         <item android:id="@+id/delete"
-          android:title="Delete" />
+            android:icon="@drawable/ic_action_discard"
+          android:title="Delete" 
+          android:showAsAction="ifRoom" />
         
-        <item android:id="@+id/cancel"
+   <!-- <item android:id="@+id/cancel"
           android:icon="@drawable/ic_action_cancel"
           android:title="Cancel"
-          android:showAsAction="ifRoom" />
+          android:showAsAction="ifRoom" />	
         
         <item android:id="@+id/accept"
           android:icon="@drawable/ic_action_accept"
@@ -22,7 +24,7 @@
         
         <item android:id="@+id/edit"
           android:icon="@drawable/ic_action_edit"
-          android:title="Edit" />
+          android:title="Edit" />	-->
         
     </menu>
 
