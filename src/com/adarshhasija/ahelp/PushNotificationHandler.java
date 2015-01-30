@@ -1,5 +1,7 @@
 package com.adarshhasija.ahelp;
 
+import java.util.List;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -46,7 +48,18 @@ public class PushNotificationHandler extends BroadcastReceiver {
 		@Override
 		public void done(ParseObject object, ParseException e) {
 			if(e == null) {
-				object.pinInBackground("Records", saveCallback);
+				object.getParseObject("location").fetchIfNeededInBackground();
+            	object.getParseObject("subject").fetchIfNeededInBackground();
+            	try {
+					List<ParseObject> actionList = object.getList("actions");
+	            	for(int i = 0; i < actionList.size(); i++) {
+	            		((ParseObject) object.getList("actions").get(i)).fetchIfNeeded();
+	            	}
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				object.pinInBackground("ScribeRequest", saveCallback);
 			} else {
 				e.printStackTrace();
 			}
@@ -56,16 +69,16 @@ public class PushNotificationHandler extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
+		Log.d("WOW", "************ON RECEIVE**************");
 		ParseUser currentUser = ParseUser.getCurrentUser();
 		if(currentUser != null) {
 			try {
 				json = new JSONObject(intent.getExtras().getString("com.parse.Data"));
 				this.context = context;
-				this.json = json;
-				generateNotification();
+				//generateNotification();
 			
 				//UNCOMMENT THIS IF YOU WANT OFFLINE STORAGE
-				//saveRecord(); 
+				saveRecord(); 
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
@@ -74,9 +87,22 @@ public class PushNotificationHandler extends BroadcastReceiver {
 	
 	private void saveRecord() {
 		try {
-			String objectId = json.getString("objectId");
-			ParseQuery<ParseObject> query = ParseQuery.getQuery("Record");
-			query.getInBackground(objectId, getCallback);
+			String objectId=null;
+			String uuid = null;
+			if(json.getString("objectId") != null) {
+				objectId = json.getString("objectId");
+			}
+			if(json.getString("uuid") != null) {
+				uuid = json.getString("uuid");
+			}
+			ParseQuery<ParseObject> query = ParseQuery.getQuery("ScribeRequest");
+			if(objectId != null) {
+				query.getInBackground(objectId, getCallback);
+			}
+			else {
+				query.whereEqualTo("uuid", uuid);
+				query.getFirstInBackground(getCallback);
+			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -97,7 +123,7 @@ public class PushNotificationHandler extends BroadcastReceiver {
 		        NotificationCompat.Builder mBuilder =
 		        new NotificationCompat.Builder(context)
 		        .setSmallIcon(R.drawable.ic_launcher)
-		        .setContentTitle("aHelp")
+		        .setContentTitle("aScribe")
 		        //.setLargeIcon(R.drawable.ic_launcher)
 		        .setAutoCancel(true)
 		        .setContentText("You have notifications");

@@ -59,7 +59,116 @@ public class ExamChangesActivity extends Activity {
 		
 		return dateTimeString;
 	}
-
+	
+	
+	private void applyDateTimeChanges(ParseObject parseObject)
+	{
+		Date oldDate = parseObject.getDate("oldDate");
+		Calendar oldCalendar = Calendar.getInstance();
+		oldCalendar.setTime(oldDate);
+		Date newDate = parseObject.getDate("newDate");
+		Calendar newCalendar = Calendar.getInstance();
+		newCalendar.setTime(newDate);
+		
+		TextView dateView = (TextView) findViewById(R.id.dateTime);
+		if(oldCalendar.getTimeInMillis() != newCalendar.getTimeInMillis()) {
+			String oldDateText = dateTimeFormatted(oldCalendar);
+			String newDateText = dateTimeFormatted(newCalendar);
+			dateView.setText("DATE\nFROM "+oldDateText+"\nTO "+newDateText);
+			dateView.setContentDescription("DATE FROM "+oldDateText+" TO "+newDateText);
+		}
+		else {
+			dateView.setVisibility(View.GONE);
+		}
+	}
+	
+	private void applyLocationChanges(ParseObject parseObject) throws ParseException
+	{
+	/*	ParseObject oldLocation = parseObject.getParseObject("oldLocation");
+		ParseObject newLocation = parseObject.getParseObject("newLocation");
+		oldLocation.fetchFromLocalDatastore();
+		newLocation.fetchFromLocalDatastore();	*/
+		String oldLocation = parseObject.getString("oldLocationString");
+		String newLocation = parseObject.getString("newLocationString");
+		
+		TextView locationView = (TextView) findViewById(R.id.location);
+		if(!oldLocation.equals(newLocation)) {
+			String string = "LOCATION\nFROM " + oldLocation + "\nTO " +
+									newLocation;
+			String contentDescription = "LOCATION FROM " + oldLocation + " TO " +
+					newLocation;
+			locationView.setText(string);
+			locationView.setContentDescription(contentDescription);
+		}
+		else {
+			locationView.setVisibility(View.GONE);
+		}
+	}
+	
+	private void applySubjectChanges(ParseObject parseObject) throws ParseException
+	{
+	/*	ParseObject oldSubject = parseObject.getParseObject("oldSubject");
+		ParseObject newSubject = parseObject.getParseObject("newSubject");
+		oldSubject.fetchFromLocalDatastore();
+		newSubject.fetchFromLocalDatastore();	*/
+		String oldSubject = parseObject.getString("oldSubjectString");
+		String newSubject = parseObject.getString("newSubjectString");
+		
+		TextView subjectView = (TextView) findViewById(R.id.subject);
+		if(!oldSubject.equals(newSubject)) {
+			String string = "SUBJECT\nFROM " + oldSubject + "\nTO " +
+									newSubject;
+			String contentDescription = "SUBJECT FROM " + oldSubject + " TO " +
+					newSubject;
+			subjectView.setText(string);
+			subjectView.setContentDescription(contentDescription);
+		}
+		else {
+			subjectView.setVisibility(View.GONE);
+		}
+	}
+	
+	private void applyRepresenteeChanges(ParseObject parseObject)
+	{
+		String oldRepresenteePhoneNumber = parseObject.getString("oldRepresenteePhoneNumber");
+		String oldRepresenteeFirstName = parseObject.getString("oldRepresenteeFirstName");
+		String oldRepresenteeLastName = parseObject.getString("oldRepresenteeLastName");
+		String newRepresenteePhoneNumber = parseObject.getString("newRepresenteePhoneNumber");
+		String newRepresenteeFirstName = parseObject.getString("newRepresenteeFirstName");
+		String newRepresenteeLastName = parseObject.getString("newRepresenteeLastName");
+		
+		TextView notesView = (TextView) findViewById(R.id.notes);
+		if(oldRepresenteePhoneNumber == null && newRepresenteePhoneNumber == null) {
+			notesView.setVisibility(View.GONE);
+		}
+		else if(oldRepresenteePhoneNumber == null && newRepresenteePhoneNumber != null) {
+			notesView.setText("DETAILS OF WHO IS BEING REPRESENTED HAVE BEEN ADDED:\n" + 
+								newRepresenteeFirstName + " " + newRepresenteeLastName +
+									"\n" + newRepresenteePhoneNumber);
+			notesView.setContentDescription("DETAILS ON WHO IS BEING REPRESENTED HAVE BEEN ADDED: " + 
+												newRepresenteeFirstName + " " + newRepresenteeLastName +
+													" " + newRepresenteePhoneNumber);
+		}
+		else if(oldRepresenteePhoneNumber != null && newRepresenteePhoneNumber == null) {
+			notesView.setText("DETAILS OF WHO IS BEING REPRESENTED HAVE BEEN REMOVED");
+			notesView.setContentDescription("DETAILS OF WHO IS BEING REPRESENTED HAVE BEEN REMOVED");
+		}
+		else if(!oldRepresenteePhoneNumber.equals(newRepresenteePhoneNumber) ||
+				!oldRepresenteeFirstName.equals(newRepresenteeFirstName) || 
+					!oldRepresenteeLastName.equals(newRepresenteeLastName)) {
+			notesView.setText("DETAILS OF WHO IS BEING REPRESENTED HAVE CHANGED:\n" +
+								"FROM " + oldRepresenteeFirstName + " " + oldRepresenteeLastName + ", " + oldRepresenteePhoneNumber +
+									"\nTO " + newRepresenteeFirstName + " " + newRepresenteeLastName + ", " + newRepresenteePhoneNumber);
+			notesView.setContentDescription("DETAILS OF WHO IS BEING REPRESENTED HAVE CHANGED: " +
+					"FROM " + oldRepresenteeFirstName + " " + oldRepresenteeLastName + ", " + oldRepresenteePhoneNumber +
+					" TO " + newRepresenteeFirstName + " " + newRepresenteeLastName + ", " + newRepresenteePhoneNumber);
+		}
+		else {
+			notesView.setVisibility(View.GONE);
+		}
+	}
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -72,74 +181,15 @@ public class ExamChangesActivity extends Activity {
 		ParseObject parseObject = getActionObject();
 		
 		try {
-			Date oldDate = parseObject.getDate("oldDate");
-			Calendar oldCalendar = Calendar.getInstance();
-			oldCalendar.setTime(oldDate);
-			Date newDate = parseObject.getDate("newDate");
-			Calendar newCalendar = Calendar.getInstance();
-			newCalendar.setTime(newDate);
-			ParseObject oldLocation = parseObject.getParseObject("oldLocation");
-			ParseObject newLocation = parseObject.getParseObject("newLocation");
-			oldLocation.fetchFromLocalDatastore();
-			newLocation.fetchFromLocalDatastore();
-			String oldSubject = parseObject.getString("oldSubject");
-			String newSubject = parseObject.getString("newSubject");
-			String oldNotes = parseObject.getString("oldNotes");
-			String newNotes = parseObject.getString("newNotes");
+			applyDateTimeChanges(parseObject);
 			
-			TextView dateView = (TextView) findViewById(R.id.dateTime);
-			TextView locationView = (TextView) findViewById(R.id.location);
-			TextView subjectView = (TextView) findViewById(R.id.subject);
-			TextView notesView = (TextView) findViewById(R.id.notes);
-			
-			if(oldCalendar.getTimeInMillis() != newCalendar.getTimeInMillis()) {
-				String oldDateText = dateTimeFormatted(oldCalendar);
-				String newDateText = dateTimeFormatted(newCalendar);
-				dateView.setText("DATE\nFROM "+oldDateText+"\nTO "+newDateText);
-				dateView.setContentDescription("DATE FROM "+oldDateText+" TO "+newDateText);
+			if(parseObject.getString("newLocationString") != null) {
+				applyLocationChanges(parseObject);
 			}
-			else {
-				dateView.setVisibility(View.GONE);
+			if(parseObject.getString("newSubjectString") != null) {
+				applySubjectChanges(parseObject);
 			}
-			
-			if(!oldLocation.getString("title").equals(newLocation.getString("title"))) {
-				String locationString = "LOCATION\nFROM " + oldLocation.getString("title") + "\nTO " +
-										newLocation.getString("title");
-				String locationContentDescription = "LOCATION FROM " + oldLocation.getString("title") + " TO " +
-						newLocation.getString("title");
-				locationView.setText(locationString);
-				locationView.setContentDescription(locationContentDescription);
-			}
-			else {
-				locationView.setVisibility(View.GONE);
-			}
-			
-			if(!oldSubject.equalsIgnoreCase(newSubject)) {
-				subjectView.setText("SUBJECT\nFROM " + oldSubject + "\nTO " + newSubject);
-				subjectView.setContentDescription("SUBJECT FROM "+oldSubject + " TO " + newSubject);
-			}
-			else {
-				subjectView.setVisibility(View.GONE);
-			}
-			
-			if(oldNotes == null && newNotes == null) {
-				notesView.setVisibility(View.GONE);
-			}
-			else if(oldNotes == null && newNotes != null) {
-				notesView.setText("NOTES ADDED: " + newNotes);
-				notesView.setContentDescription("NOTES ADDED: " + newNotes);
-			}
-			else if(oldNotes != null && newNotes == null) {
-				notesView.setText("NOTES REMOVED: " + oldNotes);
-				notesView.setContentDescription("NOTES REMOVED: " + oldNotes);
-			}
-			else if(!oldNotes.equalsIgnoreCase(newNotes)) {
-				notesView.setText("NOTES\nFROM "+ oldNotes + "\nTO " + newNotes);
-				notesView.setContentDescription("NOTES FROM "+ oldNotes + " TO " + newNotes);
-			}
-			else {
-				notesView.setVisibility(View.GONE);
-			}
+			applyRepresenteeChanges(parseObject);
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}

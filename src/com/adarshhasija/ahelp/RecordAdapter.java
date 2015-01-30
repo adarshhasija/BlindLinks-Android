@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import org.json.JSONArray;
+
 import com.adarshhasija.ahelp.R;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -195,14 +197,14 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> implements Filterab
 		return null;
 	}
 	
-	private int getStatusIcon(ParseObject lastAction, ViewHolderRecord viewHolder)
+	private int getStatusIcon(ParseObject record, ViewHolderRecord viewHolder)
 	{
 		int imageResource;
 		
-		if(lastAction.getString("statusString") == null) {
+		if(record.getBoolean("status") == false) {
 			imageResource = R.drawable.ic_action_event;
 		}
-		else if(lastAction.getString("statusString").equals("accepted")) {
+		else if(record.getBoolean("status") == true) {
 			imageResource = R.drawable.ic_action_accept;
 		}
 		else {
@@ -259,31 +261,27 @@ public class RecordAdapter extends ArrayAdapter<ParseObject> implements Filterab
 		
 	    ParseObject record = recordList.get(position);
 	    ParseUser creator = record.getParseUser("createdBy");
-	    ParseObject exam = record.getParseObject("exam");
 	    List<ParseObject> actionList;
 	    ParseObject lastAction=null;
 	    try {
 			creator.fetchFromLocalDatastore();
-			exam.fetchFromLocalDatastore();
-			ParseObject examLocation = exam.getParseObject("location");
-			examLocation.fetchFromLocalDatastore();
-			actionList = exam.getList("actions");
+			ParseObject scribeRequestLocation = record.getParseObject("location");
+			scribeRequestLocation.fetchFromLocalDatastore();
+			actionList = record.getList("actions");
 			lastAction = (ParseObject) actionList.get(actionList.size()-1); //GET THE MOST RECENT ACTION
 			lastAction.fetchFromLocalDatastore();
-			
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if(record != null) {
 			if(lastAction != null) {
-				int imageResource = getStatusIcon(lastAction, viewHolder);
+				int imageResource = getStatusIcon(record, viewHolder);
 				viewHolder.iconView.setImageResource(imageResource);
 			}
 			
 			viewHolder.userView.setText(creator.getString("firstName") + " " + creator.getString("lastName"));
-			viewHolder.subjectView.setText(exam.getString("subject"));
-			String recordDateTime = getDateValueAsString(exam.getDate("dateTime"));
+			String recordDateTime = getDateValueAsString(record.getDate("dateTime"));
 			viewHolder.dateTimeView.setText(recordDateTime);
 			if(lastAction != null) {
 				String lastActionString = getLastActionFormatted(lastAction);

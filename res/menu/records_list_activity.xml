@@ -17,10 +17,10 @@
           android:title="New"
           android:showAsAction="ifRoom" />
         
-        <item
+   <!-- <item
         android:id="@+id/refresh"
         android:showAsAction="never"
-        android:title="Refresh"/>
+        android:title="Refresh"/>	-->
         
         <item
         android:id="@+id/contacts"

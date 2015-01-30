@@ -109,13 +109,15 @@ public class SubjectsListActivity extends ListActivity {
 	private void populateListLocal() {
 		ParseQuery<ParseObject> localQuery = ParseQuery.getQuery("Subject");
 		localQuery.fromLocalDatastore();
-		localQuery.orderByDescending("updatedAt");
+		//localQuery.orderByDescending("updatedAt");
+		localQuery.orderByAscending("title");
 		localQuery.findInBackground(populateListCallbackLocal);
 	}
 	
 	private void populateListCloud() {
 		ParseQuery<ParseObject> cloudQuery = ParseQuery.getQuery("Subject");
-		cloudQuery.orderByDescending("updatedAt");
+		//cloudQuery.orderByDescending("updatedAt");
+		cloudQuery.orderByAscending("title");
 		cloudQuery.findInBackground(populateListCallbackCloud);
 	}
 	
@@ -270,7 +272,7 @@ public class SubjectsListActivity extends ListActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		
-		getMenuInflater().inflate(R.menu.locations, menu);
+		getMenuInflater().inflate(R.menu.subjects, menu);
 		
 		progressButton = (MenuItem)menu.findItem(R.id.progress);
 		progressButton.setVisible(false);
@@ -285,6 +287,7 @@ public class SubjectsListActivity extends ListActivity {
 		
 		addButton = (MenuItem)menu.findItem(R.id.add);
 		refreshButton = (MenuItem)menu.findItem(R.id.refresh);
+		refreshButton.setVisible(false);
 		
 		return super.onCreateOptionsMenu(menu);
 	}

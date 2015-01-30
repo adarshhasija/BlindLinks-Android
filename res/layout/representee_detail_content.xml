@@ -1,0 +1,42 @@
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/representee"
+    	android:layout_width="match_parent"
+    	android:layout_height="?android:attr/listPreferredItemHeightLarge"
+    	android:background="#FFD6E9DE"
+    	android:orientation="vertical" >
+    
+	    <LinearLayout
+	        android:orientation="vertical"
+	        android:layout_marginLeft="10dp"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_centerVertical="true">
+	        
+	        <TextView
+        		android:id="@+id/representee_name"
+        		android:layout_width="wrap_content"
+        		android:layout_height="wrap_content"
+        		android:textStyle="bold"
+        		android:text="Representing: Nobody"
+        		android:textSize="18sp" />
+	        
+	        <TextView
+        		android:id="@+id/representee_phone_number"
+        		android:layout_width="wrap_content"
+        		android:layout_height="wrap_content"
+        		android:textSize="16sp" />
+	        
+	    </LinearLayout>
+	    
+	    <ImageView
+        	android:id="@+id/call"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:layout_alignParentRight="true"
+        	android:layout_centerVertical="true"
+        	android:layout_marginRight="6dip"
+        	android:contentDescription="Call"
+        	android:src="@drawable/ic_action_call" />
+    
+	</RelativeLayout>

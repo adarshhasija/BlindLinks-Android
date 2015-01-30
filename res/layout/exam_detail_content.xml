@@ -91,7 +91,7 @@
         android:contentDescription="Subject"
         android:textSize="14sp" />
       
-      <TextView
+ <!-- <TextView
         android:id="@+id/notes"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -103,7 +103,7 @@
         android:singleLine="true"
         android:text="Notes"
         android:contentDescription="Notes"
-        android:textSize="14sp" />
+        android:textSize="14sp" />	-->
       
   </LinearLayout>
     

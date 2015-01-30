@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">aHelp</string>
+    <string name="app_name">aScribe</string>
     <string name="login">LOGIN</string>
     <string name="signup">SIGNUP</string>
     <string name="ok">OK</string>
     <string name="contacts">Contacts</string>
+    <string name="contact_details">Contact Details</string>
     <string name="coordinator">Coordinator</string>
     <string name="select_contact">Select Contact</string>
+    <string name="select_subject">Select Subject</string>
     <string name="select_location">Select Location</string>
     <string name="hint_enter_location">Enter Location</string>
+    <string name="representing_someone">Representing Someone</string>
+    
+    <string name="scribe_request">Scribe Request</string>
     <string name="new_location">New location</string>
     <string name="location_details">Location Details</string>
     <string name="title_record_detail">Record Detail</string>

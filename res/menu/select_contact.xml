@@ -10,19 +10,19 @@
             android:title="progress"
           android:showAsAction="ifRoom" />
         
-        <item android:id="@+id/search"
+    	 <item android:id="@+id/search"
           android:title="@string/search_title"
           android:icon="@drawable/ic_action_search"
           android:showAsAction="collapseActionView|ifRoom"
-          android:actionViewClass="android.widget.SearchView" />
+          android:actionViewClass="android.widget.SearchView" />	
         
-     <!-- <item android:id="@+id/send"
+   <!-- <item android:id="@+id/send"
           android:icon="@drawable/ic_action_send_now"
           android:title="Send"
-          android:showAsAction="ifRoom" />	-->
+          android:showAsAction="ifRoom" />	-->	
         
-   <!-- <item android:id="@+id/refresh"
-          android:title="Refresh" />	-->
+   	 <item android:id="@+id/refresh"
+          android:title="Refresh" />	
         
     </menu>
 

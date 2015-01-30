@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="@dimen/com_parse_ui_vertical_margin"
+    android:paddingLeft="@dimen/com_parse_ui_horizontal_margin"
+    android:paddingRight="@dimen/com_parse_ui_horizontal_margin"
+    android:paddingBottom="@dimen/com_parse_ui_vertical_margin"
+    android:orientation="vertical" >
+    
+    <TextView
+        android:id="@+id/explanation"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="If you are recording this scribe request on behalf of a disabled person, please turn the switch to ON and enter their details here. This is to ensure that the scribes can contact them directly"
+        android:contentDescription="If you are recording this scribe request on behalf of a disabled person, please turn the switch to ON and enter their details here. This is to ensure that the scribes can contact them directly"
+        android:textSize="15sp" />
+    
+    <EditText
+        android:id="@+id/phone_number"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing"
+        android:layout_below="@+id/signingUpLbl"
+        android:layout_centerHorizontal="true"
+        android:ems="10"
+        android:hint="Phone number"
+        android:contentDescription="@string/phone_number"
+        android:inputType="number" >
+
+        <requestFocus />
+    </EditText>
+    
+    <EditText
+        android:id="@+id/first_name"
+        android:hint="@string/first_name"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing"
+        android:ems="10"
+        android:contentDescription="@string/first_name"
+        android:inputType="text" />
+    
+    <EditText
+        android:id="@+id/last_name"
+        android:hint="@string/last_name"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/com_parse_ui_small_vertical_spacing"
+        android:ems="10"
+        android:contentDescription="@string/last_name"
+        android:inputType="text" />
+ 
+
+
+</LinearLayout>

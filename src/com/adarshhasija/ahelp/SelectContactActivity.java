@@ -51,11 +51,12 @@ public class SelectContactActivity extends ListActivity {
 	private ArrayList<String> userList=null;
 	
 	private ParseUser selectedUser;
-	private ParseObject event;
+/*	private ParseObject event;
 	private ParseObject exam;
 	private ParseObject examLocation;
 	private ParseObject action;
-	private ParseObject location;
+	private ParseObject location;	*/
+	private ParseObject scribeRequest;
 	
 	//MenuItems
 	private MenuItem progressButton;
@@ -110,16 +111,20 @@ public class SelectContactActivity extends ListActivity {
 		public void done(ParseException e) {
 			toggleProgressBarVisibility();
 			if(e == null) {
-				Intent returnIntent = new Intent();
+			/*	Intent returnIntent = new Intent();
 				Bundle bundle = new Bundle();
-				bundle.putString("uuid", event.getString("uuid"));
+				if(scribeRequest.getObjectId() != null) {
+					bundle.putString("parseId", scribeRequest.getObjectId());
+				}
+				bundle.putString("uuid", scribeRequest.getString("uuid"));
 				returnIntent.putExtras(bundle);
 				setResult(Activity.RESULT_OK, returnIntent);
-		    	   finish();
-		/*		JSONObject jsonObj=new JSONObject();
+		    	   finish();	*/
+				JSONObject jsonObj=new JSONObject();
 	        	try {
 					jsonObj.put("action", "com.adarshhasija.ahelp.intent.RECEIVE");
-					jsonObj.put("objectId", event.getObjectId());
+					jsonObj.put("objectId", scribeRequest.getObjectId());
+					jsonObj.put("uuid", scribeRequest.getString("uuid"));
 				} catch (JSONException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -132,14 +137,21 @@ public class SelectContactActivity extends ListActivity {
 				   public void done(String success, ParseException e) {
 					   toggleProgressBarVisibility();
 				       if (e == null) {
-				    	   setResult(Activity.RESULT_OK);
-				    	   finish();
+				    	   Intent returnIntent = new Intent();
+							Bundle bundle = new Bundle();
+							if(scribeRequest.getObjectId() != null) {
+								bundle.putString("parseId", scribeRequest.getObjectId());
+							}
+							bundle.putString("uuid", scribeRequest.getString("uuid"));
+							returnIntent.putExtras(bundle);
+							setResult(Activity.RESULT_OK, returnIntent);
+					    	   finish();
 				       }
 				       else {
 				    	   Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
 				       }
 				   }
-				});		*/
+				});		
 				
 				
 			}
@@ -175,58 +187,117 @@ public class SelectContactActivity extends ListActivity {
 	};
 	
 	private void send(int position) {
-		toggleProgressBarVisibility();
+		//toggleProgressBarVisibility();
+		selectedUser = userObjects.get(position);
 		
 		Bundle extras = getIntent().getExtras();
-		selectedUser = userObjects.get(position);
+		ParseUser selectedUser = userObjects.get(position);
 		long dateTimeMillis = extras.getLong("dateTime");
-		String locationId = extras.getString("locationId");
+	/*	String locationId = extras.getString("locationId");
 		String subject = extras.getString("subject");
-		String notes = extras.getString("notes");
+		String notes = extras.getString("notes");	*/
+		String locationParseId = extras.getString("locationParseId");
+		String locationUuid = extras.getString("locationUuid");
+		String subjectParseId = extras.getString("subjectParseId");
+		String subjectUuid = extras.getString("subjectUuid");
+		String representeePhoneNumber = extras.getString("representeePhoneNumber");
+		String representeeFirstName = extras.getString("representeeFirstName");
+		String representeeLastName = extras.getString("representeeLastName");
+		
+		ParseObject location=null;
+		ParseObject subject=null;
+		try {
+			ParseQuery<ParseObject> queryLocation = ParseQuery.getQuery("Location");
+			queryLocation.fromLocalDatastore();
+			if(locationParseId != null) {
+				location = queryLocation.get(locationParseId);
+			}
+			else if(locationUuid != null) {
+				queryLocation.whereEqualTo("uuid", locationUuid);
+				location = queryLocation.getFirst();
+			}
+			
+			ParseQuery<ParseObject> querySubject = ParseQuery.getQuery("Subject");
+			querySubject.fromLocalDatastore();
+			if(subjectParseId != null) {
+				subject = querySubject.get(subjectParseId);
+			}
+			else if(subjectUuid != null) {
+				querySubject.whereEqualTo("uuid", subjectUuid);
+				subject = querySubject.getFirst();
+			}
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 		
 		Calendar dateTime = Calendar.getInstance();
 		dateTime.setTimeInMillis(dateTimeMillis);
 		Date finalDate = dateTime.getTime();
 		
-		examLocation = new ParseObject("ExamLocation");
-		examLocation.put("title", location.getString("title"));
-		examLocation.put("location", location);
+		ParseObject scribeRequestLocation = new ParseObject("ScribeRequestLocation");
+		scribeRequestLocation.put("title", location.getString("title"));
+		//scribeRequestLocation.put("referenceLocation", location);
 		
-		action = new ParseObject("Action");
+		ParseObject scribeRequestSubject = new ParseObject("ScribeRequestSubject");
+		scribeRequestSubject.put("title", subject.getString("title"));
+		//scribeRequestSubject.put("referenceSubject", subject);
+		
+		ParseObject action = new ParseObject("Action");
 		action.put("from", ParseUser.getCurrentUser());
 		action.put("to", selectedUser);
 		action.put("type", "request");
 		
-		exam = new ParseObject("Exam");
-		exam.put("dateTime", finalDate);
-		exam.put("location", examLocation);
-		exam.put("subject", subject);
-		if(notes != null) {
-			exam.put("notes", notes);
+		scribeRequest = new ParseObject("ScribeRequest");
+		scribeRequest.put("dateTime", finalDate);
+		scribeRequest.put("location", scribeRequestLocation);
+		scribeRequest.put("subject", scribeRequestSubject);
+		if(representeePhoneNumber != null &&
+				representeeFirstName != null &&
+					representeeLastName != null) {
+			scribeRequest.put("representeePhoneNumber", representeePhoneNumber);
+			scribeRequest.put("representeeFirstName", representeeFirstName);
+			scribeRequest.put("representeeLastName", representeeLastName);
 		}
 		List<ParseObject> actionList = new ArrayList<ParseObject>();
 		actionList.add(action);
-		exam.put("actions", actionList);
-		
-		event = new ParseObject("Event");
-		event.put("createdBy", ParseUser.getCurrentUser());
-		event.put("status", false);
-		event.put("exam", exam);
+		scribeRequest.put("actions", actionList);
+		scribeRequest.put("createdBy", ParseUser.getCurrentUser());
+		scribeRequest.put("status", false);
+
 		ParseACL recordAcl = new ParseACL();
 		recordAcl.setReadAccess(ParseUser.getCurrentUser(), true);
 		recordAcl.setReadAccess(selectedUser, true);
 		recordAcl.setWriteAccess(ParseUser.getCurrentUser(), true);
-		event.setACL(recordAcl);
-		event.saveEventually();
+		scribeRequest.setACL(recordAcl);
 	
 		action.put("uuid", UUID.randomUUID().toString());
-		exam.put("uuid", UUID.randomUUID().toString());
-		event.put("uuid", UUID.randomUUID().toString());
-		event.pinInBackground("Event", saveCallback);
-		//examLocation.put("uuid", UUID.randomUUID().toString());
-		//examLocation.pinInBackground("ExamLocation");
-		//action.put("uuid", UUID.randomUUID().toString());
-		//action.pinInBackground("Action", saveCallback);
+		scribeRequestLocation.put("uuid", UUID.randomUUID().toString());
+		scribeRequestSubject.put("uuid", UUID.randomUUID().toString());
+		scribeRequest.put("uuid", UUID.randomUUID().toString());
+		
+		List<String> phoneNumbers = new ArrayList<String>();
+		phoneNumbers.add(selectedUser.getString("phoneNumber"));
+		scribeRequest.put("phoneNumbers", phoneNumbers);
+		
+		ConnectivityManager cm = (ConnectivityManager) getSystemService(this.CONNECTIVITY_SERVICE);
+		if(cm.getActiveNetworkInfo() != null) {
+			scribeRequest.pinInBackground("ScribeRequest");
+			scribeRequest.saveInBackground(saveCallback);
+		}
+		else {	
+			scribeRequest.put("isDraft", true);
+			scribeRequest.pinInBackground("ScribeRequest");
+			
+			Intent returnIntent = new Intent();
+			Bundle bundle = new Bundle();
+			if(scribeRequest.getObjectId() != null) {
+				bundle.putString("parseId", scribeRequest.getObjectId());
+			}
+			bundle.putString("uuid", scribeRequest.getString("uuid"));
+			returnIntent.putExtras(bundle);
+			setResult(Activity.RESULT_OK, returnIntent);
+	    	   finish();
+		}
 		
 	/*	List<ParseObject> actions = new ArrayList<ParseObject>();
 		actions.add(action);
@@ -312,48 +383,34 @@ public class SelectContactActivity extends ListActivity {
 		ParseQuery<ParseUser> queryUsersLocal = ParseUser.getQuery();
 		//queryUsersLocal.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
 		queryUsersLocal.fromLocalDatastore();
+		queryUsersLocal.orderByAscending("lastName");
 		queryUsersLocal.findInBackground(findCallbackLocal);
 		
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(this.CONNECTIVITY_SERVICE);
 		if(cm.getActiveNetworkInfo() != null) {
 			ParseQuery<ParseUser> queryUsersCloud = ParseUser.getQuery();
+			queryUsersCloud.orderByAscending("lastName");
 			queryUsersCloud.findInBackground(findCallbackCloud);
 		}
 		
-		Bundle extras = getIntent().getExtras();
-		String uuid = extras.getString("locationUuid");
-		String parseId = extras.getString("locationParseId");
+	/*	Bundle extras = getIntent().getExtras();
+		String locationUuid = extras.getString("locationUuid");
+		String locationParseId = extras.getString("locationParseId");
 		ParseQuery<ParseObject> query = ParseQuery.getQuery("Location");
 		query.fromLocalDatastore();
-		if(uuid != null) {
-			query.whereEqualTo("uuid", uuid);
-			query.getFirstInBackground(new GetCallback<ParseObject>() {
-
-				@Override
-				public void done(ParseObject object,
-						ParseException e) {
-					if(e == null) {
-						object.remove("uuid");
-						location = object;
-					}
-					else {
-						Log.d("SelectContactActivity", "Failed to get location object by uuid");
-					}
-				}
-				
-			});
-		}
-		else {
-			query.getInBackground(parseId, new GetCallback<ParseObject>() {
-			    public void done(ParseObject object, ParseException e) {
-			        if (e == null) {
-			            location = object;
-			        } else {
-			        	Log.d("SelectContactActivity", "Failed to get location object by parse id");
-			        }
-			    }
-			});
-		}
+		try {
+			if(locationParseId != null) {
+				location = query.get(locationParseId);
+			}
+			else {
+				query.whereEqualTo("uuid", locationUuid);
+				location = query.getFirst();
+			}
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	*/
+		
 	}
 	
 	@Override
@@ -436,6 +493,7 @@ public class SelectContactActivity extends ListActivity {
 	            (SearchView) menu.findItem(R.id.search).getActionView();
 	    searchView.setOnQueryTextListener(onQueryTextListener);
 	    searchButton = menu.findItem(R.id.search);
+	    searchButton.setVisible(false);
 	    
 	    //sendButton = menu.findItem(R.id.send);
 	    
@@ -443,6 +501,7 @@ public class SelectContactActivity extends ListActivity {
 	    //searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
 		
 		refreshButton = (MenuItem)menu.findItem(R.id.refresh);
+		refreshButton.setVisible(false);
 		
 		return super.onCreateOptionsMenu(menu);
 	}

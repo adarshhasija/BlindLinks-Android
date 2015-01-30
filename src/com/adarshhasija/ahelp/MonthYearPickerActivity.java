@@ -37,7 +37,8 @@ public class MonthYearPickerActivity extends ListActivity {
 			monthString = c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);
 			year = c.get(Calendar.YEAR);
 			list.add(monthString + " " + year);
-			c.set(Calendar.MONTH, c.get(Calendar.MONTH) + 1);
+			//c.set(Calendar.MONTH, c.get(Calendar.MONTH) + 1);
+			c.add(Calendar.MONTH, 1);
 		}
 		
 		LargeHeightSimpleArrayAdapter adapter = new LargeHeightSimpleArrayAdapter(this, 0, list);
@@ -50,7 +51,6 @@ public class MonthYearPickerActivity extends ListActivity {
 		
 		Calendar c = Calendar.getInstance();
 		c.add(Calendar.MONTH, position);
-		
 		Bundle bundle = new Bundle();
         bundle.putInt("month", c.get(Calendar.MONTH));
         bundle.putInt("year", c.get(Calendar.YEAR));

@@ -28,13 +28,18 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
+		//ParseObject.unpinAllInBackground("Location");
+		//ParseObject.unpinAllInBackground("Subject");
 		//ParseObject.unpinAllInBackground("Action");
 		//ParseObject.unpinAllInBackground("Exam");
 		//ParseObject.unpinAllInBackground("Event");
+		//ParseObject.unpinAllInBackground("ScribeRequestSubject");
+		//ParseObject.unpinAllInBackground("ScribeRequestLocation");
+		//ParseObject.unpinAllInBackground("ScribeRequest");
 		
 		ParseUser currentUser = ParseUser.getCurrentUser();
 		if(currentUser != null) {
-			Intent intent = new Intent(this, RecordListActivity.class);
+			Intent intent = new Intent(this, MainListActivity.class);
 			startActivity(intent);
 			finish();						 	 
 		}

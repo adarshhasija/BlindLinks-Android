@@ -70,6 +70,7 @@ public class ActionListAdapter extends ArrayAdapter<ParseObject> {
 			ParseUser fromUser = record.getParseUser("from");
 			ParseUser toUser = record.getParseUser("to");
 			String type = record.getString("type");
+			String status = record.getString("statusString");
 			String typeString="";
 			if(type.equals("request")) {
 				typeString = "requested";
@@ -89,8 +90,27 @@ public class ActionListAdapter extends ArrayAdapter<ParseObject> {
 				}
 				else {
 					toUser.fetchFromLocalDatastore();
-					actionString = fromUser.getString("firstName") + " " + fromUser.getString("lastName") + " " + 
-									typeString + " " + toUser.getString("firstName") + " " + toUser.getString("lastName");
+					String sender = fromUser.getString("firstName") + " " + fromUser.getString("lastName");
+					String receiver = toUser.getString("lastName") + " " + toUser.getString("lastName");
+					if(fromUser.getObjectId().equals(ParseUser.getCurrentUser().getObjectId())) {
+						sender = "You";
+					}
+					if(toUser.getObjectId().equals(ParseUser.getCurrentUser().getObjectId())) {
+						receiver = "you";
+					}
+					
+					if(status != null) {
+						if(status.equals("accepted")) {
+							actionString = receiver + " accepted the request";
+						}
+						else if(status.equals("rejected")) {
+							actionString = sender + " rejected the request";
+						}
+					}
+					else {
+						actionString = sender + " " + 
+									typeString + " " + receiver;
+					}
 				
 					if(record.getString("statusString") == null) {
 						contentDescription = actionString + ". Currently waiting for response";

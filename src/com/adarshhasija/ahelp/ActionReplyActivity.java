@@ -68,7 +68,7 @@ public class ActionReplyActivity extends ListActivity {
 			parseObject.put("statusString", "rejected");
 		}
 		parseObject.remove("uuid");
-		parseObject.saveEventually(); //this is because we dont want uuid saved to the cloud
+		//parseObject.saveEventually(); //this is because we dont want uuid saved to the cloud
 		if(uuid != null) {
 			parseObject.put("uuid", uuid);
 		}
@@ -127,11 +127,11 @@ public class ActionReplyActivity extends ListActivity {
 		
 		View unselectedView;
 		if(position == 0) {
-			Toast.makeText(ActionReplyActivity.this, "You selected accept", Toast.LENGTH_SHORT).show();
+			Toast.makeText(ActionReplyActivity.this, "You selected accept, tap send button to send response", Toast.LENGTH_SHORT).show();
 			unselectedView = l.getChildAt(1);
 		}
 		else {
-			Toast.makeText(ActionReplyActivity.this, "You selected reject", Toast.LENGTH_SHORT).show();
+			Toast.makeText(ActionReplyActivity.this, "You selected reject, tap send button to send response", Toast.LENGTH_SHORT).show();
 			unselectedView = l.getChildAt(0);
 		}
 			v.setBackgroundColor(Color.rgb(204, 255, 255)); //baby blue
@@ -148,7 +148,7 @@ public class ActionReplyActivity extends ListActivity {
         	return true;
         default:
             return super.onOptionsItemSelected(item);
-    }
+		}
 	}
 
 

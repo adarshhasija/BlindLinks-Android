@@ -304,13 +304,13 @@ public class RecordListFragment extends ListFragment {
 	}
 	
 	private void populateListLocal() {
-		ParseQuery<ParseObject> localQuery = ParseQuery.getQuery("Event");
+		ParseQuery<ParseObject> localQuery = ParseQuery.getQuery("ScribeRequest");
 		localQuery.fromLocalDatastore();
 		localQuery.findInBackground(populateListCallbackLocal);
 	}
 	
 	private void populateListCloud() {
-		ParseQuery<ParseObject> cloudQuery = ParseQuery.getQuery("Event");
+		ParseQuery<ParseObject> cloudQuery = ParseQuery.getQuery("ScribeRequest");
 		cloudQuery.findInBackground(populateListCallbackCloud);
 	}
 	

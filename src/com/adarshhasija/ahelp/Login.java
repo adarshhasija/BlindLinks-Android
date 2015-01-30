@@ -73,7 +73,7 @@ public class Login extends Activity {
 				
 				populateContactsList();
 				
-				//Intent mainIntent = new Intent(Login.this, RecordListActivity.class);
+				//Intent mainIntent = new Intent(Login.this, MainListActivity.class);
 				//startActivity(mainIntent);
 		    } else {
 		    	Toast.makeText(Login.this, e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -151,7 +151,7 @@ public class Login extends Activity {
 	}
 	
 	private void openApp() {
-		Intent mainIntent = new Intent(Login.this, RecordListActivity.class);
+		Intent mainIntent = new Intent(Login.this, MainListActivity.class);
 		startActivity(mainIntent);
 	}
 	
@@ -206,7 +206,7 @@ public class Login extends Activity {
 		ParseUser currentUser = ParseUser.getCurrentUser();
 		if(currentUser != null) {
 			populateContactsList();
-			Intent mainAppIntent = new Intent(this, RecordListActivity.class);
+			Intent mainAppIntent = new Intent(this, MainListActivity.class);
 			startActivity(mainAppIntent);
 			finish();
 		}

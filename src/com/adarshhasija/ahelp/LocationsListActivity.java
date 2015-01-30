@@ -197,11 +197,13 @@ public class LocationsListActivity extends ListActivity {
 		if(!progressButton.isVisible()) {
 			progressButton.setVisible(true);
 			searchButton.setVisible(false);
+			addButton.setVisible(false);
 			refreshButton.setVisible(false);
 		}
 		else {
 			progressButton.setVisible(false);
 			searchButton.setVisible(true);
+			addButton.setVisible(true);
 			refreshButton.setVisible(true);
 		}
 	}
@@ -209,13 +211,15 @@ public class LocationsListActivity extends ListActivity {
 	private void populateListLocal() {
 		ParseQuery<ParseObject> localQuery = ParseQuery.getQuery("Location");
 		localQuery.fromLocalDatastore();
-		localQuery.orderByDescending("updatedAt");
+		//localQuery.orderByDescending("updatedAt");
+		localQuery.orderByAscending("title");
 		localQuery.findInBackground(populateListCallbackLocal);
 	}
 	
 	private void populateListCloud() {
 		ParseQuery<ParseObject> cloudQuery = ParseQuery.getQuery("Location");
-		cloudQuery.orderByDescending("updatedAt");
+		//cloudQuery.orderByDescending("updatedAt");
+		cloudQuery.orderByAscending("title");
 		cloudQuery.findInBackground(populateListCallbackCloud);
 	}
 	
@@ -350,6 +354,7 @@ final LocationListAdapter adapter = (LocationListAdapter) getListAdapter();
 		
 		addButton = (MenuItem)menu.findItem(R.id.add);
 		refreshButton = (MenuItem)menu.findItem(R.id.refresh);
+		refreshButton.setVisible(false);
 		
 		return super.onCreateOptionsMenu(menu);
 	}

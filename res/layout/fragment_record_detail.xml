@@ -7,7 +7,9 @@
     tools:context=".RecordDetailActivity"
     tools:ignore="MergeRootFrame" >
     
-    <include layout="@layout/record_detail_content"/>
+ <!-- <include layout="@layout/exam_detail_content"/>
+    <include layout="@layout/representee_detail_content"/>	--> 
+    <include layout="@layout/exam_content"/>  
     
     <TextView
         android:id="@+id/header"

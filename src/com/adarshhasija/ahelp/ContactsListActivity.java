@@ -13,13 +13,16 @@ import com.parse.ParseUser;
 import android.app.ListActivity;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filterable;
+import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -165,11 +168,13 @@ public class ContactsListActivity extends ListActivity {
 		
 		ParseQuery<ParseUser> queryUsersLocal = ParseUser.getQuery();
 		queryUsersLocal.fromLocalDatastore();
+		queryUsersLocal.orderByAscending("lastName");
 		queryUsersLocal.findInBackground(findCallbackLocal);
 		
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(this.CONNECTIVITY_SERVICE);
 		if(cm.getActiveNetworkInfo() != null) {
 			ParseQuery<ParseUser> queryUsersCloud = ParseUser.getQuery();
+			queryUsersCloud.orderByAscending("lastName");
 			queryUsersCloud.findInBackground(findCallbackCloud);
 		}
 	}
@@ -185,6 +190,20 @@ public class ContactsListActivity extends ListActivity {
 		super.onStart();
 	}
 	
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		super.onListItemClick(l, v, position, id);
+		
+		Intent intent = new Intent(this, ContactDetailsActivity.class);
+		Bundle bundle = new Bundle();
+		ParseUser user = userObjects.get(position);
+		bundle.putString("parseId", user.getObjectId());
+		bundle.putString("uuid", user.getString("uuid"));
+		intent.putExtras(bundle);
+		startActivity(intent);
+	}
+
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle presses on the action bar items

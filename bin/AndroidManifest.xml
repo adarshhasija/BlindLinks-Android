@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.adarshhasija.ahelp"
-    android:versionCode="5"
-    android:versionName="1.0.4" >
+    android:versionCode="6"
+    android:versionName="1.1" >
 
     <uses-sdk
-        android:minSdkVersion="14"
+        android:minSdkVersion="8"
         android:targetSdkVersion="18" />
     
     <uses-permission android:name="android.permission.INTERNET" />
@@ -16,6 +16,7 @@
 	<uses-permission android:name="android.permission.GET_ACCOUNTS" />
 	<uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
 	<uses-permission android:name="android.permission.READ_CONTACTS" />
+	<uses-permission android:name="android.permission.CALL_PHONE" />
 	<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 	
 	<permission android:protectionLevel="signature"
@@ -58,12 +59,28 @@
                    android:value=".SearchResultListActivity" />
         </activity>
         <activity
+            android:name="com.adarshhasija.ahelp.MainListActivity"
+            android:label="@string/app_name"
+            android:configChanges="orientation"
+    		android:screenOrientation="portrait" >
+            <meta-data android:name="android.app.searchable"
+                   android:value=".SearchResultListActivity" />
+        </activity>
+        <activity
             android:name="com.adarshhasija.ahelp.RecordDetailActivity"
             android:label="@string/title_record_detail"
             android:parentActivityName="com.adarshhasija.ahelp.RecordListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".RecordListActivity" />
+        </activity>
+        <activity
+            android:name="com.adarshhasija.ahelp.MainDetailActivity"
+            android:label="@string/title_record_detail"
+            android:parentActivityName="com.adarshhasija.ahelp.MainListActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainListActivity" />
         </activity>
         <activity
             android:name="com.adarshhasija.ahelp.SelectContactActivity"
@@ -76,6 +93,10 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".RecordListActivity" />
+        </activity>
+        <activity
+            android:name="com.adarshhasija.ahelp.ContactDetailsActivity"
+            android:label="@string/contact_details" >
         </activity>
         <activity
             android:name="com.adarshhasija.ahelp.CoordinatorListActivity"
@@ -110,7 +131,7 @@
         </activity>
         <activity
             android:name="com.adarshhasija.ahelp.RecordEditActivity"
-            android:label="@string/new_record"  >
+            android:label="@string/scribe_request"  >
         </activity>
         <activity
             android:name="com.adarshhasija.ahelp.MonthYearPickerActivity"
@@ -129,6 +150,10 @@
             android:label="@string/select_location" >
         </activity>
         <activity
+            android:name="com.adarshhasija.ahelp.SelectSubjectActivity"
+            android:label="@string/select_subject" >
+        </activity>
+        <activity
             android:name="com.adarshhasija.ahelp.SubjectEditActivity"
             android:label="@string/subject_details" 
             android:windowSoftInputMode="stateVisible" >
@@ -145,6 +170,10 @@
         <activity
             android:name="com.adarshhasija.ahelp.ExamChangesActivity"
             android:label="@string/changes" >
+        </activity>
+        <activity
+            android:name="com.adarshhasija.ahelp.RepresenteeEditActivity"
+            android:label="@string/representing_someone" >
         </activity>
         
         

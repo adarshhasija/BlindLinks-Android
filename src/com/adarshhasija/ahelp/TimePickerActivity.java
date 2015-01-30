@@ -44,12 +44,13 @@ public class TimePickerActivity extends ListActivity {
 		Calendar c = Calendar.getInstance();
 
 		if(dateTime.get(Calendar.MONTH) == c.get(Calendar.MONTH) &&
-				dateTime.get(Calendar.DAY_OF_MONTH) == c.get(Calendar.DAY_OF_MONTH)) {
+				dateTime.get(Calendar.DAY_OF_MONTH) == c.get(Calendar.DAY_OF_MONTH) &&
+					c.get(Calendar.HOUR_OF_DAY) >= 7) {  //If it is today and after 7am, give the current time rounded to the next 15th min
 			int mod = c.get(Calendar.MINUTE) % 15;
 			c.add(Calendar.MINUTE, 15-mod);
 		}
 		else {
-			c.set(Calendar.HOUR_OF_DAY, 0);
+			c.set(Calendar.HOUR_OF_DAY, 7);
 			c.set(Calendar.MINUTE, 0);
 		}
 		startHourOfDay = c.get(Calendar.HOUR_OF_DAY);

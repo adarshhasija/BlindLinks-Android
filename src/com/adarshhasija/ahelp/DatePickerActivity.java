@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 public class DatePickerActivity extends ListActivity {
 	
-	private Calendar dateTime;
+	private Calendar dateTime=null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +26,8 @@ public class DatePickerActivity extends ListActivity {
 		int year = extras.getInt("year");
 		
 		dateTime = Calendar.getInstance();
-		dateTime.set(Calendar.MONTH, month);
+		//dateTime.set(Calendar.MONTH, month);
+		dateTime.add(Calendar.MONTH, (month - dateTime.get(Calendar.MONTH)));
 		dateTime.set(Calendar.YEAR, year);
 		
 		String monthString = dateTime.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US);

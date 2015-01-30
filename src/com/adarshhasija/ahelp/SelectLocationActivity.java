@@ -131,13 +131,15 @@ public class SelectLocationActivity extends ListActivity {
 	private void populateListLocal() {
 		ParseQuery<ParseObject> localQuery = ParseQuery.getQuery("Location");
 		localQuery.fromLocalDatastore();
-		localQuery.orderByDescending("updatedAt");
+		//localQuery.orderByDescending("updatedAt");
+		localQuery.orderByAscending("title");
 		localQuery.findInBackground(populateListCallbackLocal);
 	}
 	
 	private void populateListCloud() {
 		ParseQuery<ParseObject> cloudQuery = ParseQuery.getQuery("Location");
-		cloudQuery.orderByDescending("updatedAt");
+		//cloudQuery.orderByDescending("updatedAt");
+		cloudQuery.orderByAscending("title");
 		cloudQuery.findInBackground(populateListCallbackCloud);
 	}
 	
@@ -170,7 +172,7 @@ public class SelectLocationActivity extends ListActivity {
 	protected void onStart() {
 		TextView emptyView = new TextView(this);
 		((ViewGroup) getListView().getParent()).addView(emptyView);
-		emptyView.setText("There are currently no locations to list.\n Tap + to add a location");
+		emptyView.setText("There are currently no locations to list.");
 		emptyView.setGravity(Gravity.CENTER);
 		getListView().setEmptyView(emptyView);
 	/*	getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -284,8 +286,10 @@ public class SelectLocationActivity extends ListActivity {
 	            (SearchView) menu.findItem(R.id.search).getActionView();
 	    searchView.setOnQueryTextListener(onQueryTextListener);
 	    searchButton = menu.findItem(R.id.search);
+	    searchButton.setVisible(false);
 	    
-	    //addButton = menu.findItem(R.id.add);
+	    addButton = menu.findItem(R.id.add);
+	    addButton.setVisible(false);
 		
 		return super.onCreateOptionsMenu(menu);
 	}

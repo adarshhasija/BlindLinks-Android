@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -66,8 +67,8 @@ public class RecordDetailFragment extends Fragment {
 	 * The dummy content this fragment is presenting.
 	 */
 	private DummyContent.DummyItem mItem; 
-	private ParseObject record;
-	private ParseObject exam;
+	private ParseObject scribeRequest=null;
+	//private ParseObject exam;
 	private ParseUser otherUser;
 	private MenuItem progressButton;
 	private MenuItem deleteButton;
@@ -108,7 +109,7 @@ public class RecordDetailFragment extends Fragment {
 		@Override
 		public void done(ParseException e) {
 			if(e == null) {
-				Toast.makeText(getActivity(), "Status successfully changed to "+record.getString("status"), Toast.LENGTH_SHORT).show();
+				Toast.makeText(getActivity(), "Status successfully changed to "+scribeRequest.getString("status"), Toast.LENGTH_SHORT).show();
 				
 		/*		((TextView) getActivity().findViewById(R.id.status))
 				.setText("Status: " + record.getString("status").toUpperCase());
@@ -118,7 +119,7 @@ public class RecordDetailFragment extends Fragment {
 				JSONObject jsonObj=new JSONObject();
 	        	try {
 					jsonObj.put("action", "com.adarshhasija.ahelp.intent.RECEIVE");
-					jsonObj.put("objectId", record.getObjectId());
+					jsonObj.put("objectId", scribeRequest.getObjectId());
 				} catch (JSONException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -174,16 +175,16 @@ public class RecordDetailFragment extends Fragment {
         builder.setMessage("Are you sure?")
                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                    public void onClick(DialogInterface dialog, int id) {
-                	   if(record.getParseUser("createdBy").equals(ParseUser.getCurrentUser())) { //They can delete the entire event
-                		   record.deleteEventually();
-                		   record.unpinInBackground("Event", deleteCallback);
+                	   if(scribeRequest.getParseUser("createdBy").equals(ParseUser.getCurrentUser())) { //They can delete the entire thing
+                		   scribeRequest.deleteEventually();
+                		   scribeRequest.unpinInBackground("ScribeRequest", deleteCallback);
                 	   }
                 	   else {  //Simply remove the read access
-                		   ParseACL recordAcl = record.getACL();
+                		   ParseACL recordAcl = scribeRequest.getACL();
                 		   recordAcl.setReadAccess(ParseUser.getCurrentUser(), false);
-                		   record.setACL(recordAcl);
-                		   record.saveEventually();
-                		   record.unpinInBackground("Event", deleteCallback);
+                		   scribeRequest.setACL(recordAcl);
+                		   scribeRequest.saveEventually();
+                		   scribeRequest.unpinInBackground("ScribeRequest", deleteCallback);
                 	   }
                    }
                })
@@ -201,8 +202,8 @@ public class RecordDetailFragment extends Fragment {
 	 * 
 	 */
 	private void setExamDetails() {
-		ParseUser creator = record.getParseUser("createdBy");
-		Date dateTime = exam.getDate("dateTime");
+		ParseUser creator = scribeRequest.getParseUser("createdBy");
+		Date dateTime = scribeRequest.getDate("dateTime");
 		
 		Calendar c = Calendar.getInstance();
 		c.setTime(dateTime);
@@ -218,32 +219,72 @@ public class RecordDetailFragment extends Fragment {
 				minuteString + " " +
 				c.getDisplayName(Calendar.AM_PM, Calendar.LONG, Locale.US);
 		
-		ParseObject examLocation = exam.getParseObject("location");
-		String subject = exam.getString("subject");
-		String notes = exam.getString("notes");
-		if(notes == null) {
-			notes = "No additional notes";
-		}
+		ParseObject location = scribeRequest.getParseObject("location");
+		ParseObject subject = scribeRequest.getParseObject("subject");
+		final String representeePhoneNumber = scribeRequest.getString("representeePhoneNumber");
+		String representeeFirstName = scribeRequest.getString("representeeFirstName");
+		String representeeLastName = scribeRequest.getString("representeeLastName");
 		try {
 			creator.fetchFromLocalDatastore();
-			examLocation.fetchFromLocalDatastore();
+			location.fetchFromLocalDatastore();
+			subject.fetchFromLocalDatastore();
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		String contentDescription = "Exam set by "+creator.getString("firstName") + " " + creator.getString("lastName") +
-									" on " + dateTimeString + " at " + examLocation.getString("title") + ".";
 		
 		((TextView) getActivity().findViewById(R.id.user))
 		.setText(creator.getString("firstName") + " " + creator.getString("lastName"));
 		((TextView) getActivity().findViewById(R.id.recordDateTime))
 		.setText(dateTimeString);
 		((TextView) getActivity().findViewById(R.id.location))
-		.setText(examLocation.getString("title"));
+		.setText(location.getString("title"));
 		((TextView) getActivity().findViewById(R.id.subject))
-		.setText(subject);
-		((TextView) getActivity().findViewById(R.id.notes))
-		.setText(notes);
+		.setText(subject.getString("title"));
+		
+		if(representeePhoneNumber != null &&
+				representeeFirstName != null &&
+					representeeLastName != null) {
+			((TextView) getActivity().findViewById(R.id.representee_name))
+			.setText("Representing: "+ representeeFirstName + " " + representeeLastName);
+			((TextView) getActivity().findViewById(R.id.representee_phone_number))
+			.setText(representeePhoneNumber);
+			((ImageView) getActivity().findViewById(R.id.call))
+			.setVisibility(View.VISIBLE);
+			((ImageView) getActivity().findViewById(R.id.call))
+			.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					String uri = "tel:" + representeePhoneNumber.trim() ;
+					 Intent intent = new Intent(Intent.ACTION_CALL);
+					 intent.setData(Uri.parse(uri));
+					 startActivity(intent);
+				}
+			});
+		}
+		else {
+			((TextView) getActivity().findViewById(R.id.representee_name))
+			.setText("Representing: Nobody");
+			((TextView) getActivity().findViewById(R.id.representee_phone_number))
+			.setText("");
+			((ImageView) getActivity().findViewById(R.id.call))
+			.setVisibility(View.GONE);
+		}
+		
+		String contentDescription;
+		
+		if(representeePhoneNumber != null &&
+				representeeFirstName != null &&
+					representeeLastName != null) {
+			contentDescription = "Scribe requested by "+creator.getString("firstName") + " " + creator.getString("lastName") +
+				" on " + dateTimeString + " at " + location.getString("title") + " for "+ subject.getString("title") + 
+				". Request made on behalf " + representeeFirstName + " " + representeeLastName + " who can be reached at " + representeePhoneNumber;
+		}
+		else {
+			contentDescription = "Scribe requested by "+creator.getString("firstName") + " " + creator.getString("lastName") +
+					" on " + dateTimeString + " at " + location.getString("title") + " for "+ subject.getString("title");
+		}
 		
 		RelativeLayout examLayout = ((RelativeLayout) getActivity().findViewById(R.id.exam));
 		examLayout.setContentDescription(contentDescription);
@@ -257,8 +298,8 @@ public class RecordDetailFragment extends Fragment {
 	private void setResultForReturn() 
 	{
 		Bundle bundle = new Bundle();
-		bundle.putString("parseId", record.getObjectId());
-		bundle.putString("uuid", record.getString("uuid"));
+		bundle.putString("parseId", scribeRequest.getObjectId());
+		bundle.putString("uuid", scribeRequest.getString("uuid"));
 		Intent returnIntent = new Intent();
 		returnIntent.putExtras(bundle);
 		getActivity().setResult(getActivity().RESULT_OK, returnIntent);
@@ -278,10 +319,10 @@ public class RecordDetailFragment extends Fragment {
 			// to load content from a content provider.
 			//mItem = DummyContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
 			String parseId = getArguments().getString("parseId");
-			ParseQuery<ParseObject> query = ParseQuery.getQuery("Record");
+			ParseQuery<ParseObject> query = ParseQuery.getQuery("ScribeRequest");
 			query.fromLocalDatastore();
 			try {
-				record = query.get(parseId);
+				scribeRequest = query.get(parseId);
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -289,25 +330,21 @@ public class RecordDetailFragment extends Fragment {
 		}
 		if (getArguments().containsKey("uuid")) {
 			String uuid = getArguments().getString("uuid");
-			ParseQuery<ParseObject> query = ParseQuery.getQuery("Event");
+			ParseQuery<ParseObject> query = ParseQuery.getQuery("ScribeRequest");
 			query.fromLocalDatastore();
 			query.whereEqualTo("uuid", uuid);
 			try {
-				record = query.getFirst();
-				if(record != null) {
-					exam = record.getParseObject("exam");
-					exam.fetchFromLocalDatastore();
-				}
+				scribeRequest = query.getFirst();
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		
-		if(exam != null) {
+		if(scribeRequest != null) {
 			setExamDetails();
 			
-			List<ParseObject> list = exam.getList("actions");
+			List<ParseObject> list = scribeRequest.getList("actions");
 			List<ParseObject> actionList = new ArrayList<ParseObject>();
 			try {
 				for(ParseObject action : list) {
@@ -321,8 +358,8 @@ public class RecordDetailFragment extends Fragment {
 			
 			RelativeLayout examLayout = ((RelativeLayout) getActivity().findViewById(R.id.exam));
 			
-			ParseACL examAcl = exam.getACL();
-			if(!examAcl.getWriteAccess(ParseUser.getCurrentUser())) {
+			ParseACL recordAcl = scribeRequest.getACL();
+			if(!recordAcl.getWriteAccess(ParseUser.getCurrentUser())) {
 				ImageView editView = ((ImageView) getActivity().findViewById(R.id.edit));
 				editView.setVisibility(View.GONE);
 			}
@@ -332,8 +369,8 @@ public class RecordDetailFragment extends Fragment {
 					@Override
 					public void onClick(View view) {
 						Bundle bundle = new Bundle();
-						bundle.putString("parseId", exam.getObjectId());
-						bundle.putString("uuid", exam.getString("uuid"));
+						bundle.putString("parseId", scribeRequest.getObjectId());
+						bundle.putString("uuid", scribeRequest.getString("uuid"));
 						Intent intent = new Intent(getActivity(), RecordEditActivity.class);
 						intent.putExtras(bundle);
 						startActivityForResult(intent, 1000); //this means exam being edited 
@@ -387,21 +424,21 @@ public class RecordDetailFragment extends Fragment {
 					Bundle extras = data.getExtras();
 					String parseId = extras.getString("parseId");
 					String uuid = extras.getString("uuid");
-					ParseQuery examQuery = ParseQuery.getQuery("Exam");
-					examQuery.fromLocalDatastore();
+					ParseQuery scribeRequestQuery = ParseQuery.getQuery("ScribeRequest");
+					scribeRequestQuery.fromLocalDatastore();
 					
 					ParseObject lastAction;
 					try {
 						if(parseId != null) {
-							exam = examQuery.get(parseId);
+							scribeRequest = scribeRequestQuery.get(parseId);
 						}
 						else {
-							examQuery.whereEqualTo("uuid", uuid);
-							exam = examQuery.getFirst();
+							scribeRequestQuery.whereEqualTo("uuid", uuid);
+							scribeRequest = scribeRequestQuery.getFirst();
 						}
 						setExamDetails();
 						
-						List<ParseObject> actions = exam.getList("actions");
+						List<ParseObject> actions = scribeRequest.getList("actions");
 						ParseObject action = actions.get(actions.size()-1);
 						
 						ListView actionListView = (ListView) getActivity().findViewById(R.id.actionList);
@@ -456,18 +493,18 @@ public class RecordDetailFragment extends Fragment {
 						if(statusString.equals("accepted")) {
 							iconView.setImageResource(R.drawable.ic_action_accept);
 							deleteButton.setVisible(false);
-							ParseACL examAcl = exam.getACL();
-							examAcl.setWriteAccess(ParseUser.getCurrentUser(), false);
-							exam.setACL(examAcl);
+							ParseACL recordAcl = scribeRequest.getACL();
+							recordAcl.setWriteAccess(ParseUser.getCurrentUser(), false);
+							scribeRequest.setACL(recordAcl);
 							((ImageView) getActivity().findViewById(R.id.edit)).setVisibility(View.GONE);
 							((RelativeLayout) getActivity().findViewById(R.id.exam)).setOnClickListener(null);
 						}
 						else {
 							iconView.setImageResource(R.drawable.ic_action_event);
 							deleteButton.setVisible(true);
-							ParseACL examAcl = exam.getACL();
-							examAcl.setWriteAccess(ParseUser.getCurrentUser(), true);
-							exam.setACL(examAcl);
+							ParseACL recordAcl = scribeRequest.getACL();
+							recordAcl.setWriteAccess(ParseUser.getCurrentUser(), true);
+							scribeRequest.setACL(recordAcl);
 							((ImageView) getActivity().findViewById(R.id.edit)).setVisibility(View.VISIBLE);
 							((RelativeLayout) getActivity().findViewById(R.id.exam))
 							.setOnClickListener(new View.OnClickListener() {
@@ -475,18 +512,17 @@ public class RecordDetailFragment extends Fragment {
 								@Override
 								public void onClick(View view) {
 									Bundle bundle = new Bundle();
-									bundle.putString("parseId", exam.getObjectId());
-									bundle.putString("uuid", exam.getString("uuid"));
+									bundle.putString("parseId", scribeRequest.getObjectId());
+									bundle.putString("uuid", scribeRequest.getString("uuid"));
 									Intent intent = new Intent(getActivity(), RecordEditActivity.class);
 									intent.putExtras(bundle);
 									startActivityForResult(intent, 1000); //this means exam being edited 
 								}
 							});
 						}
-						exam.saveEventually();
-						exam.pinInBackground();
 					}
-					record.saveEventually();
+					scribeRequest.saveEventually();
+					scribeRequest.pinInBackground();
 				}
 			
 			setResultForReturn();	//Exam or action has been edited
